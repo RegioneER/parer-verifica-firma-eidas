@@ -53,7 +53,7 @@
 	<repositories>
        <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/RegioneER/parer.sacer.verificafirma-eidas.beans/</url>
+            <url>https://maven.pkg.github.com/RegioneER/parer.sacer.parent/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
