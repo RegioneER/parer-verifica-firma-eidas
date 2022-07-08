@@ -1,0 +1,62 @@
+spring:
+  profiles:
+    active: war
+    
+  security: 
+    user:
+     name: admin
+     password: admin
+     roles: ADMIN
+     
+  datasource:
+    url: jdbc:h2:~/eidasdb
+    driver-class-name: org.h2.Driver
+    username: admin
+    password: admin
+    platform: h2
+    #data: file:/<path>/data.sql
+    
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      max_fetch_depth: 3
+      hbm2ddl:
+        auto: update
+      show_sql: true
+      
+  h2:
+    console:
+      enabled: true
+      path: /admin/h2-console
+      settings:
+        web-allow-others: true
+  main:
+    allow-bean-definition-overriding: true
+
+# LOGGING
+logging: 
+  pattern:
+    console: "%d %-5p [%c] [%t] [%X{uuid}] %m %n"
+  level:
+    root: INFO
+    eu.europa.esig.dss: INFO
+    org.springframework: INFO
+    org.apache: INFO
+    it.eng.parer.eidas: INFO
+    org.hibernate: INFO
+    com.zaxxer: INFO
+    com.sun.xml.bind: INFO
+    javax.xml.bind: INFO
+
+# BEAN
+it:
+  eng:
+    parer:
+      core:
+        viewhelper:
+          propstoskip: .*H2_USER.*|.*H2_PWD.*|.*ADMIN_USER.*|.*ADMIN_PWD.*|.*password.*|.*email.*
+      eidas:
+        core:
+          validation:
+            writefile: false
+    

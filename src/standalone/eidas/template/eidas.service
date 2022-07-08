@@ -1,0 +1,20 @@
+# /etc/systemd/system/eidas.service
+
+[Unit]
+Description=Verifica firma EIDAS
+After=syslog.target network.target
+	 
+[Service]
+Type=simple
+User=<utente con cui viene eseguito il processo>
+Restart=on-failure
+RestartSec=3s
+
+WorkingDirectory=<directory completa con installazione eidas>
+
+ExecStart=<directory completa con installazione eidas>/bin/eidas 
+SuccessExitStatus=143 
+
+[Install] 
+WantedBy=multi-user.target
+

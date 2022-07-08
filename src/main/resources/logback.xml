@@ -1,0 +1,52 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d %-5p [%c] [%t] [%X{uuid}] %m %n
+            </Pattern>
+        </layout>
+    </appender>
+     
+    <logger name="eu.europa.esig.dss.tsl.job" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+    </logger> 
+    <logger name="eu.europa.esig.dss" level="error" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+     <logger name="org.springframework" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+     <logger name="org.apache" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+     <logger name="it.eng.parer.eidas" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+     <logger name="org.hibernate" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger>      
+     <logger name="com.sun.xml.bind" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger>  
+     <logger name="javax.xml.bind" level="info" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger>  
+     <logger name="com.zaxxer.hikari.HikariConfig" level="off" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger>  
+     <logger name="com.fasterxml.jackson" level="off" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger>                                       
+     <logger name="springfox.documentation" level="off" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+      <logger name="org.apache.pdfbox" level="off" additivity="false">
+         <appender-ref ref="CONSOLE"/> 
+     </logger> 
+     
+     
+               
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

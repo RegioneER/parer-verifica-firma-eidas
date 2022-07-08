@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="SHORTCUT ICON" type="image/x-icon"
+	th:href="@{/img/favicon.ico}" />
+<link rel="stylesheet" th:href="@{/css/error.css}">
+<title>EIDAS: Errore</title>
+</head>
+<body>
+	<figure>
+		<div class="sad-mac"></div>
+		<div class="errordesc">
+			<h1>Codice: [[${status + ' - ' + error}]]</h1>
+		</div>
+	</figure>
+</body>
+</html>

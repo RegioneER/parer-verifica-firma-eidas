@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+    
+        <div th:fragment="commonlist" id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a
+                                th:href="@{/validation}" title="Verifica firme">Verifica firma</a></li>
+
+                        <li class="list-group-item"><a target="_blank"
+                                th:href="@{/swagger-ui.html}" title="Swagger">Swagger UI</a></li>
+                        <th:block th:if="${#request.isUserInRole('ADMIN')}">
+                        
+                            <li th:if="${@environment.getProperty('management.server.port') == null} or (${@environment.getProperty('management.server.port')} == ${@environment.getProperty('server.port')})" class="list-group-item">
+                                <a target="_blank" th:href="@{/actuator}" title="Actuator">Spring Boot Actuator</a>
+                            </li>
+                           
+                            <li class="list-group-item">
+                                <a target="_blank" 
+                                   th:href="@{${#request.isUserInRole('ADMIN')}?'/admin/h2-console':'/h2-console'}"
+                                   title="H2 Console">H2 Console</a>
+                            </li>
+                        
+                    </th:block>      
+                </ul>
+        </div>   
+    
+	<div th:fragment="apidocs" class="card">
+			<div class="card-header">
+				<a class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">Funzioni</a>
+			</div>
+		 	
+     	    <div th:replace="fragments/spring.html :: commonlist"></div>
+	</div>
+	<div th:fragment="utilities" class="card">
+			<div class="card-header">
+				<a class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">Funzioni</a>
+		   </div>
+		   
+		   <div th:replace="fragments/spring.html :: commonlist"></div>
+	</div>
+	<div th:fragment="env" th:if="${#request.isUserInRole('ADMIN')}" class="card">
+		    <div class="card-header">
+					<a class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="text-decoration: none;">
+							Valore variabili d'ambiente </a>
+				</div>
+			<div id="collapseTwo" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+				<div class="card-body">
+					<div class="input-group">
+					    <input type="text" class="form-control" placeholder="Search..." onkeyup="filter(this,'prop')">
+					    <a id="searchclear" class="btn bg-transparent" 
+					     style="margin-left: -40px; z-index: 100;" 
+					     onclick="$(this).prev('input').val('');filter(this,'prop');return false;">
+					      <em class="fa fa-times"></em>
+					    </a>
+					</div>
+										
+				</div>
+				<ul id="prop" class="list-group list-group-flush">
+					<li th:each="val : ${app}" class="list-group-item">
+						[[${val.key}]] = <b>[[${val.value}]]</b>
+					</li>
+				</ul>
+			</div>
+	</div>
+</body>
+</html>

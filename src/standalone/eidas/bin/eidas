@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# env 
+source bin/env.conf
+# laucher 
+/usr/bin/java $APP_JAVA_OPTS -jar $APP_BINARY $APP_LOGGING $APP_CONFIG

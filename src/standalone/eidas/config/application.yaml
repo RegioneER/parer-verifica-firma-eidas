@@ -1,0 +1,59 @@
+server:
+  port: 9080
+  
+# LOGGING
+logging: 
+  file:
+    name: logs/eidas.log
+  pattern:
+    console: ""
+    file: "%d %-5p [%c] \\(%t\\) [%X{uuid}] %m %n"
+  level:
+    root: INFO
+    eu.europa.esig.dss: INFO
+    org.springframework: INFO
+    org.apache: INFO
+    it.eng.parer.eidas: INFO
+    org.hibernate: INFO
+    com.sun.xml.bind: INFO
+    javax.xml.bind: INFO
+    com.zaxxer.hikari.HikariConfig: OFF
+    com.fasterxml.jackson: OFF
+    springfox.documentation: OFF
+     
+spring:
+  profiles:
+    active: dameon
+  security: 
+    user:
+     name: eidas
+     password: passw0rd!
+     roles: ADMIN
+ # H2
+  datasource:
+    url: jdbc:h2:file:./db/eidasdb;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE 
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+    hikari:
+      #idle-timeout: 10000
+      maximum-pool-size: 20
+      #minimum-idle: 5
+      pool-name: ParerEidasHikariPool
+    #data: file:/<path>/data.sql (caricamento dati di default allo startup)
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show_sql: true
+    hibernate:
+      max_fetch_depth: 3
+      ddl-auto: update
+      hbm2ddl:
+        auto: update 
+  h2:
+    console:
+      enabled: true    
+      path: /admin/h2-console
+  main:
+    allow-bean-definition-overriding: true
+     
+     

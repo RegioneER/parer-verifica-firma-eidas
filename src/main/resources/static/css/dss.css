@@ -1,0 +1,33 @@
+/* DSS style */
+
+.card-header.bg-primary {
+  color: #fff !important;
+  height: 4em;
+}
+
+.bg-primary, .header-highlight {
+    background-color: #004494!important;
+}
+
+.btn-primary, .btn-primary.active, .btn-primary.focus, .btn-primary:hover, .btn-primary:disabled {
+	background-color: #004494;
+	border-color : #004494;
+}
+
+.btn-link, .btn-link.active, .btn-link.focus, .btn-link:hover, .btn-link:disabled {
+	color : #004494;
+	font-weight: bold;
+}
+
+a, a:hover {
+	color : #004494;
+}
+
+.id-copy {
+    margin-top: -.5rem;
+    margin-bottom: -.5rem;
+}
+
+.id-copy:active, .id-copy:hover{
+    background-color: rgba(0,0,0,.15);
+}

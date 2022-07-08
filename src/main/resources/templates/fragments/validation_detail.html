@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<body>
+	<th:block th:fragment="reportlayer (validationModel)">
+		<div class="container">
+				<h3
+					th:text="'Livello ' + ${validationModel.livello} + ' - busta ' + ${validationModel.busta}"></h3>
+							<!-- CONTENT -->
+							<div class="row">
+								<div class="col-md">
+								 		<ul class="nav nav-tabs nav-justified d-print-none"
+											id="tabsResult" style="margin-top: 25px;">
+											<li role="presentation" class="nav-item"><a class="nav-link active"  data-toggle="tab" role="tab" aria-controls="simple-report"
+												th:href="'#simple-report_' + ${validationModel.livello} + '-' + ${validationModel.busta}">Sintesi
+													(simple report)</a></li>
+											<li role="presentation" class="nav-item"><a class="nav-link"  data-toggle="tab" role="tab" aria-controls="detailed-report"
+												th:href="'#detailed-report_' + ${validationModel.livello} + '-' + ${validationModel.busta}">Report
+													dettagliato (detailed report)</a></li>
+											<li role="presentation" class="nav-item"><a class="nav-link" data-toggle="tab" role="tab" aria-controls="diagnostic-report" 
+												th:href="'#diagnostic-tree_' + ${validationModel.livello} + '-' + ${validationModel.busta}">Albero
+													di analisi (diagnostic tree)</a></li>
+										</ul>
+	
+										<div class="tab-content mt-1">
+	
+											<div role="tabcard" class="tab-pane fade in report active show"
+												th:id="'simple-report_'  + ${validationModel.livello} + '-' + ${validationModel.busta}">
+												<div class="position-relative">
+											 	 <div class="w-100"> 
+													<div class="position-absolute btn-group d-print-none" role="toolbar"
+														style="margin: 6px; z-index : 3; right : 0">
+														<button type="button" class="btn btn-light"
+															onclick="window.print();">
+															<span class="fa fa-print"></span> Print
+														</button>
+														<a target="_blank" class="btn btn-light"
+															th:href="@{'/validation/download-simple-report/' + ${validationModel.busta} + '/' + ${validationModel.livello}}"
+															role="button" th:if="${displayDownloadPdf}"> <span
+															class="fa fa-download"></span> Download as
+															PDF
+														</a>
+													</div>
+		
+													<div th:utext="*{validationModel.simpleReport}"></div>
+												  </div>
+												 </div>
+											</div>
+											<div role="tabcard" class="tab-pane fade report"
+												th:id="'detailed-report_'  + ${validationModel.livello} + '-' + ${validationModel.busta}">
+											  
+											    <div class="position-relative">
+												  <div class="w-100">   
+												     <div class="position-absolute btn-group d-print-none" role="toolbar"
+														style="margin: 6px; z-index : 3; right : 0">
+														<button type="button" class="btn btn-light"
+															onclick="window.print();">
+															<span class="fa fa-print"></span> Print
+														</button>
+														<a target="_blank" class="btn btn-light"
+															th:href="@{'/validation/download-detailed-report/' + ${validationModel.busta} + '/' + ${validationModel.livello}}"
+															role="button" th:if="${displayDownloadPdf}"> <span
+															class="fa fa-download"></span> Download as
+															PDF
+														</a>
+													</div>
+													    		
+													<div th:utext="*{validationModel.detailedReport}"></div>
+												  </div>
+												</div>
+											</div>
+											<div role="tabcard" class="tab-pane fade report"
+												th:id="'diagnostic-tree_'  + ${validationModel.livello} + '-' + ${validationModel.busta}">
+												<div class="position-relative">
+													<pre>
+														<code class="prettyprint lang-xml"
+															th:text="*{validationModel.diagnosticData}"></code>
+													</pre>
+												  </div>
+											 </div>
+										</div>
+									
+									<script type="text/javascript">
+									$('#tabsResult a').click(function(e) {
+										e.preventDefault()
+										$(this).tab('show')
+									});
+									</script>									
+						</div>
+			   	   </div>
+		    </div>
+	</th:block>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+spring:
+  security: 
+    user:
+     name: admin
+     password: admin
+     roles: ADMIN
+ # H2
+  datasource:
+    url: jdbc:h2:mem:eidasdb;DB_CLOSE_DELAY=-1
+    #url: jdbc:h2:~/eidasdb
+    #url: jdbc:h2:~/eidasdb;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE (con questa annotazione e l'indicazione su ddl-auto è possibile mantere i dati su db allo shutdown dell'applicazione)
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+    platform: h2
+    #data: file:/<path>/data.sql (caricamento dati di default allo startup)
+    #   pool size    
+    hikari:
+    # nota bene: per default, l'auto-commit sulla connection è "true"
+    # nel caso delle logiche su lib DSS la commit è esplicita 
+    # occorre quindi settare questa property a false per non incorrere
+    # in errori
+      auto-commit: false
+      maximum-pool-size: 30
+      pool-name: ParerEidasHikariPool
+      maxLifeTime : 600000   
+  jpa:
+    open-in-view: false  
+    database-platform: org.hibernate.dialect.H2Dialect
+    show_sql: true
+    hibernate:
+      max_fetch_depth: 3
+      ddl-auto: update
+      hbm2ddl:
+        auto: update 
+  h2:
+    console:
+      enabled: true    
+      path: /admin/h2-console
+  main:
+    allow-bean-definition-overriding: true
+     
+     

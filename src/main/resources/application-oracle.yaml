@@ -1,0 +1,36 @@
+spring:
+  security: 
+    user:
+     name: admin
+     password: admin
+     roles: ADMIN
+ # ORACLE
+  datasource:
+    url: jdbc:oracle:thin:@parer-vora-b03.ente.regione.emr.it:1521/PARER19S.ente.regione.emr.it
+    driver-class-name: oracle.jdbc.OracleDriver
+    # passare come argomenti (e.g. mvn spring-boot:run -Dspring-boot.run.arguments="--dbusername=USER,--dbpassword=PWD" oppure 
+    # come argomenti alla VM sullo starter java -Ddbusername=USER -Ddbpassword=PWD)
+    username:  ${dbusername}
+    password:  ${dbpassword}
+    #   pool size    
+    hikari:
+    # nota bene: per default, l'auto-commit sulla connection è "true"
+    # nel caso delle logiche su lib DSS la commit è esplicita 
+    # occorre quindi settare questa property a false per non incorrere
+    # in errori
+      auto-commit: false
+      maximum-pool-size: 30
+      pool-name: ParerEidasHikariPool
+      maxLifeTime : 600000      
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    show_sql: true
+    hibernate:
+      max_fetch_depth: 3
+      ddl-auto: update
+      hbm2ddl:
+        auto: update 
+  main:
+    allow-bean-definition-overriding: true
+     

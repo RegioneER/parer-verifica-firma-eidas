@@ -1,0 +1,13 @@
+/target/
+.project
+.classpath
+/.settings/
+**/target/
+**/.settings/
+/verifica-firma-eidas-web/.tern-project
+/tomcatembed/
+/verifica-firma-eidas-web/tomcatembed
+nb-configuration.xml
+nbactions.xml
+/verifica-firma-eidas-web/nbactions-jar.xml
+.idea/

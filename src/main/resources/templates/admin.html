@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.springframework.org/security/tags" lang="it">
+<head
+	th:replace="fragments/template.html :: header('EIDAS - Pagina amministratore')"></head>
+<body>
+
+	<div th:replace="fragments/template.html :: main"></div>
+
+	<sec:authorize access="isAuthenticated()">
+		<div class="container"
+			style="padding-top: 10px; padding-bottom: 10px;">
+			<div class="row">
+				<div class="col">
+					<a href="#" class="btn btn-primary btn-sm fa fa-sign-out"
+						th:href="@{/logout}"> Esci</a>
+
+				</div>
+				<div class="col-sm-2">
+					<span class="fa fa-user" /> Utente: <strong><span
+						sec:authentication="name"></span></strong>
+				</div>				
+			</div>
+		</div>
+	</sec:authorize>
+
+
+
+	<div class="container">
+	 <nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home">
+					Home</a></li>
+		</ol>
+	  </nav>
+	</div>
+
+	<div class="container">
+		<div class="panel-group" id="accordion">
+			<div th:replace="fragments/spring.html :: utilities"></div>
+
+			<div th:replace="fragments/spring.html :: env"></div>
+		</div>
+
+		<div th:replace="fragments/template.html :: info"></div>
+		<div th:replace="fragments/template.html :: footer"></div>
+	</div>
+
+</body>
+</html>
