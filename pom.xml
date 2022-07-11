@@ -39,7 +39,7 @@
 	</properties>
 
     <scm>
-		<developerConnection>scm:git:git@github.com:RegioneER/parer.sacer.verificafirma-eidas.git</developerConnection>
+		<developerConnection>scm:git:https://github.com/RegioneER/parer.sacer.verificafirma-eidas.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
