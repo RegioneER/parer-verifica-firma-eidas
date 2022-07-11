@@ -5,6 +5,18 @@
 Progetto relativo al ws per la validazione delle firme EIDAS. <br/><br/>
 Basato sulla versione <b>5.9</b> del progetto DSS (vedi <https://github.com/esig/dss>).
 
+## Configurazione settings.xml 
+
+Al fine di compilare il progetto in locale, è necessaria la presenza del software [Maven](https://maven.apache.org/) e la seguente configurazione su settings.xml: 
+
+```xml
+<server>
+	<id>github</id>
+	<username>USERNAME</username>
+	<password>ACCESS_TOKEN</password>
+</server>
+```
+per ulteriori dettagi conlsutare la documentazione ufficiale su [GitHub](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token).
 
 ## Esecuzione applicazione 
 
