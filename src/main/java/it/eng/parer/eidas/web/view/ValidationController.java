@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.web.view;
 
 import java.io.IOException;
@@ -11,13 +28,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
@@ -33,17 +47,21 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import eu.europa.esig.dss.model.MimeType;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.ws.validation.dto.WSReportsDTO;
 import it.eng.parer.eidas.core.helper.ReportRenderingHelper;
 import it.eng.parer.eidas.core.service.IVerificaFirma;
 import it.eng.parer.eidas.core.util.Constants;
-import it.eng.parer.eidas.model.DataToValidateDTOExt;
+import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
-import it.eng.parer.eidas.model.RemoteDocumentExt;
+import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.web.bean.VerificaFirmaBean;
 import it.eng.parer.eidas.web.bean.VerificaFirmaResultBean;
 import it.eng.parer.eidas.web.bean.VerificaFirmaResultPaginatorBean;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 /**
  * Controller deputato al form di verifica firma manuale.
@@ -52,6 +70,7 @@ import it.eng.parer.eidas.web.bean.VerificaFirmaResultPaginatorBean;
  */
 @Controller
 @SessionAttributes({ "validationModel", "validationResultPaginator" })
+@ConditionalOnProperty(name = "parer.eidas.validation-ui.enabled", havingValue = "true", matchIfMissing = true)
 public class ValidationController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationController.class);
@@ -88,12 +107,15 @@ public class ValidationController {
 
     @PostMapping(value = "/validation", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ModelAndView verifica(@ModelAttribute @Valid VerificaFirmaBean verificafirmaBean, BindingResult errors,
-            Model model) {
+            Model model, HttpServletRequest request) {
         VerificaFirmaResultPaginatorBean paginator = new VerificaFirmaResultPaginatorBean();
         VerificaFirmaResultBean risultato = new VerificaFirmaResultBean();
         try {
-            DataToValidateDTOExt dataToValidateDTO = convert(verificafirmaBean);
-            EidasWSReportsDTOTree validateSignature = service.validateSignature(dataToValidateDTO);
+            EidasDataToValidateMetadata metadata = convert(verificafirmaBean);
+            EidasWSReportsDTOTree validateSignature = service.validateSignatureOnMultipart(metadata, request,
+                    verificafirmaBean.getFileDaVerificare(),
+                    verificafirmaBean.getFileOriginali().toArray(new MultipartFile[0]),
+                    verificafirmaBean.getFileDssPolicy());
 
             risultato.setLivello(1);
             risultato.setBusta(1);
@@ -137,7 +159,7 @@ public class ValidationController {
             VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
             String simpleReport = ricerca.getSimpleReportXml();
 
-            response.setContentType(MimeType.PDF.getMimeTypeString());
+            response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
             response.setHeader("Content-Disposition", "attachment; filename=DSS-Simple-report.pdf");
 
             renderingService.generateSimpleReportPdf(simpleReport, response.getOutputStream());
@@ -155,7 +177,7 @@ public class ValidationController {
             VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
             String simpleReport = ricerca.getDetailedReportXml();
 
-            response.setContentType(MimeType.PDF.getMimeTypeString());
+            response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
             response.setHeader("Content-Disposition", "attachment; filename=DSS-Detailed-report.pdf");
 
             renderingService.generateDetailedReportPdf(simpleReport, response.getOutputStream());
@@ -211,8 +233,8 @@ public class ValidationController {
         }
     }
 
-    private static DataToValidateDTOExt convert(VerificaFirmaBean verificaFirmaBean) {
-        DataToValidateDTOExt dataToValidate = new DataToValidateDTOExt();
+    private static EidasDataToValidateMetadata convert(VerificaFirmaBean verificaFirmaBean) {
+        EidasDataToValidateMetadata dataToValidate = new EidasDataToValidateMetadata();
         try {
             dataToValidate.setControlloRevocaIgnorato(!verificaFirmaBean.isAbilitaControlloRevoca());
             dataToValidate.setControlloCatenaTrustIgnorato(!verificaFirmaBean.isAbilitaControlloCatenaTrusted());
@@ -240,17 +262,16 @@ public class ValidationController {
 
             MultipartFile fileDaVerificare = verificaFirmaBean.getFileDaVerificare();
 
-            dataToValidate.setIdComponente(fileDaVerificare.getName());
+            dataToValidate.setDocumentId(fileDaVerificare.getName());
             dataToValidate.setUuid(UUID.randomUUID().toString());
-            dataToValidate.setVerificaAllaDataDiFirma(verificaFirmaBean.isVerificaAllaDataFirma());
 
-            RemoteDocumentExt signedDocument = buildDocument(fileDaVerificare);
+            EidasRemoteDocument signedDocument = buildDocument(fileDaVerificare);
             // Documento firmato
-            dataToValidate.setSignedDocumentExt(signedDocument);
+            dataToValidate.setRemoteSignedDocument(signedDocument);
 
             MultipartFile policy = verificaFirmaBean.getFileDssPolicy();
             if (policy != null && !policy.isEmpty()) {
-                RemoteDocumentExt policyDocument = buildDocument(policy);
+                EidasRemoteDocument policyDocument = buildDocument(policy);
                 // Custom policy DSS
                 dataToValidate.setPolicyExt(policyDocument);
             }
@@ -259,12 +280,12 @@ public class ValidationController {
             if (documentiOriginali != null) {
                 for (MultipartFile documentoOriginale : documentiOriginali) {
                     if (!documentoOriginale.isEmpty()) {
-                        RemoteDocumentExt originalDocument = buildDocument(documentoOriginale);
-                        if (dataToValidate.getOriginalDocumentsExt() == null) {
-                            dataToValidate.setOriginalDocumentsExt(new ArrayList<RemoteDocumentExt>());
+                        EidasRemoteDocument originalDocument = buildDocument(documentoOriginale);
+                        if (dataToValidate.getRemoteOriginalDocuments() == null) {
+                            dataToValidate.setRemoteOriginalDocuments(new ArrayList<EidasRemoteDocument>());
                         }
                         // Original Documents
-                        dataToValidate.getOriginalDocumentsExt().add(originalDocument);
+                        dataToValidate.getRemoteOriginalDocuments().add(originalDocument);
                     }
                 }
             }
@@ -275,8 +296,8 @@ public class ValidationController {
         return dataToValidate;
     }
 
-    private static RemoteDocumentExt buildDocument(MultipartFile fileUploaded) throws IOException {
-        RemoteDocumentExt policyDocument = new RemoteDocumentExt();
+    private static EidasRemoteDocument buildDocument(MultipartFile fileUploaded) throws IOException {
+        EidasRemoteDocument policyDocument = new EidasRemoteDocument();
         policyDocument.setName(fileUploaded.getName());
         policyDocument.setAbsolutePath(fileUploaded.getOriginalFilename());
         policyDocument.setBytes(fileUploaded.getBytes());

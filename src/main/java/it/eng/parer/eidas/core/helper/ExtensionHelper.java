@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.helper;
 
 import java.io.ByteArrayInputStream;
@@ -9,7 +26,6 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -71,8 +87,7 @@ public class ExtensionHelper {
                 // Estrazione del CrlNumber
                 // solo CRL
                 for (XmlCertificateRevocation certificateRevocation : certificate.getRevocations().stream()
-                        .filter(r -> r.getRevocation().getType().equals(RevocationType.CRL))
-                        .collect(Collectors.toList())) {
+                        .filter(r -> r.getRevocation().getType().equals(RevocationType.CRL)).toList()) {
                     byte[] base64EncodedCrl = certificateRevocation.getRevocation().getBase64Encoded();
                     // check if not null
                     if (base64EncodedCrl != null) {

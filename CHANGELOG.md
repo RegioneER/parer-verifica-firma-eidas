@@ -1,4 +1,53 @@
 
+## 1.11.1 (13-09-2023)
+
+### Bugfix: 2
+- [#30189](https://parermine.regione.emilia-romagna.it/issues/30189) Eliminazione OracleDB constraint e introduzione configurazione per eliminazione di oggetti "non più validi"
+- [#30078](https://parermine.regione.emilia-romagna.it/issues/30078) Correzione processo di verifica documenti "multi busta" con DSS-EIDAS versione 5.12
+
+## 1.11.0 (16-08-2023)
+
+### Novità: 3
+- [#29863](https://parermine.regione.emilia-romagna.it/issues/29863) Aggiornamento librerie obsolete 2023
+- [#29853](https://parermine.regione.emilia-romagna.it/issues/29853) Aggiornamento alle versione 5.12 della libreria DSS
+- [#29852](https://parermine.regione.emilia-romagna.it/issues/29852) Modifica gestione TLS (rimosso il default alla versione v1.2) con inserimento certificato trusted "Certigna Services CA" 
+
+## 1.10.0 (28-06-2023)
+
+### Novità: 2
+- [#29717](https://parermine.regione.emilia-romagna.it/issues/29717) Gestione casi in cui il certificato del responder OCSP ha data di inizio validità maggiore del riferimento temporale a cui si chiede di verificare la firma
+- [#29693](https://parermine.regione.emilia-romagna.it/issues/29693) Introduzione degli attribute su reponse dei servizi (ETag + last-modified) e aggiornamento spring boot
+
+## 1.9.0 (19-05-2023)
+
+### Novità: 1
+- [#27885](https://parermine.regione.emilia-romagna.it/issues/27885) Gestione risposta Verifica Eidas se impostato a true UtilizzoDataFirmaPerRifTemp
+
+## 1.8.0 (28-02-2023)
+
+### Novità: 1
+- [#28008](https://parermine.regione.emilia-romagna.it/issues/28008) Modifica parametri di input per object storage
+
+## 1.7.0 (10-01-2023)
+
+### Novità: 1
+- [#28141](https://parermine.regione.emilia-romagna.it/issues/28141)  Aggiornamento libreria dss 5.11
+
+## 1.6.0 (23-11-2022)
+
+### Novità: 1
+- [#27525](https://parermine.regione.emilia-romagna.it/issues/27525) aggiornamento libreria dss 5.10
+
+## 1.5.0 (18-10-2022)
+
+### Novità: 1
+- [#27361](https://parermine.regione.emilia-romagna.it/issues/27361) Analisi librerie obsolete 2022
+
+## 1.4.1 (03-08-2022)
+
+### Bugfix: 1
+- [#27524](https://parermine.regione.emilia-romagna.it/issues/27524) Correzione verifica firma documenti PDF PADES
+
 ## 1.4.0 (31-05-2022)
 
 ### Novità: 1

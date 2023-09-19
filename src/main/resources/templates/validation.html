@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.springframework.org/security/tags"
       lang="it">
-    <head th:replace="fragments/template.html :: header('EIDAS - Verifica')"></head>
+    <head th:replace="~{fragments/template.html :: header('EIDAS - Verifica')}"></head>
     
     <body>  
        <script type="text/javascript">
@@ -24,16 +24,16 @@
     	});
 	    </script>
 	    
-        <div th:replace="fragments/template.html :: main"></div>
+        <div th:replace="~{fragments/template.html :: main}"></div>
 
-		<div th:if="${#request.isUserInRole('ADMIN')}" class="container"
+		<div sec:authorize="hasRole('ROLE_ADMIN')" class="container"
 				style="padding-top: 10px; padding-bottom: 10px;">
 				<div class="row">
 					<div class="col">
 						<a href="#" class="btn btn-primary btn-sm fa fa-sign-out" th:href="@{/logout}"> Esci</a>
 					</div>				
 					<div class="col-sm-2">
-						<span class="fa fa-user"/> Utente: <strong><span sec:authentication="name"></span></strong>
+						<span class="fa fa-user fa-sm"/> Utente: <strong><span sec:authentication="name"></span></strong>
 					</div>					
 				</div>
 	   </div>
@@ -41,7 +41,7 @@
 	    <div class="container">
 	     <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-               	<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home">
+               	<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home fa-sm">
 					Home</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Verifica</li>
             </ol>
@@ -49,7 +49,7 @@
         </div>
               
         <div class="container">
-            <form action="#" th:action="@{/validation}" th:object="${verificafirmaBean}" method="post" enctype="multipart/form-data">
+            <form action="#" th:if="${@environment.getProperty('parer.eidas.validation-ui.enabled') ?: true}" th:action="@{/validation}" th:object="${verificafirmaBean}" method="post" enctype="multipart/form-data">
                 <fieldset class="form-group border p-2">
                     <legend class="float-none w-auto p-2">Parametri Verifica</legend>
                     <div class="form-group">
@@ -58,26 +58,22 @@
                         <label for="ora_riferimento" class="col-form-label">Ora di riferimento</label>
                         <input id="ora_riferimento" type="time" name="ora_riferimento" th:field="*{oraRiferimento}" pattern="\d{2}:\d{2}"/>
                     </div>
-                    <div class="form-group">
-                        <input id="verifica_data_firma" class="col-form-control" type="checkbox" name="verifica_data_firma" th:field="*{verificaAllaDataFirma}"/>
-                        <label for="verifica_data_firma" class="col-form-label">Verifica alla data di firma</label>
-                    </div>
                      <div class="form-group">
                     	<input id="abil_raw" class="col-form-control" type="checkbox" name="abil_raw" th:field="*{includiRaw}"/> 
                         <label for="abil_raw" class="col-form-label">Includi file su report</label>
                     </div>
                     <div class="form-group">
-                        <label for="file_da_verificare" class="col-form-label"><span class="fa fa-upload"></span> Documento firmato</label>
+                        <label for="file_da_verificare" class="col-form-label"><span class="fa fa-upload fa-sm"></span> Documento firmato</label>
                         <input id="file_da_verificare" class="form-control-file" name="file_da_verificare" type="file" aria-describedby="file_da_verificare_help" th:field="*{fileDaVerificare}" required="required"/>
                         <small id="file_da_verificare_help" class="form-text text-muted">Parametro obbligatorio.</small>
                     </div>
                     <div class="form-group">
-                        <label for="file_originali" title="Aggiungere uno o più file"><span class="fa fa-upload"></span> Documenti originali</label>
+                        <label for="file_originali" title="Aggiungere uno o più file"><span class="fa fa-upload fa-sm"></span> Documenti originali</label>
                         <input id="file_originali" class="form-control-file" name="file_originali" type="file" th:field="*{fileOriginali}" aria-describedby="file_originali_help" multiple="multiple"/>
                         <small id="file_originali_help" class="form-text text-muted">Caricare uno o più file originali.</small>
                     </div>
                     <div class="form-group">
-                        <label for="file_policy"><span class="fa fa-upload"></span> DSS policy</label>
+                        <label for="file_policy"><span class="fa fa-upload fa-sm"></span> DSS policy</label>
                         <input id="file_policy" class="form-control-file" name="file_policy" type="file" th:field="*{fileDssPolicy}"/>
                     </div>    
                 </fieldset>
@@ -104,12 +100,12 @@
 	                	<label for="abil_crypto" class="col-form-label">Controllo crittografico</label>
                     </div>
                 </fieldset>
-                <button type="submit" name="verifica" id="verifica" class="btn btn-primary"><span class="fa fa-check"></span> Verifica</button>
-                <button type="button" name="clean" id="clean" class="btn btn-danger"><span class="fa fa-eraser"></span> Ripulisci</button>
+                <button type="submit" name="verifica" id="verifica" class="btn btn-primary"><span class="fa fa-check fa-sm"></span> Verifica</button>
+                <button type="button" name="clean" id="clean" class="btn btn-danger"><span class="fa fa-eraser fa-sm"></span> Ripulisci</button>
             </form>
             
-            <div th:replace="fragments/template.html :: info"></div>
-            <div th:replace="fragments/template.html :: footer"></div>
+            <div th:replace="~{fragments/template.html :: info}"></div>
+            <div th:replace="~{fragments/template.html :: footer}"></div>
         </div>
 
     </body>

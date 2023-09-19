@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.helper;
 
 import static org.apache.xmlgraphics.util.MimeConstants.MIME_PDF;
@@ -10,7 +27,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -41,6 +57,7 @@ import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
 import eu.europa.esig.dss.utils.Utils;
 import it.eng.parer.eidas.web.bean.VerificaFirmaResultBean;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class ReportRenderingHelper {
@@ -60,19 +77,6 @@ public class ReportRenderingHelper {
     private FOUserAgent foUserAgent;
     private Templates templateSimpleReportPdf;
     private Templates templateDetailedReportPdf;
-
-    /*
-     * # https://webgate.ec.europa.eu/tl-browser/#/tl/BE tl.browser.country.root.url =
-     * https://webgate.ec.europa.eu/tl-browser/#/tl/
-     * 
-     * # https://webgate.ec.europa.eu/tl-browser/#/trustmark/[CC]/[VAT] tl.browser.trustmark.root.url =
-     * https://webgate.ec.europa.eu/tl-browser/#/trustmark/
-     * 
-     * 
-     * @Value("${tl.browser.trustmark.root.url}") private String rootTrustmarkUrlInTlBrowser;
-     * 
-     * @Value("${tl.browser.country.root.url}") private String rootCountryUrlInTlBrowser;
-     */
 
     @PostConstruct
     public void init() throws JAXBException, TransformerConfigurationException, IOException {

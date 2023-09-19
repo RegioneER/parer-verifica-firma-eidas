@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.service;
 
 import static it.eng.parer.eidas.core.util.Constants.TMP_FILE_SUFFIX;
@@ -8,12 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +35,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import it.eng.parer.eidas.core.helper.EidasHelper;
-import it.eng.parer.eidas.model.DataToValidateDTOExt;
-import it.eng.parer.eidas.model.EidasMetadataToValidate;
+import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
-import it.eng.parer.eidas.model.RemoteDocumentExt;
+import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class VerificaFirmaImpl implements IVerificaFirma {
@@ -43,61 +57,39 @@ public class VerificaFirmaImpl implements IVerificaFirma {
     EidasHelper helper;
 
     @Override
-    public EidasWSReportsDTOTree validateSignatureOnJson(DataToValidateDTOExt dataToValidateDTO,
+    public EidasWSReportsDTOTree validateSignatureOnJson(EidasDataToValidateMetadata dataToValidateDTO,
             HttpServletRequest request) {
-        // verify armor ascii
-        Path signedDocumentElab = helper.verifyAndExtractFileContent(dataToValidateDTO.getUuid().concat("-"),
-                dataToValidateDTO.getSignedDocumentExt().getBytes());
-        if (signedDocumentElab != null) {
-            // delete bytes
-            dataToValidateDTO.getSignedDocumentExt().setBytes(null);
-            // set file Bae64 decoded
-            dataToValidateDTO.getSignedDocumentExt().setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
-            LOG.debug("Ascii Armor detected, riferimento file {}",
-                    dataToValidateDTO.getSignedDocumentExt().getAbsolutePath());
-        }
+        // verify dto
+        elabValidateDtoExt(dataToValidateDTO);
         // call verificaFirma
         return service.validateSignature(dataToValidateDTO, request);
     }
 
     @Override
-    public EidasWSReportsDTOTree validateSignatureOnMultipart(EidasMetadataToValidate metadata,
+    public EidasWSReportsDTOTree validateSignatureOnMultipart(EidasDataToValidateMetadata dataToValidateDTO,
             HttpServletRequest request, MultipartFile signedDocument, MultipartFile[] originalDocuments,
             MultipartFile validationPolicy) {
-        // insert files on DataToValidateDTOExt
-        DataToValidateDTOExt dataToValidateDTO = fillDtoByMetadataAndFiles(metadata, signedDocument, originalDocuments,
-                validationPolicy);
+        // verify dto
+        elaborateValidateDtoExtMultiPart(dataToValidateDTO, signedDocument, originalDocuments, validationPolicy);
         // call verificaFirma
         return service.validateSignature(dataToValidateDTO, request);
     }
 
-    private DataToValidateDTOExt fillDtoByMetadataAndFiles(EidasMetadataToValidate metadata,
-            MultipartFile signedDocument, MultipartFile[] originalDocuments, MultipartFile validationPolicy) {
-
-        // create dss dto
-        DataToValidateDTOExt dataToValidateDTOExt = new DataToValidateDTOExt(metadata);
+    private void elaborateValidateDtoExtMultiPart(EidasDataToValidateMetadata metadata, MultipartFile signedDocument,
+            MultipartFile[] originalDocuments, MultipartFile validationPolicy) {
 
         try {
             // tmp files prefix
             final String tmpFilePrefix = metadata.getUuid().concat("-");
-            // manage document name
-            String signedDocumentFileName = metadata.getSignedDocumentName(); // default
-            if (StringUtils.isBlank(signedDocumentFileName)) {
-                signedDocumentFileName = StringUtils.isNotBlank(signedDocument.getOriginalFilename())
-                        ? signedDocument.getOriginalFilename() : signedDocument.getName();
-            }
-            // tranfer to (create tmp file on disk)
-            final Path signedDocumentPath = Files.createTempFile(tmpFilePrefix, TMP_FILE_SUFFIX, attr);
-            signedDocument.transferTo(signedDocumentPath);
-            signedDocumentPath.toFile().deleteOnExit();
-
+            // signed document
+            EidasRemoteDocument signedRemoteDocumentExt = metadata.getRemoteSignedDocument();
+            // transfer to (create tmp file on disk)
+            final Path signedDocumentPath = transferViaMultiPartFile(signedDocument, tmpFilePrefix, TMP_FILE_SUFFIX);
             // verify armor ascii
-            Path signedDocumentElab = helper.verifyAndExtractFileContent(tmpFilePrefix, signedDocumentPath);
+            final Path signedDocumentElab = helper.verifyAndExtractFileContent(metadata, tmpFilePrefix,
+                    signedDocumentPath);
 
-            RemoteDocumentExt signedRemoteDocumentExt = null;
             // insert signed file
-            signedRemoteDocumentExt = new RemoteDocumentExt();
-            signedRemoteDocumentExt.setName(signedDocumentFileName); // set original file name
             if (signedDocumentElab != null) {
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
                 //
@@ -108,69 +100,125 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             } else {
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentPath.toAbsolutePath().toString());
             }
-            dataToValidateDTOExt.setSignedDocumentExt(signedRemoteDocumentExt);
 
             // 2. if exists MultipartFile originalDocuments ....
             if (originalDocuments != null && originalDocuments.length != 0) {
-                // create list
-                dataToValidateDTOExt.setOriginalDocumentsExt(new ArrayList<>());
                 // for earch multipart
-                int idx = 0;
                 for (MultipartFile originalDocument : originalDocuments) {
-                    String originalDocumentFileName = metadata.getOriginalDocumentNames() != null
-                            && metadata.getOriginalDocumentNames().length > 0 ? metadata.getOriginalDocumentNames()[idx]
-                                    : StringUtils.EMPTY; // default
-                    if (StringUtils.isBlank(originalDocumentFileName)) {
-                        originalDocumentFileName = StringUtils.isNotBlank(originalDocument.getOriginalFilename())
-                                ? originalDocument.getOriginalFilename() : originalDocument.getName().concat("_" + idx);
+                    EidasRemoteDocument originalRemoteDocumentExt = null;
+                    // search on metadata by multipart file name
+                    Optional<EidasRemoteDocument> originalRemoteDocumentExtFound = metadata.getRemoteOriginalDocuments()
+                            .stream()
+                            .filter(d -> d.getName().equalsIgnoreCase(originalDocument.getName())
+                                    || d.getName().equalsIgnoreCase(originalDocument.getOriginalFilename()))
+                            .findFirst();
+                    // not present on metadata
+                    if (!originalRemoteDocumentExtFound.isPresent()) {
+                        // create new one
+                        originalRemoteDocumentExt = new EidasRemoteDocument();
+                        metadata.getRemoteOriginalDocuments().add(originalRemoteDocumentExt); // add on metadata
+                    } else {
+                        originalRemoteDocumentExt = originalRemoteDocumentExtFound.get();
                     }
-
-                    // tranfer to
-                    final Path originalDocumentPath = Files.createTempFile(tmpFilePrefix, TMP_FILE_SUFFIX, attr);
-                    originalDocument.transferTo(originalDocumentPath);
-                    originalDocumentPath.toFile().deleteOnExit();
-
-                    RemoteDocumentExt originalRemoteDocumentExt = null;
-                    // insert signed file
-                    originalRemoteDocumentExt = new RemoteDocumentExt();
-                    originalRemoteDocumentExt.setName(originalDocumentFileName); // set original file name
-                    originalRemoteDocumentExt.setAbsolutePath(originalDocumentPath.toAbsolutePath().toString()); // set
-                    // absolute
-                    // path
-                    // (file
-                    // for
-                    // real)
-                    dataToValidateDTOExt.getOriginalDocumentsExt().add(originalRemoteDocumentExt);
-
-                    // increment index
-                    idx++;
+                    // transfer to (create tmp file on disk)
+                    final Path originalDocumentPath = transferViaMultiPartFile(originalDocument, tmpFilePrefix,
+                            TMP_FILE_SUFFIX);
+                    // set path
+                    originalRemoteDocumentExt.setAbsolutePath(originalDocumentPath.toAbsolutePath().toString());
                 }
             }
             // 3. if exists validation policy ....
             if (validationPolicy != null && !validationPolicy.isEmpty()) {
-                final String validationPolicyFileName = StringUtils.isNotBlank(validationPolicy.getOriginalFilename())
-                        ? validationPolicy.getOriginalFilename() : validationPolicy.getName();
-
-                // tranfer to
-                final Path validationPolicyPath = Files.createTempFile(tmpFilePrefix, validationPolicyFileName, attr);
-                validationPolicy.transferTo(validationPolicyPath);
-                validationPolicyPath.toFile().deleteOnExit();
-
-                RemoteDocumentExt policyExt = null;
-                policyExt = new RemoteDocumentExt();
-                policyExt.setName(validationPolicyFileName);
-                policyExt.setAbsolutePath(validationPolicyPath.toAbsolutePath().toString()); // set absolute path (file
-                // for real)
-                //
-                dataToValidateDTOExt.setPolicyExt(policyExt);
+                // transfer to (create tmp file on disk)
+                final Path validationPolicyPath = transferViaMultiPartFile(validationPolicy, tmpFilePrefix,
+                        TMP_FILE_SUFFIX);
+                // check metadata
+                EidasRemoteDocument policyRemoteDocumentExt = metadata.getPolicyExt();
+                if (policyRemoteDocumentExt == null) {
+                    policyRemoteDocumentExt = new EidasRemoteDocument();
+                }
+                // set path
+                policyRemoteDocumentExt.setAbsolutePath(validationPolicyPath.toAbsolutePath().toString());
             }
-            return dataToValidateDTOExt;
         } catch (IOException ex) {
             // clean from files
-            helper.deleteTmpDocExtFiles(dataToValidateDTOExt.getSignedDocumentExt(),
-                    dataToValidateDTOExt.getOriginalDocumentsExt(), dataToValidateDTOExt.getPolicyExt());
+            helper.deleteTmpDocExtFiles(metadata.getRemoteSignedDocument(), metadata.getRemoteOriginalDocuments(),
+                    metadata.getPolicyExt());
 
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(ex.getMessage());
+            throw new EidasParerException(metadata, ex).withCode(ParerError.ErrorCode.IO_ERROR)
+                    .withMessage("Errore durante elaborazione richiesta");
         }
     }
+
+    private Path transferViaMultiPartFile(MultipartFile multipartFile, final String tmpFilePrefix,
+            final String tmpFileSuffix) throws IOException {
+        final Path localDocumentPath = Files.createTempFile(tmpFilePrefix, tmpFileSuffix, attr);
+        multipartFile.transferTo(localDocumentPath);
+        localDocumentPath.toFile().deleteOnExit();
+        return localDocumentPath;
+    }
+
+    private void elabValidateDtoExt(EidasDataToValidateMetadata dataToValidateDTO) {
+
+        try {
+            // tmp files prefix
+            final String tmpFilePrefix = dataToValidateDTO.getUuid().concat("-");
+            // 1. manage signed document
+            // remote signed document
+            EidasRemoteDocument signedRemoteDocumentExt = dataToValidateDTO.getRemoteSignedDocument();
+            // transfer to (create tmp file on disk)
+            final Path signedDocumentPath = transferRemoteDocumentToLocalPath(signedRemoteDocumentExt, tmpFilePrefix,
+                    TMP_FILE_SUFFIX);
+            // set file path
+            signedRemoteDocumentExt.setAbsolutePath(signedDocumentPath.toAbsolutePath().toString());
+            // verify armor ascii
+            final Path signedDocumentElab = helper.verifyAndExtractFileContent(dataToValidateDTO, tmpFilePrefix,
+                    signedDocumentPath);
+            if (signedDocumentElab != null) {
+                // change file pointer
+                signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
+                //
+                LOG.debug("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
+                // delete previous file
+                helper.deleteTmpFile(signedDocumentPath.toAbsolutePath().toString());
+                LOG.debug("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
+            }
+
+            // 2. if exists originalDocuments ....
+            // for each originalDocument
+            for (EidasRemoteDocument originalDocument : dataToValidateDTO.getRemoteOriginalDocuments()) {
+                // transfer to (create tmp file on disk)
+                final Path originalDocumentPath = transferRemoteDocumentToLocalPath(originalDocument, tmpFilePrefix,
+                        TMP_FILE_SUFFIX);
+                // set file path
+                originalDocument.setAbsolutePath(originalDocumentPath.toAbsolutePath().toString());
+            }
+
+            // 3. if exists validation policy ....
+            if (dataToValidateDTO.getPolicyExt() != null) {
+                EidasRemoteDocument policyDocumentExt = dataToValidateDTO.getPolicyExt();
+                // transfer to (create tmp file on disk)
+                final Path validationPolicyPath = transferRemoteDocumentToLocalPath(policyDocumentExt, tmpFilePrefix,
+                        TMP_FILE_SUFFIX);
+                // set file path
+                policyDocumentExt.setAbsolutePath(validationPolicyPath.toAbsolutePath().toString());
+            }
+        } catch (IOException ex) {
+            // clean from files
+            helper.deleteTmpDocExtFiles(dataToValidateDTO.getRemoteSignedDocument(),
+                    dataToValidateDTO.getRemoteOriginalDocuments(), dataToValidateDTO.getPolicyExt());
+
+            throw new EidasParerException(dataToValidateDTO, ex).withCode(ParerError.ErrorCode.IO_ERROR)
+                    .withMessage("Errore durante elaborazione richiesta");
+        }
+    }
+
+    private Path transferRemoteDocumentToLocalPath(EidasRemoteDocument remoteDocumentExt, String tmpFilePrefix,
+            String tmpFileSuffix) throws IOException {
+        final Path localPath = Files.createTempFile(tmpFilePrefix, tmpFileSuffix, attr);
+        helper.getResourceFromURI(remoteDocumentExt.getUri(), localPath);
+        localPath.toFile().deleteOnExit();
+        return localPath;
+    }
+
 }

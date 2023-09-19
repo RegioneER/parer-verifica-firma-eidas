@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.4.1-SNAPSHOT</version>
+	<version>1.11.2-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>it.eng.parer</groupId>
 		<artifactId>parer-pom</artifactId>
-		<version>3.0.17</version>
+		<version>4.2.0</version>
 	</parent>
 
     <properties>
@@ -20,62 +20,62 @@
         <skipTests>true</skipTests>
 		<!-- Applied for jdk11 bug -->
 		<detectJavaApiLink>false</detectJavaApiLink>
-		<dss.version>5.9</dss.version>
-		<springboot.version>2.6.6</springboot.version>
-		<swagger.version>2.9.2</swagger.version>
-		<snakeyaml.version>1.30</snakeyaml.version>
-		<springdoc-openapi-ui.version>1.6.5</springdoc-openapi-ui.version>		
-		<logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
-		<verificafirma-eidas-beans.version>1.2.0</verificafirma-eidas-beans.version>
-		<!-- WEB -->
-		<logback-classic.version>1.2.3</logback-classic.version>
-		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>
-
-		<!-- TEST -->
-		<junit-platform.version>1.8.2</junit-platform.version>
-		<!-- plugins -->
-        <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>	
+        <!-- third party libs -->		
+		<dss.version>5.12.1</dss.version>
+		<springboot.version>3.0.9</springboot.version>
+		<springdoc-openapi-starter-webmvc-ui.version>2.1.0</springdoc-openapi-starter-webmvc-ui.version>		
+		<logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
+		<tika.version>2.8.0</tika.version>
+		<jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
+		<httpcore5.version>5.2.2</httpcore5.version>
+		<jaxb-api.version>2.3.1</jaxb-api.version>
+		<bootstrap.version>4.6.1</bootstrap.version>
+		<popper.js.version>1.16.0</popper.js.version>
+		<jquery.version>3.6.4</jquery.version>
+		<jquery-ui.version>1.13.2</jquery-ui.version>
+		<highlightjs.version>11.5.0</highlightjs.version>
+		<highlightjs-badgejs.version>0.0.5</highlightjs-badgejs.version>
+		<font-awesome.version>6.4.0</font-awesome.version>
+		<fop.version>2.7</fop.version>
+		<!-- custom libs -->
+		<verificafirma-eidas-beans.version>1.7.0</verificafirma-eidas-beans.version>
+		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
     <scm>
-		<developerConnection>scm:git:https://github.com/RegioneER/parer.sacer.verificafirma-eidas.git</developerConnection>
+	<developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/RegioneER/parer.sacer.verificafirma-eidas</url>
-		  </repository>      
+	   <id>github</id>
+	   <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
+	 </repository>      
     </distributionManagement>
 
-	<repositories>
-       <repository>
+    <repositories>
+      <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/RegioneER/parer.sacer.parent/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-		<repository>
-			<id>central</id>
-			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>cefdigital</id>
-			<name>cefdigital</name>
-			<url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/esignaturedss/</url>
-		  </repository>               
-	</repositories>
+            <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>            
+       </repository>
+	<repository>
+	     <id>cefdigital</id>
+	     <name>cefdigital</name>
+	    <url>https://ec.europa.eu/digital-building-blocks/artifact/content/repositories/esignaturedss/</url>
+	 </repository>               
+      </repositories>
 
 	<dependencyManagement>
 		<dependencies>
+		    <!-- DSS bom -->
+		    <dependency>
+				<groupId>eu.europa.ec.joinup.sd-dss</groupId>
+				<artifactId>sd-dss</artifactId>
+				<version>${dss.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
                 <groupId>it.eng.parer</groupId>
                 <artifactId>verificafirma-eidas-beans</artifactId>
@@ -91,13 +91,8 @@
 			<!-- Swagger -->
 			<dependency>
 				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>${springdoc-openapi-ui.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${snakeyaml.version}</version>
+				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+				<version>${springdoc-openapi-starter-webmvc-ui.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
@@ -106,15 +101,37 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-parsers</artifactId>
+				<artifactId>tika-parsers-standard-package</artifactId>
 				<version>${tika.version}</version>
+				<exclusions>
+	                 <exclusion>
+	                	  <groupId>org.bouncycastle</groupId>
+	                	  <artifactId>bcprov-jdk18on</artifactId>
+	                  </exclusion>
+	                 <exclusion>
+	                 	<groupId>org.bouncycastle</groupId>
+	                 	<artifactId>bcmail-jdk18on</artifactId>
+	                 </exclusion>
+           		 </exclusions>				
 			</dependency>
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback-encoder.version}</version>
-            </dependency>            
-        </dependencies>
+            </dependency>
+			<!-- Jakarta -->
+			<dependency>
+			    <groupId>jakarta.xml.bind</groupId>
+			    <artifactId>jakarta.xml.bind-api</artifactId>
+			    <version>${jakarta.xml.bind-api.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.httpcomponents.core5</groupId>
+			    <artifactId>httpcore5</artifactId>
+			    <version>${httpcore5.version}</version>
+			</dependency>
+
+        </dependencies>          
     </dependencyManagement>
 
 
@@ -123,103 +140,92 @@
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-document</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-cades</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-xades</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-utils-apache-commons</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-pades</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
-			<artifactId>dss-pades-openpdf</artifactId>
-			<version>${dss.version}</version>
+			<artifactId>dss-pades-pdfbox</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-crl-parser-x509crl</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-token</artifactId>
-			<version>${dss.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-service</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-model</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-validation-dto</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-signature-rest</artifactId>
-			<version>${dss.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- from 5.8 -->
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-validation-rest</artifactId>
-			<version>${dss.version}</version>			
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-server-signing-rest</artifactId>
-			<version>${dss.version}</version>						
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
-			<artifactId>dss-pades-openpdf</artifactId>
-			<version>${dss.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-tsl-validation</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-validation-soap</artifactId>
 			<scope>compile</scope>
-			<version>${dss.version}</version>
 		</dependency>
 		<!-- from 5.8 -->
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-spi</artifactId>
-			<version>${dss.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-crl-parser-stream</artifactId>
-			<version>${dss.version}</version>						
 		</dependency>
 		<!-- Model -->
 		<dependency>
@@ -252,7 +258,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
+			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ws</groupId>
@@ -262,25 +268,19 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 		<!-- Swagger -->
-		<dependency>
+        <dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-		</dependency>
-		<!-- YAML -->
-		<dependency>
-			<groupId>org.yaml</groupId>
-			<artifactId>snakeyaml</artifactId>
-		</dependency>
-		<!-- Jolokia -->
-		<dependency>
-			<groupId>org.jolokia</groupId>
-			<artifactId>jolokia-core</artifactId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 		</dependency>
 		<!-- Jaxb -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<artifactId>jackson-module-jaxb-annotations</artifactId>			
 		</dependency>
 		<!-- Encoder logstash -->
 		<dependency>
@@ -298,10 +298,6 @@
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
         </dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-		</dependency>
 		<!-- https://www.apache.org/dist/tomcat/taglibs/taglibs-standard-1.2.5/README_bin.txt -->
 		<dependency>
 			<groupId>org.apache.taglibs</groupId>
@@ -309,17 +305,12 @@
 			<version>${taglibs-standard-jstlel.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
+			<artifactId>tika-parsers-standard-package</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>xerces</groupId>
@@ -341,51 +332,69 @@
 					<groupId>org.apache.pdfbox</groupId>
 					<artifactId>pdfbox</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-		
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxb-api.version}</version>
+		</dependency>
+		<!-- Solve javadoc WARN problem:  -->
+		<!-- [WARNING] Javadoc Warnings -->
+		<!-- [WARNING] warning: unknown enum constant When.MAYBE -->
+		<!-- [WARNING] reason: class file for javax.annotation.meta.When not found -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Webjars -->
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>
-			<version>4.6.1</version>
+			<version>${bootstrap.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.webjars.npm/popper.js -->
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>popper.js</artifactId>
-		    <version>1.16.0</version>
+		    <version>${popper.js.version}</version>
 		</dependency>		
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jquery</artifactId>
-			<version>3.5.1</version>
+			<version>${jquery.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jquery-ui</artifactId>
-			<version>1.12.1</version>
+			<version>${jquery-ui.version}</version>
 		</dependency>
 		<!-- Dipendenze per la pagina di verifica -->
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>highlightjs</artifactId>
-			<version>10.1.2</version>
+			<version>${highlightjs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
 			<artifactId>highlightjs-badgejs</artifactId>
-			<version>0.0.5</version>
+			<version>${highlightjs-badgejs.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.bower</groupId>
+			<groupId>org.webjars</groupId>
 			<artifactId>font-awesome</artifactId>
-			<version>4.7.0</version>
+			<version>${font-awesome.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>
-			<version>2.6</version>
+			<version>${fop.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -405,8 +414,6 @@
 				</exclusion>				
 			</exclusions>
 		</dependency>
-
-
 		<!-- JUnit 5-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -416,11 +423,14 @@
 				<exclusion>
 					<groupId>org.junit.vintage</groupId>
 					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>				
+				</exclusion>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
             </exclusions>
         </dependency>
-        
-        <!-- Junit suite -->
+		<!-- Junit suite -->
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite</artifactId>
@@ -453,24 +463,11 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                </plugin>
-                <!-- artifact disponibile attraverso compilazione del singolo TAG pubblicato -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-				</plugin>				
+			  <plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${springboot.version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -478,7 +475,7 @@
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-compiler-plugin</artifactId>
 			    <configuration>
-			        <release>11</release>
+			        <release>17</release>
 			    </configuration>
 			</plugin>
 			<plugin>
@@ -527,7 +524,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.1.6.RELEASE</version>
 				<executions>
 					<execution>
 						<goals>
@@ -569,23 +565,13 @@
 				</configuration>
 			</plugin>
 
-				<!-- TEST 
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<configuration>
-						<classifier>tests</classifier>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>test-jar</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				-->
-	
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<doclint>none</doclint>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -610,8 +596,7 @@
                     <resource>
                         <directory>src/main/resources</directory>
                         <excludes>
-                            <exclude>**/application-h2.yaml</exclude>
-                            <exclude>**/application-oracle.yaml</exclude>
+                            <exclude>application-oracle.yaml</exclude>
                         </excludes>
                     </resource>
                 </resources>
@@ -657,8 +642,7 @@
                     <resource>
                         <directory>src/main/resources</directory>
                         <excludes>
-                            <exclude>**/application-h2.yaml</exclude>
-                            <exclude>**/application-oracle.yaml</exclude>
+                            <exclude>application-oracle.yaml</exclude>
                         </excludes>
                     </resource>
                 </resources>

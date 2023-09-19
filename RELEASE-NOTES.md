@@ -1,4 +1,5 @@
-## 1.4.0 (31-05-2022)
+## 1.11.1 (13-09-2023)
 
-### Novità: 1
-- [#27181](https://parermine.regione.emilia-romagna.it/issues/27181) Aggiornamento libreria DSS 5.9
+### Bugfix: 2
+- [#30189](https://parermine.regione.emilia-romagna.it/issues/30189) Eliminazione OracleDB constraint e introduzione configurazione per eliminazione di oggetti "non più validi"
+- [#30078](https://parermine.regione.emilia-romagna.it/issues/30078) Correzione processo di verifica documenti "multi busta" con DSS-EIDAS versione 5.12

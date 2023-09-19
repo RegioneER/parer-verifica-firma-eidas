@@ -1,22 +1,37 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +40,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
 
+import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.enumerations.TokenExtractionStrategy;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import eu.europa.esig.dss.model.MimeType;
 import eu.europa.esig.dss.policy.ValidationPolicy;
 import eu.europa.esig.dss.policy.ValidationPolicyFacade;
 import eu.europa.esig.dss.policy.jaxb.Level;
+import eu.europa.esig.dss.policy.jaxb.LevelConstraint;
 import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.CertificateVerifier;
@@ -41,12 +57,12 @@ import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.ws.validation.dto.WSReportsDTO;
 import it.eng.parer.eidas.core.helper.EidasHelper;
 import it.eng.parer.eidas.core.helper.ExtensionHelper;
-import it.eng.parer.eidas.core.util.Constants;
-import it.eng.parer.eidas.model.DataToValidateDTOExt;
+import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
+import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
-import it.eng.parer.eidas.model.RemoteDocumentExt;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocumentValidation {
 
@@ -91,39 +107,35 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
     }
 
     @Override
-    public EidasWSReportsDTOTree validateSignature(DataToValidateDTOExt dataToValidateDTO, HttpServletRequest request) {
-        SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATE_FORMAT_TIMESTAMP_TYPE);
+    public EidasWSReportsDTOTree validateSignature(EidasDataToValidateMetadata dataToValidateMetadata,
+            HttpServletRequest request) {
         //
-        final Date startValidation = new Date();
+        final LocalDateTime startValidation = LocalDateTime.now(ZoneId.systemDefault());
         //
-        LOG.info("Inizio validazione : id componente {} - data/ora inizio {}", dataToValidateDTO.getIdComponente(),
-                sdf.format(startValidation));
-
-        //
-        Reports reports = null;
-
-        SignedDocumentValidator signedDocValidator = null;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Inizio validazione documento con identificativo [{}] - data/ora inizio {}",
+                    dataToValidateMetadata.getDocumentId(), startValidation);
+        }
         //
         String mimeTypeUnsigned = null;
-
         EidasWSReportsDTOTree root = new EidasWSReportsDTOTree();
         try {
             // elab signed file
-            DSSDocument signedDocument = elabSignedFile(dataToValidateDTO.getSignedDocumentExt());
+            DSSDocument signedDocument = elabSignedFile(dataToValidateMetadata,
+                    dataToValidateMetadata.getRemoteSignedDocument());
             // validator
-            signedDocValidator = buildValidator(signedDocument, dataToValidateDTO);
+            SignedDocumentValidator signedDocValidator = buildValidator(signedDocument, dataToValidateMetadata);
             // original files
-            mimeTypeUnsigned = findOriginalFiles(dataToValidateDTO, signedDocValidator);
+            mimeTypeUnsigned = findOriginalFiles(dataToValidateMetadata, signedDocValidator);
             // create reports
-            reports = buildReports(dataToValidateDTO, dataToValidateDTO.getPolicyExt(), signedDocValidator);
+            Reports reports = buildReports(dataToValidateMetadata, signedDocValidator);
             // tree root
-            root = createRoot(signedDocument, reports, dataToValidateDTO.getIdComponente());
+            root = createRoot(signedDocument, reports, dataToValidateMetadata.getDocumentId());
             // add child
-            addChild(dataToValidateDTO, root, dataToValidateDTO.getPolicyExt(),
-                    dataToValidateDTO.getDataDiRiferimento(), signedDocValidator, dataToValidateDTO.getIdComponente(),
-                    signedDocument.getName());
+            Set<String> signProcessed = new HashSet<>();
+            addChild(dataToValidateMetadata, root, signedDocValidator, signedDocument.getName(), signProcessed);
         } finally {
-            Date endValidation = new Date();
+            LocalDateTime endValidation = LocalDateTime.now(ZoneId.systemDefault());
 
             // build version
             root.setVservice(helper.buildversion());
@@ -138,34 +150,25 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                 root.setMimeType(mimeTypeUnsigned);
             }
             // Inizio e fine validazione
-            root.setStartValidation(startValidation);
-            root.setEndValidation(endValidation);
+            root.setStartValidation(Date.from(startValidation.atZone(ZoneId.systemDefault()).toInstant()));
+            root.setEndValidation(Date.from(endValidation.atZone(ZoneId.systemDefault()).toInstant()));
 
             // delete temp files
-            helper.deleteTmpDocExtFiles(dataToValidateDTO.getSignedDocumentExt(),
-                    dataToValidateDTO.getOriginalDocumentsExt(), dataToValidateDTO.getPolicyExt());
+            helper.deleteTmpDocExtFiles(dataToValidateMetadata.getRemoteSignedDocument(),
+                    dataToValidateMetadata.getRemoteOriginalDocuments(), dataToValidateMetadata.getPolicyExt());
 
-            long totalDateTime = Duration
-                    .between(startValidation.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                            endValidation.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                    .toMillis();
-            LOG.info(
-                    "Fine validazione: id componente {} - data/ora fine {} (totale : {} ms) (dim. richiesta : {} byte)",
-                    dataToValidateDTO.getIdComponente(), sdf.format(endValidation), totalDateTime,
-                    request != null ? request.getContentLength() : BigInteger.ZERO.intValue());
+            long totalDateTime = Duration.between(startValidation, endValidation).toMillis();
+            LOG.info("Fine validazione documento con identificativo [{}] - data/ora fine {} (totale : {} ms)",
+                    dataToValidateMetadata.getDocumentId(), endValidation, totalDateTime);
         }
 
         return root;
     }
 
-    /**
-     * @param signedFile
-     * 
-     * @return
-     */
-    private DSSDocument elabSignedFile(RemoteDocumentExt signedFile) {
+    private DSSDocument elabSignedFile(EidasDataToValidateMetadata dataToValidateMetadata,
+            EidasRemoteDocument signedFile) {
         if (signedFile == null) {
-            throw new EidasParerException().withCode(ParerError.ErrorCode.METADATA_ERROR)
+            throw new EidasParerException(dataToValidateMetadata).withCode(ParerError.ErrorCode.METADATA_ERROR)
                     .withMessage("Errore nei metadati inviati, firma da verificare non presente");
         }
         DSSDocument signedDocument = null;
@@ -180,35 +183,25 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         }
 
         // detect mimetype
-        MimeType mime = new MimeType();
-        mime.setMimeTypeString(helper.detectMimeType(signedDocument));
-        signedDocument.setMimeType(mime);
+        signedDocument.setMimeType(MimeType.fromMimeTypeString(helper.detectMimeType(signedDocument)));
 
         return signedDocument;
     }
 
-    /**
-     *
-     * @param inputVerifica
-     * @param policy
-     * @param signedDocValidator
-     * 
-     * @return
-     * 
-     * @throws IOException
-     */
-    private Reports buildReports(DataToValidateDTOExt inputVerifica, RemoteDocumentExt policy,
+    private Reports buildReports(EidasDataToValidateMetadata dataToValidateMetadata,
             SignedDocumentValidator signedDocValidator) {
         Reports reports = null;
+        EidasRemoteDocument policy = dataToValidateMetadata.getPolicyExt();
         if (policy == null) {
             ValidationPolicy customValidationConstraints;
             try {
-                customValidationConstraints = compileValidationPolicy(inputVerifica);
+                customValidationConstraints = compileValidationPolicy(dataToValidateMetadata);
             } catch (JAXBException | XMLStreamException | SAXException ex) {
-                throw new EidasParerException().withCode(ParerError.ErrorCode.GENERIC_ERROR)
-                        .withMessage(ex.getMessage());
+                throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.GENERIC_ERROR)
+                        .withMessage("Errore generico in fase di compilazione custom policy");
             } catch (IOException ex) {
-                throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(ex.getMessage());
+                throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.IO_ERROR)
+                        .withMessage("Errore generico in fase di compilazione custom policy");
             }
             reports = signedDocValidator.validateDocument(customValidationConstraints);
         } else {
@@ -217,8 +210,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                 try (ByteArrayInputStream bais = new ByteArrayInputStream(policy.getBytes())) {
                     reports = signedDocValidator.validateDocument(bais);
                 } catch (IOException ex) {
-                    throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR)
-                            .withMessage(ex.getMessage());
+                    throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.IO_ERROR)
+                            .withMessage("Errore generico in fase di lettura policy");
                 }
             } else if (StringUtils.isNotBlank(policy.getAbsolutePath())) {
                 LOG.debug("ConstraintPolicy: as file path {}", policy.getAbsolutePath());
@@ -226,7 +219,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             } else {
                 LOG.error("ConstraintPolicy: check name of policy file on multipartfile and metadata sent,  "
                         + " policy file declared name {}", policy.getName());
-                throw new EidasParerException().withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA)
+                throw new EidasParerException(dataToValidateMetadata)
+                        .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA)
                         .withMessage("Errore su recupero file policy, verificare nome file su multipart/form-data");
             }
 
@@ -240,20 +234,14 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         return reports;
     }
 
-    /**
-     *
-     * @param inputVerifica
-     * @param signedDocValidator
-     * 
-     * @return
-     */
-    private String findOriginalFiles(DataToValidateDTOExt inputVerifica, SignedDocumentValidator signedDocValidator) {
+    private String findOriginalFiles(EidasDataToValidateMetadata dataToValidateMetadata,
+            SignedDocumentValidator signedDocValidator) {
         // mime type
         String mimeType = null;
-        List<RemoteDocumentExt> originalFiles = inputVerifica.getOriginalDocumentsExt();
+        List<EidasRemoteDocument> originalFiles = dataToValidateMetadata.getRemoteOriginalDocuments();
         if (originalFiles != null && !originalFiles.isEmpty()) {
             List<DSSDocument> list = new ArrayList<>();
-            for (RemoteDocumentExt originalFile : originalFiles) {
+            for (EidasRemoteDocument originalFile : originalFiles) {
                 DSSDocument originalDocument = null;
                 if (Utils.isArrayNotEmpty(originalFile.getBytes())) {
                     originalDocument = new InMemoryDocument(originalFile.getBytes(), originalFile.getName());
@@ -266,9 +254,9 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                 } else {
                     LOG.error("Original DSSDocument: check name of original file on multipartfile and metadata sent,  "
                             + " original file declared name {}", originalFile.getName());
-                    throw new EidasParerException()
-                            .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA)
-                            .withMessage("Errore su recupero file policy, verificare nome file su multipart/form-data");
+                    throw new EidasParerException(dataToValidateMetadata)
+                            .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA).withMessage(
+                                    "Il nome dichiarato su 'name' del metadata 'originalDocumentsExt' non coicide con nessuno dei multipart file caricati su originalFiles");
                 }
                 // detect mimetype
                 mimeType = helper.detectMimeType(originalDocument);
@@ -286,15 +274,17 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      * policy/constraint.xml sulla base dei flag passati al servizio
      *
      */
-    private ValidationPolicy compileValidationPolicy(DataToValidateDTOExt inputVerifica)
+    private ValidationPolicy compileValidationPolicy(EidasDataToValidateMetadata dataToValidateMetadata)
             throws JAXBException, XMLStreamException, IOException, SAXException {
+        // Level IGNORE
+        final LevelConstraint ignore = new LevelConstraint();
+        ignore.setLevel(Level.IGNORE);
 
         // flag
-        boolean controlloCrittograficoIgnorato = inputVerifica.isControlloCrittograficoIgnorato();
-        boolean controlloCatenaTrustIgnorato = inputVerifica.isControlloCatenaTrustIgnorato();
-        boolean controlloCertificatoIgnorato = inputVerifica.isControlloCertificatoIgnorato();
-        boolean controlloRevocaIgnorato = inputVerifica.isControlloRevocaIgnorato();
-        boolean verificaAllaDataDiFirma = inputVerifica.isVerificaAllaDataDiFirma();
+        boolean controlloCrittograficoIgnorato = dataToValidateMetadata.isControlloCrittograficoIgnorato();
+        boolean controlloCatenaTrustIgnorato = dataToValidateMetadata.isControlloCatenaTrustIgnorato();
+        boolean controlloCertificatoIgnorato = dataToValidateMetadata.isControlloCertificatoIgnorato();
+        boolean controlloRevocaIgnorato = dataToValidateMetadata.isControlloRevocaIgnorato();
 
         final ValidationPolicyFacade facade = ValidationPolicyFacade.newFacade();
         final ValidationPolicy validationPolicyJaxb = defaultValidationPolicy.exists()
@@ -422,11 +412,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             LOG.debug("Validation policy controlloCRLIgnorato set to level {}", Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
-                    .getRevocationDataFreshness().setLevel(Level.IGNORE); // default FAIL
+                    .setRevocationFreshnessNextUpdate(ignore);
             LOG.debug(
-                    "Validation policy: basicSignatureConstraints/signingCertificate/revocationDataFreshness constraint original level {}, to level {}",
+                    "Validation policy: basicSignatureConstraints/signingCertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
-                            .getSigningCertificate().getRevocationDataFreshness().getLevel(),
+                            .getSigningCertificate().getRevocationFreshnessNextUpdate().getLevel(),
                     Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
@@ -457,24 +447,14 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
              * questo tipo di controllo, non porta a criticità.
              */
             // CA
+            // no time constraint
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
-                    .getRevocationDataFreshness().setLevel(Level.IGNORE); // default FAIL
+                    .setRevocationFreshnessNextUpdate(ignore);
             LOG.debug(
-                    "Validation policy: basicSignatureConstraints/CACertificate/revocationDataFreshness constraint original level {}, to level {}",
+                    "Validation policy: basicSignatureConstraints/CACertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
-                            .getRevocationDataFreshness().getLevel(),
+                            .getRevocationFreshnessNextUpdate().getLevel(),
                     Level.IGNORE);
-
-            // validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
-            // .getRevocationDataNextUpdatePresent().setLevel(Level.IGNORE); // default FAIL
-            // LOG.debug(
-            // "Validation policy:
-            // basicSignatureConstraints/CACertificate/revocationDataNextUpdatePresent
-            // constraint
-            // original level {}, to level {}",
-            // validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
-            // .getRevocationDataNextUpdatePresent().getLevel(),
-            // Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                     .getRevocationDataAvailable().setLevel(Level.IGNORE); // default FAIL
@@ -484,14 +464,19 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                             .getRevocationDataAvailable().getLevel(),
                     Level.IGNORE);
 
-            validationPolicyJaxb.getRevocationFreshnessConstraint().setLevel(Level.IGNORE); // default (già IGNORE)
-            LOG.debug("Validation policy: revocationFreshnessConstraint constraint original level {}, to level {}",
-                    validationPolicyJaxb.getRevocationFreshnessConstraint().getLevel(), Level.IGNORE);
-
             //
             validationPolicyJaxb.getRevocationConstraints().setLevel(Level.IGNORE);
             LOG.debug("Validation policy: revocationConstraints constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getLevel(), Level.IGNORE);
+
+            // no time constraint
+            validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints().getSigningCertificate()
+                    .setRevocationFreshnessNextUpdate(ignore);
+            LOG.debug(
+                    "Validation policy: revocationConstraints/revocationFreshnessNextUpdate constraint original level {}, to level {}",
+                    validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints()
+                            .getSigningCertificate().getRevocationFreshnessNextUpdate(),
+                    Level.IGNORE);
 
             // OCSP
             validationPolicyJaxb.getRevocationConstraints().getUnknownStatus().setLevel(Level.IGNORE);
@@ -504,29 +489,6 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                     "Validation policy: revocationConstraints/SelfIssuedOCSP constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getSelfIssuedOCSP().getLevel(), Level.IGNORE);
 
-        }
-
-        /*
-         * Nota : EIDAS non permette di effettuare una verifica secondo la logica
-         * "verifica alla data di apposizione della firma", si sceglie il seguente workaround in cui viene ignorato il
-         * controllo sulla data di apposizione della firma al fine di verifiarne la validità al netto di una data di
-         * riferimento.
-         */
-        if (verificaAllaDataDiFirma) {
-            LOG.debug("Validation policy verificaAllaDataDiFirma set to level {}", Level.IGNORE);
-
-            validationPolicyJaxb.getSignatureConstraints().getSignedAttributes().getSigningTime()
-                    .setLevel(Level.IGNORE); // defaul FAIL
-            LOG.debug("Validation policy: signedAttributes/signingTime constraint original level {}, to level {}",
-                    validationPolicyJaxb.getSignatureConstraints().getSignedAttributes().getSigningTime().getLevel(),
-                    Level.IGNORE);
-
-            validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
-                    .getNotExpired().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug("Validation policy: signingCertificate/notExpired constraint original level {}, to level {}",
-                    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
-                            .getSigningCertificate().getNotExpired().getLevel(),
-                    Level.IGNORE);
         }
 
         return validationPolicyJaxb;
@@ -567,29 +529,31 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
     /**
      * Crea, ricorsivamente, l'output del processo di verifica in cui in ogni "strato" è presente un livello di
      * annidamento.
-     *
+     * 
+     * @param dataToValidateMetadata
+     *            metadati
      * @param parent
      *            puntatore al padre
-     * @param policy
-     *            validation policy utilizzata
-     * @param dataDiRiferimento
-     *            eventuale data di riferimento
      * @param signedDocValidator
      *            validatore custom per il tipo di documento.
-     * @param idComponente
-     *            id del componente
      * @param signedDocumentName
      *            nome del documento
+     * @param signatureAlreadyProcessed
+     *            lista signature id processate
      */
-    private void addChild(DataToValidateDTOExt dataToValidateDTO, EidasWSReportsDTOTree parent,
-            RemoteDocumentExt policy, Date dataDiRiferimento, SignedDocumentValidator signedDocValidator,
-            String idComponente, String signedDocumentName) {
+    private void addChild(EidasDataToValidateMetadata dataToValidateMetadata, EidasWSReportsDTOTree parent,
+            SignedDocumentValidator signedDocValidator, String signedDocumentName,
+            Set<String> signatureAlreadyProcessed) {
+        // for each signature
+        for (AdvancedSignature signature : signedDocValidator.getSignatures()) {
+            LOG.debug("Creating reports tree child element, parent signature id {}", signature.getId());
 
-        for (AdvancedSignature sign : signedDocValidator.getSignatures()) {
-            LOG.debug("Creating reports tree child element, parent signature id {}", sign.getId());
-
+            // check if sign.getId() is already done -> go next
+            if (signatureAlreadyProcessed.contains(signature.getId())) {
+                continue;
+            }
             //
-            extension.extractSignatureBytes(sign, parent);
+            extension.extractSignatureBytes(signature, parent);
             /**
              * Nota bene: EIDAS prevede l'estrazione di N documenti originali anche se di fatto, secondo la struttura
              * "classica" delle firme "imbustate" questa cardinalità è da vedere come "piatta" su un unico livello (più
@@ -597,49 +561,38 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
              */
             try {
                 //
-                for (DSSDocument doc : signedDocValidator.getOriginalDocuments(sign.getId())) {
+                for (DSSDocument doc : signedDocValidator.getOriginalDocuments(signature.getId())) {
                     // set document name (from parent)
                     doc.setName(signedDocumentName);
                     // crea child per ogni documento originale
-                    signedDocValidator = createChild(dataToValidateDTO, parent, policy, dataDiRiferimento,
-                            signedDocValidator, idComponente, doc);
+                    signedDocValidator = createChild(dataToValidateMetadata, parent, signedDocValidator, doc,
+                            signature.getId(), signatureAlreadyProcessed);
                 } // originalDocument
             } catch (Exception ignore) {
                 /**
                  * Eccezioni (gestite) che avvengono sullo sbustato verranno ignorate. In questo caso particolare il
                  * validatore non è riuscito ad invidivuare un documento orginale (vedi caso dei P7S)
                  */
-                LOG.debug("Reports DTO Tree child signature id {} no orginal documents", sign.getId());
+                LOG.debug("Reports DTO Tree child signature id {} no orginal documents", signature.getId());
             }
         } // sign
     }
 
-    private SignedDocumentValidator createChild(DataToValidateDTOExt dataToValidateDTO, EidasWSReportsDTOTree parent,
-            RemoteDocumentExt policy, Date dataDiRiferimento, SignedDocumentValidator signedDocValidator,
-            String idComponente, DSSDocument doc) {
-
-        boolean errorOnValidation = false;
-        Path tmpDoc = null;
-
-        // test file
-        boolean writeTmpFile = Boolean
-                .parseBoolean(env.getProperty(Constants.WRITE_FILE, Constants.WRITE_FILE_DEFAULT_VAL));
-        if (writeTmpFile) {
-            tmpDoc = helper.writeTmpFile(doc);
-        }
-
-        Reports reports = null;
+    private SignedDocumentValidator createChild(EidasDataToValidateMetadata dataToValidateMetadata,
+            EidasWSReportsDTOTree parent, SignedDocumentValidator signedDocValidator, DSSDocument doc,
+            String signatureId, Set<String> signatureAlreadyProcessed) {
         try {
-            signedDocValidator = buildValidator(doc, dataToValidateDTO);
+            signedDocValidator = buildValidator(doc, dataToValidateMetadata);
             // build reports
-            reports = buildReports(dataToValidateDTO, policy, signedDocValidator);
+            Reports reports = buildReports(dataToValidateMetadata, signedDocValidator);
             // tree root
-            EidasWSReportsDTOTree child = createRoot(doc, reports, idComponente);
+            EidasWSReportsDTOTree child = createRoot(doc, reports, dataToValidateMetadata.getDocumentId());
             // set child
             parent.addChild(child);
+            // ad sign by id as processed
+            signatureAlreadyProcessed.add(signatureId);
             // call recursive
-            addChild(dataToValidateDTO, child, policy, dataDiRiferimento, signedDocValidator, idComponente,
-                    doc.getName());
+            addChild(dataToValidateMetadata, child, signedDocValidator, doc.getName(), signatureAlreadyProcessed);
         } catch (Exception ignore) {
             /**
              * Eccezioni (gestite) che avvengono sullo sbustato verranno ignorate. Elemento (child) aggiunto sarà
@@ -647,17 +600,12 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
              */
             LOG.debug("Reports tree child element doc {} is unsigned with mimetype {}", doc.getName(),
                     doc.getMimeType() != null ? doc.getMimeType().getMimeTypeString() : "none");
-            errorOnValidation = true;
             // build tree (mimetype is needed for validation) unsigned doc
             EidasWSReportsDTOTree child = new EidasWSReportsDTOTree(helper.detectMimeType(doc));
             // id componente
-            child.setIdComponente(dataToValidateDTO.getIdComponente());
+            child.setIdComponente(dataToValidateMetadata.getDocumentId());
             // add child
             parent.addChild(child);
-        } finally {
-            if (writeTmpFile && !errorOnValidation) {
-                FileUtils.deleteQuietly(tmpDoc.toFile());
-            }
         }
         return signedDocValidator;
     }
@@ -667,12 +615,13 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      *
      * @param signedDocument
      *            documento da verificare
-     * @param dataToValidateDTO
+     * @param dataToValidateMetadata
      *            data a cui deve essere effettuata la validazione (opzionale)
      * 
      * @return validatore per il documento
      */
-    private SignedDocumentValidator buildValidator(DSSDocument signedDocument, DataToValidateDTOExt dataToValidateDTO) {
+    private SignedDocumentValidator buildValidator(DSSDocument signedDocument,
+            EidasDataToValidateMetadata dataToValidateMetadata) {
         /*
          * Nota: viene prima effettuata verifica con validatori "interni" e poi quello standard di EIDAS
          */
@@ -680,19 +629,20 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             SignedDocumentValidator signedDocValidator = SignedDocumentValidator.fromDocument(signedDocument);
             // dataDiRiferimento if null = NOW
             // validation date
-            signedDocValidator.setValidationTime(dataToValidateDTO.getDataDiRiferimento());
+            signedDocValidator.setValidationTime(dataToValidateMetadata.getDataDiRiferimento());
             // token strategy
-            signedDocValidator.setTokenExtractionStrategy(
-                    TokenExtractionStrategy.fromParameters(dataToValidateDTO.isIncludeCertificateRevocationValues(),
-                            dataToValidateDTO.isIncludeTimestampTokenValues(),
-                            dataToValidateDTO.isIncludeCertificateTokenValues()));
-            signedDocValidator.setIncludeSemantics(dataToValidateDTO.isIncludeSemanticTokenValues());
+            signedDocValidator.setTokenExtractionStrategy(TokenExtractionStrategy.fromParameters(
+                    dataToValidateMetadata.isIncludeCertificateRevocationValues(),
+                    dataToValidateMetadata.isIncludeTimestampTokenValues(),
+                    dataToValidateMetadata.isIncludeCertificateTokenValues()));
+            signedDocValidator.setIncludeSemantics(dataToValidateMetadata.isIncludeSemanticTokenValues());
             //
             signedDocValidator.setCertificateVerifier(verifier);
             LOG.debug("Signed Document Validator created class name: {}", signedDocValidator.getClass().getName());
             return signedDocValidator;
         } catch (Exception ex) {
-            throw new EidasParerException().withCode(ParerError.ErrorCode.EIDAS_ERROR).withMessage(ex.getMessage());
+            throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.EIDAS_ERROR)
+                    .withMessage("Formato del documento non riconosciuto / gestito");
         }
 
     }

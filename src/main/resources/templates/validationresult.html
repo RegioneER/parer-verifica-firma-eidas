@@ -3,19 +3,19 @@
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.springframework.org/security/tags" lang="it">
 	
-	<head th:replace="fragments/template.html :: header('EIDAS - Risultati Verifica')"></head>
+	<head th:replace="~{fragments/template.html :: header('EIDAS - Risultati Verifica')}"></head>
 	
 	<body>
-		<div th:replace="fragments/template.html :: main"></div>
+		<div th:replace="~{fragments/template.html :: main}"></div>
 	
-	    <div th:if="${#request.isUserInRole('ADMIN')}" class="container"
+	    <div sec:authorize="hasRole('ROLE_ADMIN')" class="container"
 					style="padding-top: 10px; padding-bottom: 10px;">
 					<div class="row">
 						<div class="col">
 							<a href="#" class="btn btn-primary btn-sm fa fa-sign-out" th:href="@{/logout}"> Esci</a>
 						</div>					
 						<div class="col-sm-2">
-							<span class="fa fa-user"/> Utente: <strong><span sec:authentication="name"></span></strong>
+							<span class="fa fa-user fa-sm"/> Utente: <strong><span sec:authentication="name"></span></strong>
 						</div>
 					</div>
 		 </div>
@@ -23,9 +23,9 @@
 		<div class="container">
 		 <nav aria-label="breadcrumb">
 			<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home">
+				<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home fa-sm">
 						Home</a></li>
-				<li class="breadcrumb-item"><a href="#" th:href="@{/validation}">Verifica</a></li>
+				<li class="breadcrumb-item"><a href="#" th:if="${@environment.getProperty('parer.eidas.validation-ui.enabled') ?: true}" th:href="@{/validation}">Verifica</a></li>
 				<li class="breadcrumb-item active" aria-current="page">
 					Risultati verifica</li>
 			</ol>
@@ -50,13 +50,13 @@
 					<!-- } -->
 					<th:block th:case="false">
 						<div
-							th:replace="fragments/validation_detail.html :: reportlayer (validationModel = ${validationModel})"></div>
+							th:replace="~{fragments/validation_detail.html :: reportlayer (validationModel = ${validationModel})}"></div>
 					</th:block>
 					<!-- ERRORI -->
 					<th:block th:case="*">
 						<div class="alert alert-warning">
 							<h4>
-								<span class="fa fa-warning-sign"></span>
+								<span class="fa fa-warning-sign fa-sm"></span>
 								Attenzione!
 							</h4>
 							<p>Si è verificato un problema durante la validazione del
@@ -71,8 +71,8 @@
 		<script th:src="@{/js/dss.js}"></script>
 		
 		<div class="container">
-			<div th:replace="fragments/template.html :: info"></div>
-			<div th:replace="fragments/template.html :: footer"></div>
+			<div th:replace="~{fragments/template.html :: info}"></div>
+			<div th:replace="~{fragments/template.html :: footer}"></div>
 		</div>
 </body>
 </html>

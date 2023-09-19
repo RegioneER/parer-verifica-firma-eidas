@@ -1,9 +1,26 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.helper;
 
-import static org.apache.tika.metadata.TikaMetadataKeys.RESOURCE_NAME_KEY;
-import static it.eng.parer.eidas.core.util.Constants.TMP_FILE_SUFFIX;
-import static it.eng.parer.eidas.core.util.Constants.DSS_VERSION;
 import static it.eng.parer.eidas.core.util.Constants.BUILD_VERSION;
+import static it.eng.parer.eidas.core.util.Constants.DSS_VERSION;
+import static it.eng.parer.eidas.core.util.Constants.TMP_FILE_SUFFIX;
+import static org.apache.tika.metadata.TikaCoreProperties.RESOURCE_NAME_KEY;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,15 +31,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -39,16 +56,23 @@ import org.apache.tika.mime.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.MimeType;
 import eu.europa.esig.dss.spi.DSSUtils;
-import it.eng.parer.eidas.model.RemoteDocumentExt;
+import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
+import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
+import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
 
 @Component
 public class EidasHelper {
@@ -70,25 +94,24 @@ public class EidasHelper {
     @Autowired
     BuildProperties buildProperties;
 
+    // default 60 s
+    @Value("${parer.eidas.webclient.timeout:360}")
+    long webClientTimeout;
+
+    // default 5 times
+    @Value("${parer.eidas.webclient.backoff:10}")
+    long webClientBackoff;
+
+    // default 3 s
+    @Value("${parer.eidas.webclient.backofftime:3}")
+    long webClientBackoffTime;
+
     public String buildversion() {
         return env.getProperty(BUILD_VERSION);
     }
 
     public String dssversion() {
         return buildProperties.get(DSS_VERSION);
-    }
-
-    public Path writeTmpFile(DSSDocument doc) {
-        //
-        Path tmpDoc = null;
-        try {
-            // tmp file (uuid as file name)
-            tmpDoc = Files.createTempFile(UUID.randomUUID().toString(), TMP_FILE_SUFFIX, attr);
-            Files.copy(doc.openStream(), tmpDoc, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException ex) {
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(ex.getMessage());
-        }
-        return tmpDoc;
     }
 
     /**
@@ -124,7 +147,7 @@ public class EidasHelper {
             // a new one beacause is NOT THREAD SAFE !
             getSecureSchemaFactory().parse(is);
             // change with correct type
-            return MimeType.XML.getMimeTypeString();
+            return MimeTypeEnum.XML.getMimeTypeString();
         } catch (Exception ex) {
             LOG.debug("Calcolato mime : {}, non risulta XML valido", currentMimeType, ex);
         }
@@ -150,14 +173,14 @@ public class EidasHelper {
      *            documento DSS, policy (standard / custom)
      *
      */
-    public void deleteTmpDocExtFiles(RemoteDocumentExt signedDocumentExt, List<RemoteDocumentExt> originalDocumentsExt,
-            RemoteDocumentExt policyExt) {
+    public void deleteTmpDocExtFiles(EidasRemoteDocument signedDocumentExt,
+            List<EidasRemoteDocument> originalDocumentsExt, EidasRemoteDocument policyExt) {
         // signed file
         deleteTmpFile(signedDocumentExt.getAbsolutePath());
 
         // original file
         if (originalDocumentsExt != null && !originalDocumentsExt.isEmpty()) {
-            for (RemoteDocumentExt originalFileExt : originalDocumentsExt) {
+            for (EidasRemoteDocument originalFileExt : originalDocumentsExt) {
                 deleteTmpFile(originalFileExt.getAbsolutePath());
             }
         }
@@ -183,7 +206,8 @@ public class EidasHelper {
     /**
      * Verifica contenuto array di byte. 1. verifica se ASCII armor 2. verifica se base64 encoded
      * 
-     * 
+     * @param dataToValidateMetadata
+     *            metadati forniti al servizio di validazione
      * 
      * @param prefix
      *            prefisso del file da utilizzare per la generazione del risultato
@@ -192,15 +216,16 @@ public class EidasHelper {
      * 
      * @return file risultato dell'elaborazione o null se non rientra nei due casi
      */
-    public Path verifyAndExtractFileContent(String prefix, byte[] signedBytes) {
+    public Path verifyAndExtractFileContent(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
+            byte[] signedBytes) {
 
         // detect ASCII armor
-        Path asciiarmor = detectASCIIArmor(prefix, signedBytes);
+        Path asciiarmor = detectASCIIArmor(dataToValidateMetadata, prefix, signedBytes);
         if (asciiarmor != null) {
             return asciiarmor;
         }
         // detect Base64 encoded
-        Path decodedBase64 = detectBase64Encoded(prefix, signedBytes);
+        Path decodedBase64 = detectBase64Encoded(dataToValidateMetadata, prefix, signedBytes);
         if (decodedBase64 != null) {
             return decodedBase64;
         }
@@ -211,7 +236,8 @@ public class EidasHelper {
     /**
      * Verifica contenuto path relativo al file su disco. 1. verifica se ASCII armor 2. verifica se base64 encoded
      * 
-     * 
+     * @param dataToValidateMetadata
+     *            metadati forniti al servizio di validazione
      * 
      * @param prefix
      *            prefisso del file da utilizzare per la generazione del risultato
@@ -220,15 +246,16 @@ public class EidasHelper {
      * 
      * @return file risultato dell'elaborazione o null se non rientra nei due casi
      */
-    public Path verifyAndExtractFileContent(String prefix, Path signedFile) {
+    public Path verifyAndExtractFileContent(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
+            Path signedFile) {
 
         // detect ASCII armor
-        Path asciiarmor = detectASCIIArmor(prefix, signedFile);
+        Path asciiarmor = detectASCIIArmor(dataToValidateMetadata, prefix, signedFile);
         if (asciiarmor != null) {
             return asciiarmor;
         }
         // detect Base64 encoded
-        Path decodedBase64 = detectBase64Encoded(prefix, signedFile);
+        Path decodedBase64 = detectBase64Encoded(dataToValidateMetadata, prefix, signedFile);
         if (decodedBase64 != null) {
             return decodedBase64;
         }
@@ -236,52 +263,37 @@ public class EidasHelper {
         return null; // no detection
     }
 
-    /**
+    /*
      * Verifica se i byte[] relativi al file (passati via json) fanno riferimento ad un ASCII-Armor, in quel caso si
      * ottiene come risultato il Path di un nuovo file contenente la decodifica in Base64 del file originale.
      *
-     * @param prefix
-     *            prefisso file (tipicamente viene utilizzato uuid relativo alla sessione)
-     * @param originalFileName
-     *            nome del file originale trasmesso
-     * @param signedBytes
-     *            documento DSS in byte[]
-     * 
-     * @return Path del file
      */
-    private Path detectASCIIArmor(String prefix, byte[] signedBytes) {
+    private Path detectASCIIArmor(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
+            byte[] signedBytes) {
         try (InputStream is = new ByteArrayInputStream(signedBytes)) {
-            return detectASCIIArmor(prefix, is);
+            return detectASCIIArmor(dataToValidateMetadata, prefix, is);
         } catch (IOException e) {
-            LOG.error("Detect ASCII Armor as ByteArrayInputStream", e);
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(LOG_BASE64_ERROR);
+            throw new EidasParerException(dataToValidateMetadata, e).withCode(ParerError.ErrorCode.IO_ERROR)
+                    .withMessage(LOG_BASE64_ERROR);
         }
     }
 
-    /**
+    /*
      *
      * Verifica se il file passato è un ASCII-Armor, in quel caso si ottiene come risultato il Path di un nuovo file
      * contenente la decodifica in Base64 del file originale.
-     *
-     * @param prefix
-     *            prefisso file (tipicamente viene utilizzato uuid relativo alla sessione)
-     * @param originalFileName
-     *            nome del file originale trasmesso
-     * @param signedFile
-     *            documento DSS come {@link File}
      * 
-     * @return Path del file
      */
-    private Path detectASCIIArmor(String prefix, Path signedFile) {
+    private Path detectASCIIArmor(EidasDataToValidateMetadata dataToValidateMetadata, String prefix, Path signedFile) {
         try (InputStream is = new FileInputStream(signedFile.toFile())) {
-            return detectASCIIArmor(prefix, is);
+            return detectASCIIArmor(dataToValidateMetadata, prefix, is);
         } catch (IOException e) {
-            LOG.error("Detect ASCII Armor as FileInputStream", e);
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(LOG_BASE64_ERROR);
+            throw new EidasParerException(dataToValidateMetadata, e).withCode(ParerError.ErrorCode.IO_ERROR)
+                    .withMessage(LOG_BASE64_ERROR);
         }
     }
 
-    private Path detectASCIIArmor(String prefix, InputStream is) {
+    private Path detectASCIIArmor(EidasDataToValidateMetadata dataToValidateMetadata, String prefix, InputStream is) {
         final String BEGIN = "-----BEGIN ";
         final String END = "-----END ";
 
@@ -302,8 +314,8 @@ public class EidasHelper {
                     }
                 } // writer
             } catch (IOException e) {
-                LOG.error("Detect ASCII Armor error", e);
-                throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage("Errore generico");
+                throw new EidasParerException(dataToValidateMetadata, e).withCode(ParerError.ErrorCode.IO_ERROR)
+                        .withMessage("Errore generico");
             }
         }
 
@@ -327,21 +339,22 @@ public class EidasHelper {
 
     // base64 file detection
 
-    private Path detectBase64Encoded(String prefix, byte[] signedBytes) {
+    private Path detectBase64Encoded(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
+            byte[] signedBytes) {
         try (InputStream is = new ByteArrayInputStream(signedBytes)) {
             return readBase64EncodedFile(prefix, is);
         } catch (IOException e) {
-            LOG.error("Detect ASCII Armor as ByteArrayInputStream", e);
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR).withMessage(LOG_BASE64_ERROR);
+            throw new EidasParerException(dataToValidateMetadata, e).withCode(ParerError.ErrorCode.IO_ERROR)
+                    .withMessage(LOG_BASE64_ERROR);
         }
     }
 
-    private Path detectBase64Encoded(String prefix, Path signedFile) {
+    private Path detectBase64Encoded(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
+            Path signedFile) {
         try (InputStream is = new FileInputStream(signedFile.toFile())) {
             return readBase64EncodedFile(prefix, is);
         } catch (IOException e) {
-            LOG.error("Detect Base64 as FileInputStream", e);
-            throw new EidasParerException().withCode(ParerError.ErrorCode.IO_ERROR)
+            throw new EidasParerException(dataToValidateMetadata, e).withCode(ParerError.ErrorCode.IO_ERROR)
                     .withMessage("Errore verifica Base64");
         }
     }
@@ -369,4 +382,19 @@ public class EidasHelper {
         return base64Encoded;
     }
 
+    public void getResourceFromURI(URI signedResource, Path localPath) throws IOException {
+        try {
+            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono essere problemi di conversione
+            // dei
+            // caratteri
+            Flux<DataBuffer> dataBuffer = WebClient.create().get().uri(signedResource).retrieve()
+                    .bodyToFlux(DataBuffer.class);
+            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un prova e l'altra
+            DataBufferUtils.write(dataBuffer, localPath).timeout(Duration.ofSeconds(webClientTimeout))
+                    .retryWhen(Retry.backoff(webClientBackoff, Duration.ofSeconds(webClientBackoffTime))).share()
+                    .block();
+        } catch (Exception ex) {
+            throw new IOException("Impossibile recuperare il documento da URI", ex);
+        }
+    }
 }
