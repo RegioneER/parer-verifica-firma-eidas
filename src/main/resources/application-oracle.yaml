@@ -6,10 +6,10 @@ spring:
      roles: ADMIN
  # ORACLE
   datasource:
-    url: jdbc:oracle:thin:@parer-vora-b03.ente.regione.emr.it:1521/PARER19S.ente.regione.emr.it
     driver-class-name: oracle.jdbc.OracleDriver
     # passare come argomenti (e.g. mvn spring-boot:run -Dspring-boot.run.arguments="--dbusername=USER,--dbpassword=PWD" oppure 
-    # come argomenti alla VM sullo starter java -Ddbusername=USER -Ddbpassword=PWD)
+    # come argomenti alla VM sullo starter java -Ddburl=DBURI -Ddbusername=USER -Ddbpassword=PWD)
+    url: ${dburl}
     username:  ${dbusername}
     password:  ${dbpassword}
     #   pool size    

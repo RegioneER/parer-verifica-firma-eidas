@@ -7,17 +7,17 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="SHORTCUT ICON" type="image/x-icon" th:href="@{/img/favicon.ico}" />
 		<link th:href="@{/webjars/bootstrap/4.6.1/css/bootstrap.min.css}" rel="stylesheet" />
-        <link th:href="@{/webjars/highlightjs/10.1.2/styles/magula.min.css}" rel="stylesheet" />
-        <link th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}" rel="stylesheet" />
+        <link th:href="@{/webjars/highlightjs/11.5.0/styles/magula.min.css}" rel="stylesheet" />
+        <link th:href="@{/webjars/font-awesome/6.4.0/css/all.min.css}" rel="stylesheet" />
         <!-- Custom -->
 		<link th:href="@{/css/css_carousel.css}" rel='stylesheet' />
 		<link th:href="@{/css/app.css}" rel='stylesheet' />
         <link th:href="@{/css/dss.css}" rel='stylesheet' />
                 
-        <script type="text/javascript" th:src="@{/webjars/jquery/3.5.1/jquery.min.js}"></script>
+        <script type="text/javascript" th:src="@{/webjars/jquery/3.6.4/jquery.min.js}"></script>
         <script type="text/javascript" th:src="@{/webjars/popper.js/1.16.0/umd/popper.min.js}"></script>
 		<script type="text/javascript" th:src="@{/webjars/bootstrap/4.6.1/js/bootstrap.min.js}"></script>
-        <script type="text/javascript" th:src="@{/webjars/highlightjs/10.1.2/highlight.min.js}"></script>
+        <script type="text/javascript" th:src="@{/webjars/highlightjs/11.5.0/highlight.min.js}"></script>
         <script type="text/javascript" th:src="@{/webjars/highlightjs-badgejs/0.0.5/highlightjs-badgejs.min.js}"></script>
         <!-- Custom -->
 		<script th:src="@{/js/app.js}"></script>
@@ -69,14 +69,14 @@
 	<div th:fragment="info" class="container" style="margin-top: 1.5em;">
 
 		   <samp>
-				<small id="info"> <span th:if="${#request.isUserInRole('ADMIN')}"> Profilo: <b
+				<small id="info"> <span sec:authorize="hasRole('ROLE_ADMIN')" th:if="${@environment.getProperty('parer.eidas.admin-ui.enabled') ?: true}"> Profilo: <b
 						th:if="${@environment.getProperty('spring.profiles.active')} == null">
 							default</b> <b>[[${@environment.getProperty('spring.profiles.active')}]]</b>
 				</span> <span> Versione: <b>[[${version}]]</b>
-				</span> <span th:if="${#request.isUserInRole('ADMIN')}"> Git Branch: <b>[[${@environment.getProperty('git.branch')}]]</b>
+				</span> <span sec:authorize="hasRole('ROLE_ADMIN')" th:if="${@environment.getProperty('parer.eidas.admin-ui.enabled') ?: true}"> Git Branch: <b>[[${@environment.getProperty('git.branch')}]]</b>
 				</span> <span> Ultima modifica: <b>[[${builddate}]]</b>
 				</span> <span> DSS Library: <b>[[${dss}]]</b>
-				</span> <span> GiHub Project: <a href="https://github.com/esig/dss"
+				</span> <span> GitHub Project: <a href="https://github.com/esig/dss"
 						target="blank_" >link</a>
 				</span>
 				</small>

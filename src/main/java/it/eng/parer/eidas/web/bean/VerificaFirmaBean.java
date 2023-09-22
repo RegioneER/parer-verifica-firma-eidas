@@ -1,12 +1,30 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.web.bean;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.validation.constraints.NotNull;
 
 /**
  * DTO per la pagina di verifica firma manuale.
@@ -27,7 +45,6 @@ public class VerificaFirmaBean implements Serializable {
     private LocalDate dataRiferimento;
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime oraRiferimento;
-    private boolean verificaAllaDataFirma;
     @NotNull(message = "Il file da verificare non può essere vuoto")
     private transient MultipartFile fileDaVerificare;
     private transient MultipartFile fileDssPolicy;
@@ -94,14 +111,6 @@ public class VerificaFirmaBean implements Serializable {
 
     public void setOraRiferimento(LocalTime oraRiferimento) {
         this.oraRiferimento = oraRiferimento;
-    }
-
-    public boolean isVerificaAllaDataFirma() {
-        return verificaAllaDataFirma;
-    }
-
-    public void setVerificaAllaDataFirma(boolean verificaAllaDataFirma) {
-        this.verificaAllaDataFirma = verificaAllaDataFirma;
     }
 
     public MultipartFile getFileDaVerificare() {

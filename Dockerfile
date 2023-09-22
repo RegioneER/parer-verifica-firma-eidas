@@ -1,3 +1,27 @@
+####
+# This Dockerfile is used in order to build a container that runs the Quarkus application in JVM mode
+#
+# Before building the container image run:
+#
+# ./mvnw package
+#
+# Then, build the image with:
+#
+# docker build -f src/main/docker/Dockerfile.jvm -t verifica-firma-eidas .
+#
+# Then run the container using:
+#
+# docker run -i --rm -p 8080:8080 verifica-firma-eidas
+#
+# If you want to include the debug port into your docker image
+# you will have to expose the debug port (default 5005 being the default) like this :  EXPOSE 8080 5005.
+# Additionally you will have to set -e JAVA_DEBUG=true and -e JAVA_DEBUG_PORT=*:5005
+# when running the container
+#
+# Then run the container using :
+#
+# docker run -i --rm -p 8080:8080 verifica-firma-eidas
+#
 # This image uses the `run-java.sh` script to run the application.
 # This scripts computes the command line to execute your Java application, and
 # includes memory/GC tuning.
@@ -53,7 +77,7 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-11:1.11
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.15
 
 LABEL io.k8s.description="Microservizio verifica firma EIDAS (basato su immagine ubi RedHat)" \
       io.k8s.display-name="Verifica firma EIDAS" \
@@ -61,7 +85,17 @@ LABEL io.k8s.description="Microservizio verifica firma EIDAS (basato su immagine
       app="verifica-firma-eidas" \ 
       group="it.eng.parer"
 
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
+# This is a custom layer 
+# Add layer with extra certification authorities certificates
+# Base directory whith certificates
+ARG EXTRA_CA_CERTS_DIR=docker_build/certs
+# Copy and trust extra CA certs files
+COPY ${EXTRA_CA_CERTS_DIR}/ /etc/pki/ca-trust/source/anchors/
+USER root
+RUN update-ca-trust 
+# End custom layer 
+
+ENV LANGUAGE='en_US:en'
 
 COPY --chown=185 target/*.jar /deployments/verifica-firma-eidas.jar
 

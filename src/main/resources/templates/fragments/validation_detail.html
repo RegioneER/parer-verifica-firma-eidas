@@ -31,12 +31,12 @@
 														style="margin: 6px; z-index : 3; right : 0">
 														<button type="button" class="btn btn-light"
 															onclick="window.print();">
-															<span class="fa fa-print"></span> Print
+															<span class="fa fa-print fa-sm"></span> Print
 														</button>
 														<a target="_blank" class="btn btn-light"
 															th:href="@{'/validation/download-simple-report/' + ${validationModel.busta} + '/' + ${validationModel.livello}}"
 															role="button" th:if="${displayDownloadPdf}"> <span
-															class="fa fa-download"></span> Download as
+															class="fa fa-download fa-sm"></span> Download as
 															PDF
 														</a>
 													</div>
@@ -54,12 +54,12 @@
 														style="margin: 6px; z-index : 3; right : 0">
 														<button type="button" class="btn btn-light"
 															onclick="window.print();">
-															<span class="fa fa-print"></span> Print
+															<span class="fa fa-print fa-sm"></span> Print
 														</button>
 														<a target="_blank" class="btn btn-light"
 															th:href="@{'/validation/download-detailed-report/' + ${validationModel.busta} + '/' + ${validationModel.livello}}"
 															role="button" th:if="${displayDownloadPdf}"> <span
-															class="fa fa-download"></span> Download as
+															class="fa fa-download fa-sm"></span> Download as
 															PDF
 														</a>
 													</div>

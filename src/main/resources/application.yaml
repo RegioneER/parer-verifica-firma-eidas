@@ -123,15 +123,13 @@ admin:
 tsp-source: "classpath:config/tsp-config.xml"
 
 
-# BEAN
-it:
-  eng:
-    parer:
-      core:
-        viewhelper:
-          propstoskip: .*H2_USER.*|.*H2_PWD.*|.*ADMIN_USER.*|.*ADMIN_PWD.*|.*user.*|.*password.*|.*email.*
-      eidas:
-        core:
-          validation:
-            writefile: false
+# EIDAS
+# CUSTOM
+parer:
+  eidas:
+    admin-ui:
+      enabled: true
+      propstoskip: .*H2_USER.*|.*H2_PWD.*|.*ADMIN_USER.*|.*ADMIN_PWD.*|.*user.*|.*password.*|.*email.*      
+    validation-ui:
+      enabled: true
         

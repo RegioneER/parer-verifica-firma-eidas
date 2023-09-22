@@ -4,20 +4,20 @@
     
         <div th:fragment="commonlist" id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
                 <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><a
+                        <li class="list-group-item" th:if="${@environment.getProperty('parer.eidas.validation-ui.enabled') ?: true}"><a
                                 th:href="@{/validation}" title="Verifica firme">Verifica firma</a></li>
 
                         <li class="list-group-item"><a target="_blank"
                                 th:href="@{/swagger-ui.html}" title="Swagger">Swagger UI</a></li>
-                        <th:block th:if="${#request.isUserInRole('ADMIN')}">
+                        <th:block sec:authorize="hasRole('ROLE_ADMIN')" th:if="${@environment.getProperty('parer.eidas.admin-ui.enabled') ?: true}">
                         
                             <li th:if="${@environment.getProperty('management.server.port') == null} or (${@environment.getProperty('management.server.port')} == ${@environment.getProperty('server.port')})" class="list-group-item">
                                 <a target="_blank" th:href="@{/actuator}" title="Actuator">Spring Boot Actuator</a>
                             </li>
                            
-                            <li class="list-group-item">
+                            <li class="list-group-item" th:if="${@environment.getProperty('spring.h2.console.enabled') != null} and ${@environment.getProperty('spring.h2.console.enabled')}">
                                 <a target="_blank" 
-                                   th:href="@{${#request.isUserInRole('ADMIN')}?'/admin/h2-console':'/h2-console'}"
+                               th:href="@{${@environment.getProperty('spring.h2.console.path')} != null?${@environment.getProperty('spring.h2.console.path')}:'/NON_CONFIGURATO'}"
                                    title="H2 Console">H2 Console</a>
                             </li>
                         
@@ -30,16 +30,16 @@
 				<a class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">Funzioni</a>
 			</div>
 		 	
-     	    <div th:replace="fragments/spring.html :: commonlist"></div>
+     	    <div th:replace="~{fragments/spring.html :: commonlist}"></div>
 	</div>
 	<div th:fragment="utilities" class="card">
 			<div class="card-header">
 				<a class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">Funzioni</a>
 		   </div>
 		   
-		   <div th:replace="fragments/spring.html :: commonlist"></div>
+		   <div th:replace="~{fragments/spring.html :: commonlist}"></div>
 	</div>
-	<div th:fragment="env" th:if="${#request.isUserInRole('ADMIN')}" class="card">
+	<div th:fragment="env" sec:authorize="hasRole('ROLE_ADMIN')" th:if="${@environment.getProperty('parer.eidas.admin-ui.enabled') ?: true}" class="card">
 		    <div class="card-header">
 					<a class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style="text-decoration: none;">
 							Valore variabili d'ambiente </a>
@@ -51,7 +51,7 @@
 					    <a id="searchclear" class="btn bg-transparent" 
 					     style="margin-left: -40px; z-index: 100;" 
 					     onclick="$(this).prev('input').val('');filter(this,'prop');return false;">
-					      <em class="fa fa-times"></em>
+					      <em class="fa fa-times fa-sm"></em>
 					    </a>
 					</div>
 										

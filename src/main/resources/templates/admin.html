@@ -3,10 +3,10 @@
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.springframework.org/security/tags" lang="it">
 <head
-	th:replace="fragments/template.html :: header('EIDAS - Pagina amministratore')"></head>
+	th:replace="~{fragments/template.html :: header('EIDAS - Pagina amministratore')}"></head>
 <body>
 
-	<div th:replace="fragments/template.html :: main"></div>
+	<div th:replace="~{fragments/template.html :: main}"></div>
 
 	<sec:authorize access="isAuthenticated()">
 		<div class="container"
@@ -18,7 +18,7 @@
 
 				</div>
 				<div class="col-sm-2">
-					<span class="fa fa-user" /> Utente: <strong><span
+					<span class="fa fa-user fa-sm" /> Utente: <strong><span
 						sec:authentication="name"></span></strong>
 				</div>				
 			</div>
@@ -30,7 +30,7 @@
 	<div class="container">
 	 <nav aria-label="breadcrumb">
 		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home">
+			<li class="breadcrumb-item"><a href="#" th:href="@{/}" class="fa fa-home fa-sm">
 					Home</a></li>
 		</ol>
 	  </nav>
@@ -38,13 +38,13 @@
 
 	<div class="container">
 		<div class="panel-group" id="accordion">
-			<div th:replace="fragments/spring.html :: utilities"></div>
+			<div th:replace="~{fragments/spring.html :: utilities}"></div>
 
-			<div th:replace="fragments/spring.html :: env"></div>
+			<div th:replace="~{fragments/spring.html :: env}"></div>
 		</div>
 
-		<div th:replace="fragments/template.html :: info"></div>
-		<div th:replace="fragments/template.html :: footer"></div>
+		<div th:replace="~{fragments/template.html :: info}"></div>
+		<div th:replace="~{fragments/template.html :: footer}"></div>
 	</div>
 
 </body>

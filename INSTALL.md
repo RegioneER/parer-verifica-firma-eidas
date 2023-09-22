@@ -79,7 +79,7 @@ APP_CONFIG="-Dspring.config.location=file:config/application.yaml,classpath:appl
 # env 
 source bin/env.conf
 # laucher 
-/usr/bin/java -jar $APP_BINARY $APP_LOGGING $APP_JAVA_OPTS $APP_CONFIG
+/usr/bin/java $APP_JAVA_OPTS -jar $APP_BINARY $APP_LOGGING $APP_CONFIG
 ```
 
 #### Creare file sotto /etc/systemd/system

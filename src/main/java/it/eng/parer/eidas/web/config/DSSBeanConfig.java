@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.web.config;
 
 import java.io.File;
@@ -6,7 +23,7 @@ import java.security.KeyStore.PasswordProtection;
 
 import javax.sql.DataSource;
 
-import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,20 +53,25 @@ import eu.europa.esig.dss.service.http.commons.SSLCertificateLoader;
 import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
 import eu.europa.esig.dss.service.ocsp.JdbcCacheOCSPSource;
 import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
+import eu.europa.esig.dss.service.x509.aia.JdbcCacheAIASource;
 import eu.europa.esig.dss.spi.client.http.DSSFileLoader;
 import eu.europa.esig.dss.spi.client.http.IgnoreDataLoader;
 import eu.europa.esig.dss.spi.client.jdbc.JdbcCacheConnector;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
+import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
+import eu.europa.esig.dss.spi.x509.aia.OnlineAIASource;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection;
 import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
 import eu.europa.esig.dss.tsl.job.TLValidationJob;
 import eu.europa.esig.dss.tsl.source.LOTLSource;
+import eu.europa.esig.dss.validation.CRLFirstRevocationDataLoadingStrategyFactory;
 import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.ws.signature.common.RemoteDocumentSignatureServiceImpl;
 import eu.europa.esig.dss.ws.signature.common.RemoteMultipleDocumentsSignatureServiceImpl;
+import eu.europa.esig.dss.ws.signature.common.RemoteTrustedListSignatureServiceImpl;
 import eu.europa.esig.dss.ws.validation.common.RemoteDocumentValidationService;
 import eu.europa.esig.dss.xades.signature.XAdESService;
 import it.eng.parer.eidas.core.bean.CommonsDataLoaderExt;
@@ -99,10 +121,10 @@ public class DSSBeanConfig {
     @Value("${dss.server.signing.keystore.password}")
     private String serverSigningKeystorePassword;
 
-    @Value("${dss.dataloader.timeoutconnection:6000}")
+    @Value("${dss.dataloader.timeoutconnection:60000}")
     private int timeoutConnection;
 
-    @Value("${dss.dataloader.timeoutsocket:6000}")
+    @Value("${dss.dataloader.timeoutsocket:60000}")
     private int timeoutSocket;
 
     @Value("${dss.dataloader.connectionsmaxtotal:20}")
@@ -111,7 +133,8 @@ public class DSSBeanConfig {
     @Value("${dss.dataloader.connectionsmaxperroute:2}")
     private int connectionsMaxPerRoute;
 
-    @Value("${dss.dataloader.ldaptimeoutconnection:6000}")
+    /* custom */
+    @Value("${dss.dataloader.ldaptimeoutconnection:60000}")
     private String ldapTimeoutConnection;
 
     /* from 5.6 */
@@ -127,13 +150,16 @@ public class DSSBeanConfig {
     @Autowired
     private TSPSource tspSource;
 
-    // // can be null
-    // @Autowired(required = false)
-    // private ProxyConfig proxyConfig;
-
     /* from 5.6 */
     @Value("${dss.cachedCRLSource.defaultNextUpdateDelay:180}")
     private long defaultNextUpdateDelay;
+
+    /* custom */
+    @Value("${dss.revoke.data.loading.strategy.crl-first.enabled:true}")
+    private boolean revokeDataLoadingStratCrlFirst;
+
+    @Value("${dss.revoke.removeExpired.enabled:true}")
+    private boolean revokeRemoveExpired;
 
     @Bean
     public CommonsDataLoaderExt dataLoader() {
@@ -189,12 +215,12 @@ public class DSSBeanConfig {
     @Bean(initMethod = "initTable")
     public JdbcCacheCRLSource cachedCRLSource() {
         JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
-        jdbcCacheCRLSource.setJdbcCacheConnector(new JdbcCacheConnector(dataSource));
+        jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheCRLSource.setProxySource(onlineCRLSource());
         jdbcCacheCRLSource.setDefaultNextUpdateDelay(defaultNextUpdateDelay); // 3 minutes
         // default = true
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-        jdbcCacheCRLSource.setRemoveExpired(false);
+        jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
         return jdbcCacheCRLSource;
     }
 
@@ -214,11 +240,11 @@ public class DSSBeanConfig {
     @Bean(initMethod = "initTable")
     public JdbcCacheOCSPSource cachedOCSPSource() {
         JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
-        jdbcCacheOCSPSource.setJdbcCacheConnector(new JdbcCacheConnector(dataSource));
+        jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheOCSPSource.setProxySource(onlineOcspSource());
         jdbcCacheOCSPSource.setDefaultNextUpdateDelay(defaultNextUpdateDelay); // 3 minutes
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-        jdbcCacheOCSPSource.setRemoveExpired(false);
+        jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
         return jdbcCacheOCSPSource;
     }
 
@@ -227,13 +253,19 @@ public class DSSBeanConfig {
     public CertificateVerifier certificateVerifier() {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setCrlSource(cachedCRLSource());
-        certificateVerifier.setOcspSource(onlineOcspSource());
-        certificateVerifier.setDataLoader(dataLoader());
+        certificateVerifier.setOcspSource(cachedOCSPSource());
+        certificateVerifier.setAIASource(cachedAIASource());
         certificateVerifier.setTrustedCertSources(trustedListSource());
 
         // Default configs
         certificateVerifier.setAlertOnMissingRevocationData(new ExceptionOnStatusAlert());
         certificateVerifier.setCheckRevocationForUntrustedChains(false);
+
+        // Revocation strategy (CRL first)
+        if (revokeDataLoadingStratCrlFirst) {
+            certificateVerifier
+                    .setRevocationDataLoadingStrategyFactory(new CRLFirstRevocationDataLoadingStrategyFactory());
+        }
 
         return certificateVerifier;
     }
@@ -321,6 +353,14 @@ public class DSSBeanConfig {
         return service;
     }
 
+    /* from 5.11 */
+    @Bean
+    public RemoteTrustedListSignatureServiceImpl remoteTrustedListSignatureService() {
+        RemoteTrustedListSignatureServiceImpl service = new RemoteTrustedListSignatureServiceImpl();
+        service.setXadesService(xadesService());
+        return service;
+    }
+
     /* from 5.6 */
     @Bean
     public KeyStoreSignatureTokenConnection remoteToken() throws IOException {
@@ -377,7 +417,7 @@ public class DSSBeanConfig {
     @Bean
     public DSSFileLoader offlineLoader() {
         FileCacheDataLoader offlineFileLoader = new FileCacheDataLoader();
-        offlineFileLoader.setCacheExpirationTime(Long.MAX_VALUE);
+        offlineFileLoader.setCacheExpirationTime(-1); // negative value means cache never expires (from 5.10)
         offlineFileLoader.setDataLoader(new IgnoreDataLoader());
         offlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
         return offlineFileLoader;
@@ -409,7 +449,7 @@ public class DSSBeanConfig {
     public CommonsDataLoader trustAllDataLoader() {
         CommonsDataLoader dataLoader = new CommonsDataLoader();
         dataLoader.setProxyConfig(proxyConfig);
-        dataLoader.setTrustStrategy(TrustAllStrategy.INSTANCE);
+        dataLoader.setTrustStrategy(new TrustAllStrategy());
         return dataLoader;
     }
 
@@ -421,6 +461,30 @@ public class DSSBeanConfig {
         SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
         sslCertificateLoader.setCommonsDataLoader(trustAllDataLoader());
         return sslCertificateLoader;
+    }
+
+    /*
+     * destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che vengano create le tabelle ma
+     * non si vuole dropparle non appena il processo viene interrotto
+     */
+    /* from 5.10.1 */
+    // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
+    @Bean(initMethod = "initTable")
+    public JdbcCacheAIASource cachedAIASource() {
+        JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
+        jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
+        jdbcCacheAIASource.setProxySource(onlineAIASource());
+        return jdbcCacheAIASource;
+    }
+
+    @Bean
+    public OnlineAIASource onlineAIASource() {
+        return new DefaultAIASource(dataLoader());
+    }
+
+    @Bean
+    public JdbcCacheConnector jdbcCacheConnector() {
+        return new JdbcCacheConnector(dataSource);
     }
 
 }

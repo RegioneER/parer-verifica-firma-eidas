@@ -1,0 +1,400 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: verificafirma-eidas
+  template: verificafirma-eidas-springboot
+metadata:
+  annotations:
+    description: |-
+      Template microservizio verifica firma EIDAS JDK17 OracleDB (vedere https://gitlab.ente.regione.emr.it/parer/okd/verificafirma-eidas.git)
+    iconClass: icon-spring
+    openshift.io/display-name: Microservice EIDAS 
+    openshift.io/documentation-url: https://gitlab.ente.regione.emr.it/parer/okd/verificafirma-eidas
+    openshift.io/long-description: Il template fornisce la creazione del microservizio EIDAS (effimero DB H2 su disco)
+    openshift.io/provider-display-name: Parer (Regione Emilia Romagna)
+    openshift.io/support-url: https://gitlab.ente.regione.emr.it/parer
+    tags: springboot,eidas
+    template.openshift.io/bindable: "false"
+  name: verificafirma-eidas-springboot
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: verificafirma-eidas-secrets
+  stringData:
+    admin-password: ${ADMIN_PASSWORD}
+    admin-user: ${ADMIN_USER}
+    database-url: ${DB_URL}
+    database-password: ${DB_PASSWORD}
+    database-user: ${DB_USER}
+    keystore-pwd: ${KEYSTORE_PASSWORD}
+  type: Opaque
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: parerapps-keystore
+  data:
+    keystore.jks: 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
+  type: Opaque
+- apiVersion: v1
+  kind: Secret
+  data:
+    .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5lbnRlLnJlZ2lvbmUuZW1yLml0L3BhcmVyLyI6eyJ1c2VybmFtZSI6Im9rZF9kZXBsb3kiLCJwYXNzd29yZCI6IlhUWkJ5V1lBQnZ4UVVMOFdreHFxIiwiZW1haWwiOiJnaXRsYWJAZGVwbG95LmxvY2FsIn19fQ==
+  metadata:
+    name: gitlab-registry-token
+  type: kubernetes.io/dockerconfigjson
+- apiVersion: v1
+  kind: ConfigMap
+  data:
+    application-${PROFILE}.yaml: |-
+      server:
+        port: 8443
+        tomcat:
+          accesslog:
+            enabled: false      
+            directory: /dev
+            prefix: stdout
+            buffered: false
+            suffix:
+            file-date-format:
+            #accept-count: 200
+            #threads:
+            #  max: 300
+        ssl:
+          key-store-type: JKS
+          key-store: file:/etc/verificafirma-eidas/keystore/keystore.jks
+          key-store-password: ${KEYSTORE_PWD}
+          key-alias: parerapps
+          require-ssl: true
+      spring:
+        #profiles:
+          #active: prod
+        security: 
+          user:
+          name: ${ADMIN_USER}
+          password: ${ADMIN_PWD}
+          roles: ADMIN
+        datasource:
+          url: ${DB_URL}
+          driver-class-name: oracle.jdbc.OracleDriver
+          username: ${DB_USER}
+          password: ${DB_PASSWORD}
+          #data: file:/<path>/data.sql
+          hikari:
+            auto-commit: false
+            minimum-idle: 5
+            maximum-pool-size: 15
+            pool-name: ParerEidasHikariPool
+            idle-timeout: 120000
+            max-lifetime: 120000          
+        jpa:
+          database-platform: org.hibernate.dialect.Oracle12cDialect
+          show_sql: false
+          hibernate:
+            max_fetch_depth: 3
+            ddl-auto: update
+            hbm2ddl:
+              auto: update
+        main:
+          allow-bean-definition-overriding: true
+      # gestione actuators
+      management:
+        endpoint: 
+          health:
+          show-details: when_authorized    
+        endpoints:
+        web: 
+          exposure: 
+            include: health
+      logging:
+        config: file:./config/logback.xml
+      servlet:
+        multipart:
+          max-file-size: 2GB
+          max-request-size: 2GB                            
+    logback.xml: |-
+      <configuration>
+          <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+              <layout class="ch.qos.logback.classic.PatternLayout">
+                  <Pattern>
+                      %d %-5p [%c] \(%t\) [%X{uuid}] %m %replace(%ex){'[\r\n]+', '\\n'}%nopex%n
+                  </Pattern>
+              </layout>
+          </appender>
+          
+          <logger name="eu.europa.esig.dss.tsl.job" level="info" additivity="false">
+          <appender-ref ref="CONSOLE"/> 
+          </logger>
+          <logger name="eu.europa.esig.dss" level="error" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger> 
+          <logger name="org.springframework" level="off" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger> 
+          <logger name="org.apache" level="off" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger> 
+          <logger name="it.eng.parer.eidas" level="info" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger> 
+          <logger name="org.hibernate" level="off" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger>      
+          <logger name="com.sun.xml.bind" level="off" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger>  
+          <logger name="javax.xml.bind" level="off" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger>  
+          <logger name="com.zaxxer" level="info" additivity="false">
+              <appender-ref ref="CONSOLE"/> 
+          </logger>  
+                    
+          <root level="info">
+              <appender-ref ref="CONSOLE"/>
+          </root>
+      </configuration>    
+  metadata:
+    name: verificafirma-eidas-config 
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: verificafirma-eidas
+      expose: "true"
+    name: verificafirma-eidas
+  spec:
+    ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      app: verificafirma-eidas
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      haproxy.router.openshift.io/timeout: 10m
+    name: verificafirma-eidas
+  spec:
+    port:
+      targetPort: https
+    tls:
+      destinationCACertificate: "-----BEGIN CERTIFICATE-----\r\nMIIDVzCCAj+gAwIBAgIELzXGJTANBgkqhkiG9w0BAQsFADBcMQswCQYDVQQGEwJJ\r\nVDELMAkGA1UECBMCQk8xEDAOBgNVBAcTB0JvbG9nbmExDDAKBgNVBAoTA0VORzEM\r\nMAoGA1UECxMDRU5HMRIwEAYDVQQDEwlPS0QgUEFSRVIwHhcNMTkxMDE0MTMzOTQ0\r\nWhcNMjkxMDExMTMzOTQ0WjBcMQswCQYDVQQGEwJJVDELMAkGA1UECBMCQk8xEDAO\r\nBgNVBAcTB0JvbG9nbmExDDAKBgNVBAoTA0VORzEMMAoGA1UECxMDRU5HMRIwEAYD\r\nVQQDEwlPS0QgUEFSRVIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCu\r\n31ClOuEFN41tY+Gmxkq2PZ9Up/xCMQsa0DeD0GSML9GqcPtzGtgCu0UA2qq/HUiY\r\n2jpdr7JLX9DKl41ziFUdciV88shWzC43q9lkFVWn5uRbZ230X7Aafs7UXBndJFfR\r\nvakz2JY7LzJY5F07SQR47L2BblN+IBAs+0ZCCCnm/qcC5K2HsAjVp90dJr7JiPpK\r\nJ4rnBM4HPG5LrntJ4sZKngVfCzOwYzDj/7B6J81//PIdj2/WwXPilm1qmcFEolSN\r\n2TKnUk2+1/jlvjoACAW0/05K3uMBxTWIbH6kjarqnhw3YmYQQAPgLPre+6uZdBke\r\naeZEJgBWyVKoqU9SqxZHAgMBAAGjITAfMB0GA1UdDgQWBBSlrADZgGDWoKdg/rHh\r\n05PHSD0WvDANBgkqhkiG9w0BAQsFAAOCAQEAgCvibvYBjN2aiXWxR7uVNk/oTAvP\r\nRwEVQRW0LneTD3PAgaYDhHG6cm8Mbp1TLPKE5MsJzek5pd8LLudOtP3QW5GdUc48\r\nAshVXyNX6mQRDQvCBCU8qC64HBglXn1KwJwVSgxoY29SvZlfuUYoLvEyaSyyKy0w\r\nDq4wlvgq/AYjyPyh+3LecrPpffZEchoyKDBh4iTPjFpZyMHT+iudCxIJ2WtTOONi\r\n2qbpKwzN1b7rRZOiifVoSNMYqeZ5CiVY50uleeZ3ozMxvsjOyXn+UbgCPsCB42ZQ\r\n++i4xbVK6dBnYXLHgkD1PKt/+eCig6Hx3Ns4v9CWR9OOGzfJoa9BqQBOAA==\r\n-----END
+        CERTIFICATE-----\r\n"
+      termination: reencrypt
+    to:
+      kind: Service
+      name: verificafirma-eidas
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: verificafirma-eidas
+      group: it.eng.parer
+      registry: ${REGISTRY}
+      tagimage: ${IMGTAG}
+      gl_log_application: eidas
+      gl_tags: ${AMBIENTE}
+    name: verificafirma-eidas
+  spec:
+    replicas: 1
+    selector:
+      app: verificafirma-eidas
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi        
+        maxUnavailable: 25%
+        timeoutSeconds: 3600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: verificafirma-eidas
+          group: it.eng.parer
+          registry: ${REGISTRY}
+          tagimage: ${IMGTAG}
+          gl_log_application: eidas
+          gl_tags: ${AMBIENTE}          
+      spec:
+        containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: AB_JOLOKIA_OFF
+              value: 'true'
+            - name: TZ
+              value: Europe/Rome
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: admin-user
+            - name: ADMIN_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: admin-password
+            - name: KEYSTORE_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: keystore-pwd
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: database-url                  
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: database-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: verificafirma-eidas-secrets
+                  key: database-password
+            - name: LANG
+              value: en_US.UTF-8
+            - name: JAVA_OPTS_APPEND
+              value: >-
+                -Dspring.profiles.active=${PROFILE} -XX:+UnlockExperimentalVMOptions 
+                -XX:+UseContainerSupport -Dsun.zip.disableMemoryMapping=true
+                -Dcom.sun.management.jmxremote=true
+                -Dcom.sun.management.jmxremote.port=3000
+                -Dcom.sun.management.jmxremote.rmi.port=3001
+                -Djava.rmi.server.hostname=127.0.0.1
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Dcom.sun.management.jmxremote.ssl=false
+            - name: JAVA_MAX_MEM_RATIO
+              value: '90'
+            - name: JAVA_INITIAL_MEM_RATIO
+              value: '40'
+          image: ${REGISTRY}:${IMGTAG}
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 180
+          name: verificafirma-eidas
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 9779
+            name: prometheus
+            protocol: TCP
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 180
+          resources:
+            limits:
+              cpu: 800m
+              memory: 2500Mi
+          securityContext:
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /etc/verificafirma-eidas/config
+            name: verificafirma-eidas-config
+            readOnly: true
+          - mountPath: /etc/verificafirma-eidas/keystore
+            name: parerapps-keystore
+            readOnly: true
+        dnsPolicy: ClusterFirst
+        imagePullSecrets:
+        - name: gitlab-registry-token
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: verificafirma-eidas-config
+          name: verificafirma-eidas-config
+        - name: parerapps-keystore
+          secret:
+            defaultMode: 420
+            secretName: parerapps-keystore
+    test: false
+    triggers:
+    - type: ConfigChange
+parameters:
+- description: Registry immagine da utilizzare
+  displayName: registry
+  name: REGISTRY
+  required: false
+  value: registry.ente.regione.emr.it/parer/okd/verifica-firma-eidas
+- description: Nome dal tag dell'immagine da utilizzare (default latest)
+  displayName: imagetag
+  name: IMGTAG
+  required: false
+  value: latest
+- description: Nome dell'ambiente o namespace (e.g. svil/pre/test/prod)
+  displayName: ambiente
+  name: AMBIENTE
+  required: true
+- description: Nome utente per accesso interfaccia web.
+  displayName: Nome utente per accesso interfaccia web
+  name: ADMIN_USER
+  value: admin  
+- description: Password per accesso interfaccia web.
+  displayName: Password per accesso interfaccia web
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: ADMIN_PASSWORD
+- description: URL database.
+  displayName: URL database
+  required: true
+  name: DB_URL
+- description: Nome utente per accesso db.
+  displayName: Nome utente per accesso db
+  name: DB_USER
+  value: eidasdb
+- description: Password per accesso db.
+  displayName: Password per accesso db
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: DB_PASSWORD
+- description: Keystore password.
+  displayName: Keystore password
+  required: true
+  name: KEYSTORE_PASSWORD
+  value: parerapps
+- description: Nome profilo springboot
+  displayName: Nome profilo springboot
+  name: PROFILE
+  required: true 
