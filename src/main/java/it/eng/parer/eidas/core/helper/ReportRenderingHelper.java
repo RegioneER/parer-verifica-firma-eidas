@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.core.helper;
 
 import static org.apache.xmlgraphics.util.MimeConstants.MIME_PDF;
@@ -62,7 +45,7 @@ import jakarta.annotation.PostConstruct;
 @Component
 public class ReportRenderingHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ReportRenderingHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(ReportRenderingHelper.class);
 
     private static final String NAV_NEXT = "next";
 
@@ -177,7 +160,7 @@ public class ReportRenderingHelper {
             String xml = marshallSimpleReport(report);
             return transformSimpleReport(xml);
         } catch (Exception e) {
-            LOG.error("Errore durante la creazione del simple report", e);
+            log.atError().log("Errore durante la creazione del simple report", e);
         }
         return "<div>Errore durante la generazione del report di base</div>";
     }
@@ -195,7 +178,7 @@ public class ReportRenderingHelper {
             String xml = marshallDetailedReport(report);
             return transformDetailedReport(xml);
         } catch (Exception e) {
-            LOG.error("Errore durante la creazione del detailed report", e);
+            log.atError().log("Errore durante la creazione del detailed report", e);
         }
         return "<div>Errore durante la generazione del report dettagliato</div>";
     }
@@ -213,7 +196,7 @@ public class ReportRenderingHelper {
         try {
             return marshallDiagnosticDataReport(report);
         } catch (JAXBException e) {
-            LOG.error("Errore durante la creazione del diagnostic report", e);
+            log.atError().log("Errore durante la creazione del diagnostic report", e);
         }
         return "<div>Errore durante la generazione del report diagnostico</div>";
     }
@@ -234,7 +217,7 @@ public class ReportRenderingHelper {
             simpleReportMarshaller.marshal(report, sw);
             return sw.toString();
         } catch (JAXBException e) {
-            LOG.error("Errore durante il marshall del simple report", e);
+            log.atError().log("Errore durante il marshall del simple report", e);
         }
         return "<div>Errore durante il marshall del simple report</div>";
     }
@@ -255,7 +238,7 @@ public class ReportRenderingHelper {
             detailedReportMarshaller.marshal(report, sw);
             return sw.toString();
         } catch (JAXBException e) {
-            LOG.error("Errore durante il marshall del detailed report", e);
+            log.atError().log("Errore durante il marshall del detailed report", e);
         }
         return "<div>Errore durante il marshall del detailed report</div>";
     }
@@ -275,7 +258,7 @@ public class ReportRenderingHelper {
             transformer.setErrorListener(new DSSXmlErrorListener());
             transformer.transform(new StreamSource(new StringReader(simpleReportXml)), new StreamResult(writer));
         } catch (Exception e) {
-            LOG.error("Error while generating simple report", e);
+            log.atError().log("Error while generating simple report", e);
         }
         return writer.toString();
     }
@@ -287,7 +270,7 @@ public class ReportRenderingHelper {
             transformer.setErrorListener(new DSSXmlErrorListener());
             transformer.transform(new StreamSource(new StringReader(detailedReportXml)), new StreamResult(writer));
         } catch (Exception e) {
-            LOG.error("Error while generating detailed report", e);
+            log.atError().log("Error while generating detailed report", e);
         }
         return writer.toString();
     }

@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.core.helper;
 
 import java.io.ByteArrayInputStream;
@@ -54,7 +37,7 @@ import it.eng.parer.eidas.model.ExtensionsDTO;
 @Component
 public class ExtensionHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExtensionHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtensionHelper.class);
 
     /**
      * Metodo che, con l'ausilio delle librerie bouncy, estrae attraverso gli opportuini OID le estensioni delle firma
@@ -74,11 +57,11 @@ public class ExtensionHelper {
                 if (base64Encoded != null) {
                     ExtensionsDTO certificateExtension = new ExtensionsDTO();
                     certificateExtension.setAuthorityKeyIdentifier(extractAuthorityKeyIdentifier(base64Encoded));
-                    LOG.debug("AuthorityKeyIdentifier {}, id {}", certificateExtension.getAuthorityKeyIdentifier(),
+                    log.atDebug().log("AuthorityKeyIdentifier {}, id {}", certificateExtension.getAuthorityKeyIdentifier(),
                             certificate.getId());
 
                     certificateExtension.setSubjectKeyIdentifier(extractSubjectKeyIdentifier(base64Encoded));
-                    LOG.debug("SubjectKeyIdentifier {}, id {}", certificateExtension.getSubjectKeyIdentifier(),
+                    log.atDebug().log("SubjectKeyIdentifier {}, id {}", certificateExtension.getSubjectKeyIdentifier(),
                             certificate.getId());
                     // add on map
                     dto.getExtensions().put(certificate.getId(), certificateExtension);
@@ -95,12 +78,12 @@ public class ExtensionHelper {
                         Long crlNumber = getCrlNumber(base64EncodedCrl);
                         crlExtension.setCrlNumber(crlNumber);
                         dto.getExtensions().put(certificateRevocation.getRevocation().getId(), crlExtension);
-                        LOG.debug("CrlNumber {}, id {}", crlNumber, certificateRevocation.getRevocation().getId());
+                        log.atDebug().log("CrlNumber {}, id {}", crlNumber, certificateRevocation.getRevocation().getId());
                     }
                 }
             }
         } catch (Exception e) {
-            LOG.debug("Errore durante il calcolo Authority Key Identifier / " + "Subject Key Identifier / "
+            log.atDebug().log("Errore durante il calcolo Authority Key Identifier / " + "Subject Key Identifier / "
                     + "CRL Number  (OID 2.5.29.35, 2.5.29.14, 2.5.29.20)", e);
         }
     }
@@ -206,7 +189,7 @@ public class ExtensionHelper {
                 ExtensionsDTO timestampExt = new ExtensionsDTO();
                 timestampExt.setMarcaBase64(encodedSignedDataValue);
                 rootReport.getExtensions().put(timestampToken.getDSSIdAsString(), timestampExt);
-                LOG.debug("TimestampToken id {} encodedSignedDataValue {}", timestampToken.getDSSIdAsString(),
+                log.atDebug().log("TimestampToken id {} encodedSignedDataValue {}", timestampToken.getDSSIdAsString(),
                         timestampExt.getMarcaBase64());
             }
         }
@@ -234,7 +217,7 @@ public class ExtensionHelper {
             }
 
         } catch (CMSException ex) {
-            LOG.debug("Impossibile ottenere le informazioni relative al timestamp", ex);
+            log.atDebug().log("Impossibile ottenere le informazioni relative al timestamp", ex);
         }
         return encodedTimestamp;
     }

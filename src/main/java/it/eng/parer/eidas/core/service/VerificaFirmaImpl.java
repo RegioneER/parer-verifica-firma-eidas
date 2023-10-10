@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.core.service;
 
 import static it.eng.parer.eidas.core.util.Constants.TMP_FILE_SUFFIX;
@@ -45,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class VerificaFirmaImpl implements IVerificaFirma {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VerificaFirmaImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(VerificaFirmaImpl.class);
 
     private static final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions
             .asFileAttribute(PosixFilePermissions.fromString("rw-------"));
@@ -93,10 +76,10 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             if (signedDocumentElab != null) {
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
                 //
-                LOG.debug("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
                 // delete previous file
                 helper.deleteTmpFile(signedDocumentPath.toAbsolutePath().toString());
-                LOG.debug("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
             } else {
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentPath.toAbsolutePath().toString());
             }
@@ -178,10 +161,10 @@ public class VerificaFirmaImpl implements IVerificaFirma {
                 // change file pointer
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
                 //
-                LOG.debug("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
                 // delete previous file
                 helper.deleteTmpFile(signedDocumentPath.toAbsolutePath().toString());
-                LOG.debug("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
             }
 
             // 2. if exists originalDocuments ....

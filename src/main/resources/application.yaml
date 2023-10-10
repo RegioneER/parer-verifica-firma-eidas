@@ -23,7 +23,6 @@ spring:
     multipart:
       max-file-size: 1024MB
       max-request-size: 1024MB
-
 # DEFAULT : UTF-8
 #  http:
 #    encoding:
@@ -52,7 +51,7 @@ management:
       exposure:
         include: "info, health, jolokia, threaddump, scheduledtasks"
         
- # DSS (sostituito rispetto dss.properties)
+# DSS (sostituito rispetto dss.properties)
 dss: 
  server:
   signing:
@@ -60,12 +59,6 @@ dss:
       type: PKCS12
       filename: classpath:user_a_rsa.p12
       password: password
- tsa:
-  url: "http://tsa.belgium.be/connect"
- dataloader: 
-   ldaptimeoutconnection: 15000
- cachedCRLSource:
-   defaultNextUpdateDelay: 180
 
 oj:
   content:
@@ -84,17 +77,13 @@ lotl:
   country:
     code: EU
 
+# https://www.freeformatter.com/cron-expression-generator-quartz.html
 cron:
   tl:
     loader:
-      enable: true
-  initial:
-    delay:
-      tl:
-        loader: 0
-  delay:
-    tl:
-      loader: 3600000
+      offline:
+        enabled: false # disable by default
+    sched: "0 0 */6 ? * *" # every 6 hours
     
 default:
   validation:

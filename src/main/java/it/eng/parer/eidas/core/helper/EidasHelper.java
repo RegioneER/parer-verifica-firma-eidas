@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.core.helper;
 
 import static it.eng.parer.eidas.core.util.Constants.BUILD_VERSION;
@@ -77,7 +60,7 @@ import reactor.util.retry.Retry;
 @Component
 public class EidasHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EidasHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(EidasHelper.class);
 
     private static final Detector TIKA_DETECTOR = TikaConfig.getDefaultConfig().getDetector();
 
@@ -136,7 +119,7 @@ public class EidasHelper {
                 mimeType = validateXML(mimeType, is);
             }
         } catch (IOException ex) {
-            LOG.debug("Impossibile leggere il DSSDocument durante il calcolo del MimeType", ex);
+            log.atDebug().log("Impossibile leggere il DSSDocument durante il calcolo del MimeType", ex);
         }
         return mimeType;
     }
@@ -149,7 +132,7 @@ public class EidasHelper {
             // change with correct type
             return MimeTypeEnum.XML.getMimeTypeString();
         } catch (Exception ex) {
-            LOG.debug("Calcolato mime : {}, non risulta XML valido", currentMimeType, ex);
+            log.atDebug().log("Calcolato mime : {}, non risulta XML valido", currentMimeType, ex);
         }
         return currentMimeType;
     }
@@ -197,7 +180,7 @@ public class EidasHelper {
             if (tmpFile.exists()) {
                 boolean result = FileUtils.deleteQuietly(new File(fileName));
                 if (!result) {
-                    LOG.warn("Impossibile cancellare il file temporaneo {}", fileName);
+                    log.atWarn().log("Impossibile cancellare il file temporaneo {}", fileName);
                 }
             }
         }
@@ -332,7 +315,7 @@ public class EidasHelper {
             String preambleString = new String(preamble);
             return preambleString.startsWith(BEGIN);
         } catch (IllegalStateException e) {
-            LOG.error("Detect ASCII Armor error / File reading preamble problem {}", e.getMessage());
+            log.atError().log("Detect ASCII Armor error / File reading preamble problem {}", e.getMessage());
             return false; // Nota: is not an ascii armor. Try to validate.
         }
     }
@@ -373,7 +356,7 @@ public class EidasHelper {
             }
         } // writer
         catch (IOException ignore) {
-            LOG.debug("Detect Base64 error", ignore);
+            log.atDebug().log("Detect Base64 error", ignore);
             // delete tmp file
             deleteTmpFile(base64Encoded.toAbsolutePath().toString());
             return null;
