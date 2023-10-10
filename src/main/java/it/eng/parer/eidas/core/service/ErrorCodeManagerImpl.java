@@ -23,8 +23,7 @@ public class ErrorCodeManagerImpl implements IErrorCodeManager {
      */
     @Override
     public List<ErrorCode> get() {
-        return Stream.of(ParerError.ErrorCode.values()).filter(e -> !e.equals(ErrorCode.NOT_FOUND))
-                .toList();
+        return Stream.of(ParerError.ErrorCode.values()).filter(e -> !e.equals(ErrorCode.NOT_FOUND)).toList();
     }
 
     @Override

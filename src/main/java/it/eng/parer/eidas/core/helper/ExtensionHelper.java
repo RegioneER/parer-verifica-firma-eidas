@@ -57,8 +57,8 @@ public class ExtensionHelper {
                 if (base64Encoded != null) {
                     ExtensionsDTO certificateExtension = new ExtensionsDTO();
                     certificateExtension.setAuthorityKeyIdentifier(extractAuthorityKeyIdentifier(base64Encoded));
-                    log.atDebug().log("AuthorityKeyIdentifier {}, id {}", certificateExtension.getAuthorityKeyIdentifier(),
-                            certificate.getId());
+                    log.atDebug().log("AuthorityKeyIdentifier {}, id {}",
+                            certificateExtension.getAuthorityKeyIdentifier(), certificate.getId());
 
                     certificateExtension.setSubjectKeyIdentifier(extractSubjectKeyIdentifier(base64Encoded));
                     log.atDebug().log("SubjectKeyIdentifier {}, id {}", certificateExtension.getSubjectKeyIdentifier(),
@@ -78,7 +78,8 @@ public class ExtensionHelper {
                         Long crlNumber = getCrlNumber(base64EncodedCrl);
                         crlExtension.setCrlNumber(crlNumber);
                         dto.getExtensions().put(certificateRevocation.getRevocation().getId(), crlExtension);
-                        log.atDebug().log("CrlNumber {}, id {}", crlNumber, certificateRevocation.getRevocation().getId());
+                        log.atDebug().log("CrlNumber {}, id {}", crlNumber,
+                                certificateRevocation.getRevocation().getId());
                     }
                 }
             }

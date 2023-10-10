@@ -133,7 +133,7 @@ public class DSSBeanConfig {
 
     @Value("${revoke.removeExpired.enabled:true}")
     private boolean revokeRemoveExpired;
-    
+
     @Value("${dataloader.timeoutconnection:60000}")
     private int timeoutConnection;
 
@@ -145,7 +145,7 @@ public class DSSBeanConfig {
 
     @Value("${dataloader.connectionsmaxperroute:2}")
     private int connectionsMaxPerRoute;
-   
+
     @Value("${dataloader.ldaptimeoutconnection:30000}")
     private String ldapTimeoutConnection;
 
@@ -231,7 +231,7 @@ public class DSSBeanConfig {
         JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
         jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheOCSPSource.setProxySource(onlineOcspSource());
-        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate);  // 0 (get new one every time)
+        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
         jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
         jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);

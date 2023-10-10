@@ -14,9 +14,8 @@ public class TSLLoaderJob {
     /*
      * Default : disabled
      * 
-     * If enable the loader is designed for loading cache offline ONLY IF exits directory on filesystem.
-     * In case the directory does not exits the DSS logic raise an exception.
-     * Check DSSBeanConfig.tlCacheDirectory method.
+     * If enable the loader is designed for loading cache offline ONLY IF exits directory on filesystem. In case the
+     * directory does not exits the DSS logic raise an exception. Check DSSBeanConfig.tlCacheDirectory method.
      */
     @Value("${cron.tl.loader.offline.enabled}")
     private boolean offlineEnabled;
@@ -35,7 +34,7 @@ public class TSLLoaderJob {
 
     @Scheduled(cron = "${cron.tl.sched}")
     public void refresh() {
-         job.onlineRefresh();
+        job.onlineRefresh();
     }
 
 }
