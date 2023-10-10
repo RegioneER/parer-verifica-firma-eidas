@@ -1,5 +1,5 @@
-## 1.11.1 (13-09-2023)
+## 1.12.0 (29-09-2023)
 
-### Bugfix: 2
-- [#30189](https://parermine.regione.emilia-romagna.it/issues/30189) Eliminazione OracleDB constraint e introduzione configurazione per eliminazione di oggetti "non più validi"
-- [#30078](https://parermine.regione.emilia-romagna.it/issues/30078) Correzione processo di verifica documenti "multi busta" con DSS-EIDAS versione 5.12
+### Novità: 2
+- [#30417](https://parermine.regione.emilia-romagna.it/issues/30417) Utilizzo della modalità fluent di slf4j
+- [#25402](https://parermine.regione.emilia-romagna.it/issues/25402) Aggiornamento jdk versione 11

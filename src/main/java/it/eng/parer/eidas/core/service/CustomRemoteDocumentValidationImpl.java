@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.core.service;
 
 import java.io.ByteArrayInputStream;
@@ -66,7 +49,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocumentValidation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CustomRemoteDocumentValidationImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomRemoteDocumentValidationImpl.class);
 
     private CertificateVerifier verifier;
 
@@ -112,10 +95,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         //
         final LocalDateTime startValidation = LocalDateTime.now(ZoneId.systemDefault());
         //
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Inizio validazione documento con identificativo [{}] - data/ora inizio {}",
-                    dataToValidateMetadata.getDocumentId(), startValidation);
-        }
+        log.atDebug().log("Inizio validazione documento con identificativo [{}] - data/ora inizio {}",
+                dataToValidateMetadata.getDocumentId(), startValidation);
         //
         String mimeTypeUnsigned = null;
         EidasWSReportsDTOTree root = new EidasWSReportsDTOTree();
@@ -158,7 +139,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                     dataToValidateMetadata.getRemoteOriginalDocuments(), dataToValidateMetadata.getPolicyExt());
 
             long totalDateTime = Duration.between(startValidation, endValidation).toMillis();
-            LOG.info("Fine validazione documento con identificativo [{}] - data/ora fine {} (totale : {} ms)",
+            log.atInfo().log("Fine validazione documento con identificativo [{}] - data/ora fine {} (totale : {} ms)",
                     dataToValidateMetadata.getDocumentId(), endValidation, totalDateTime);
         }
 
@@ -174,12 +155,12 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         DSSDocument signedDocument = null;
         if (Utils.isArrayNotEmpty(signedFile.getBytes())) {
             signedDocument = new InMemoryDocument(signedFile.getBytes(), signedFile.getName());
-            LOG.debug("DSSDocument in memory name {}", signedFile.getName());
+            log.atDebug().log("DSSDocument in memory name {}", signedFile.getName());
         } else {
             signedDocument = new FileDocument(signedFile.getAbsolutePath());
             // set original file name
             signedDocument.setName(signedFile.getName());
-            LOG.debug("DSSDocument as file path {}", signedFile.getAbsolutePath());
+            log.atDebug().log("DSSDocument as file path {}", signedFile.getAbsolutePath());
         }
 
         // detect mimetype
@@ -206,7 +187,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             reports = signedDocValidator.validateDocument(customValidationConstraints);
         } else {
             if (Utils.isArrayNotEmpty(policy.getBytes())) {
-                LOG.debug("ConstraintPolicy: in memory name {}", policy.getName());
+                log.atDebug().log("ConstraintPolicy: in memory name {}", policy.getName());
                 try (ByteArrayInputStream bais = new ByteArrayInputStream(policy.getBytes())) {
                     reports = signedDocValidator.validateDocument(bais);
                 } catch (IOException ex) {
@@ -214,10 +195,10 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                             .withMessage("Errore generico in fase di lettura policy");
                 }
             } else if (StringUtils.isNotBlank(policy.getAbsolutePath())) {
-                LOG.debug("ConstraintPolicy: as file path {}", policy.getAbsolutePath());
+                log.atDebug().log("ConstraintPolicy: as file path {}", policy.getAbsolutePath());
                 reports = signedDocValidator.validateDocument(new File(policy.getAbsolutePath()));
             } else {
-                LOG.error("ConstraintPolicy: check name of policy file on multipartfile and metadata sent,  "
+                log.atError().log("ConstraintPolicy: check name of policy file on multipartfile and metadata sent,  "
                         + " policy file declared name {}", policy.getName());
                 throw new EidasParerException(dataToValidateMetadata)
                         .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA)
@@ -228,7 +209,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
         // check if valid (no signature)
         if (reports.getSimpleReport().getSignaturesCount() == 0) {
-            LOG.debug("Nessuna firma individuata");
+            log.atDebug().log("Nessuna firma individuata");
         }
 
         return reports;
@@ -245,15 +226,17 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                 DSSDocument originalDocument = null;
                 if (Utils.isArrayNotEmpty(originalFile.getBytes())) {
                     originalDocument = new InMemoryDocument(originalFile.getBytes(), originalFile.getName());
-                    LOG.debug("Original DSSDocument: in memory name {}", originalFile.getName());
+                    log.atDebug().log("Original DSSDocument: in memory name {}", originalFile.getName());
                 } else if (StringUtils.isNotBlank(originalFile.getAbsolutePath())) {
                     originalDocument = new FileDocument(originalFile.getAbsolutePath());
                     // set name
                     originalDocument.setName(originalFile.getName());
-                    LOG.debug("Original DSSDocument: as file path {}", originalFile.getAbsolutePath());
+                    log.atDebug().log("Original DSSDocument: as file path {}", originalFile.getAbsolutePath());
                 } else {
-                    LOG.error("Original DSSDocument: check name of original file on multipartfile and metadata sent,  "
-                            + " original file declared name {}", originalFile.getName());
+                    log.atError().log(
+                            "Original DSSDocument: check name of original file on multipartfile and metadata sent,  "
+                                    + " original file declared name {}",
+                            originalFile.getName());
                     throw new EidasParerException(dataToValidateMetadata)
                             .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA).withMessage(
                                     "Il nome dichiarato su 'name' del metadata 'originalDocumentsExt' non coicide con nessuno dei multipart file caricati su originalFiles");
@@ -292,15 +275,15 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                 : facade.getDefaultValidationPolicy();
 
         if (controlloCrittograficoIgnorato) {
-            LOG.debug("Validation policy controlloCatenaTrustIgnorato set to level {}", Level.IGNORE);
+            log.atDebug().log("Validation policy controlloCatenaTrustIgnorato set to level {}", Level.IGNORE);
             //
             validationPolicyJaxb.getCryptographic().setLevel(Level.IGNORE);// default FAIL
-            LOG.debug("Validation policy: cryptographic constraint original level {}, to level {}",
+            log.atDebug().log("Validation policy: cryptographic constraint original level {}, to level {}",
                     validationPolicyJaxb.getCryptographic().getLevel(), Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCryptographic()
                     .setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/cryptographic constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCryptographic()
                             .getLevel(),
@@ -308,7 +291,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSignatureIntact()
                     .setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signatureIntact constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSignatureIntact()
                             .getLevel(),
@@ -316,7 +299,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getReferenceDataExistence()
                     .setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/referenceDataExistence constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getReferenceDataExistence().getLevel(),
@@ -324,7 +307,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getReferenceDataIntact()
                     .setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/referenceDataIntact constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getReferenceDataIntact().getLevel(),
@@ -337,7 +320,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             // CA
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                     .getCryptographic().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/CACertificate/cryptographic constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                             .getCryptographic().getLevel(),
@@ -346,14 +329,15 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             // Timestamp
             validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getCryptographic()
                     .setLevel(Level.IGNORE);
-            LOG.debug("Validation policy: timestampConstraints/cryptographic constraint original level {}, to level {}",
+            log.atDebug().log(
+                    "Validation policy: timestampConstraints/cryptographic constraint original level {}, to level {}",
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getCryptographic()
                             .getLevel(),
                     Level.IGNORE);
 
             validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getSignatureIntact()
                     .setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: timestampConstraints/cryptographic/getSignatureIntact constraint original level {}, to level {}",
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getSignatureIntact()
                             .getLevel(),
@@ -361,7 +345,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getReferenceDataExistence()
                     .setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: timestampConstraints/cryptographic/getReferenceDataExistence constraint original level {}, to level {}",
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
                             .getReferenceDataExistence().getLevel(),
@@ -369,7 +353,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getReferenceDataIntact()
                     .setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: timestampConstraints/cryptographic/getReferenceDataIntact constraint original level {}, to level {}",
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
                             .getReferenceDataIntact().getLevel(),
@@ -377,11 +361,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         }
 
         if (controlloCatenaTrustIgnorato) {
-            LOG.debug("Validation policy controlloCatenaTrustIgnorato set to level {}", Level.IGNORE);
+            log.atDebug().log("Validation policy controlloCatenaTrustIgnorato set to level {}", Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                     .getProspectiveCertificateChain().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/prospectiveCertificateChain constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getProspectiveCertificateChain().getLevel(),
@@ -389,11 +373,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         }
 
         if (controlloCertificatoIgnorato) {
-            LOG.debug("Validation policy controlloCertificatoIgnorato set to level {}", Level.IGNORE);
+            log.atDebug().log("Validation policy controlloCertificatoIgnorato set to level {}", Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSignatureIntact()
                     .setLevel(Level.IGNORE);// default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signatureIntact constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSignatureIntact()
                             .getLevel(),
@@ -409,11 +393,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
          * 
          */
         if (controlloRevocaIgnorato) {
-            LOG.debug("Validation policy controlloCRLIgnorato set to level {}", Level.IGNORE);
+            log.atDebug().log("Validation policy controlloCRLIgnorato set to level {}", Level.IGNORE);
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
                     .setRevocationFreshnessNextUpdate(ignore);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signingCertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getSigningCertificate().getRevocationFreshnessNextUpdate().getLevel(),
@@ -421,7 +405,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
                     .getRevocationDataAvailable().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signingCertificate/revocationDataAvailable constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getSigningCertificate().getRevocationDataAvailable().getLevel(),
@@ -429,7 +413,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
                     .getRevocationIssuerNotExpired().setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signingCertificate/revocationIssuerNotExpired constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getSigningCertificate().getRevocationIssuerNotExpired().getLevel(),
@@ -437,7 +421,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getSigningCertificate()
                     .getRevocationInfoAccessPresent().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/signingCertificate/revocationInfoAccessPresent constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
                             .getSigningCertificate().getRevocationInfoAccessPresent().getLevel(),
@@ -450,7 +434,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             // no time constraint
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                     .setRevocationFreshnessNextUpdate(ignore);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/CACertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                             .getRevocationFreshnessNextUpdate().getLevel(),
@@ -458,7 +442,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                     .getRevocationDataAvailable().setLevel(Level.IGNORE); // default FAIL
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: basicSignatureConstraints/CACertificate/revocationDataAvailable constraint original level {}, to level {}",
                     validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints().getCACertificate()
                             .getRevocationDataAvailable().getLevel(),
@@ -466,13 +450,13 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             //
             validationPolicyJaxb.getRevocationConstraints().setLevel(Level.IGNORE);
-            LOG.debug("Validation policy: revocationConstraints constraint original level {}, to level {}",
+            log.atDebug().log("Validation policy: revocationConstraints constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getLevel(), Level.IGNORE);
 
             // no time constraint
             validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints().getSigningCertificate()
                     .setRevocationFreshnessNextUpdate(ignore);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: revocationConstraints/revocationFreshnessNextUpdate constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints()
                             .getSigningCertificate().getRevocationFreshnessNextUpdate(),
@@ -480,12 +464,12 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
             // OCSP
             validationPolicyJaxb.getRevocationConstraints().getUnknownStatus().setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: revocationConstraints/UnknownStatus constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getUnknownStatus().getLevel(), Level.IGNORE);
 
             validationPolicyJaxb.getRevocationConstraints().getSelfIssuedOCSP().setLevel(Level.IGNORE);
-            LOG.debug(
+            log.atDebug().log(
                     "Validation policy: revocationConstraints/SelfIssuedOCSP constraint original level {}, to level {}",
                     validationPolicyJaxb.getRevocationConstraints().getSelfIssuedOCSP().getLevel(), Level.IGNORE);
 
@@ -504,7 +488,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      * @return
      */
     private EidasWSReportsDTOTree createRoot(DSSDocument signedDocument, Reports reports, String idComponente) {
-        LOG.debug("Creating reports tree root element, ID {}", idComponente);
+        log.atDebug().log("Creating reports tree root element, ID {}", idComponente);
 
         /**
          * Vedi issue <a>https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/issues/7</a>
@@ -546,7 +530,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             Set<String> signatureAlreadyProcessed) {
         // for each signature
         for (AdvancedSignature signature : signedDocValidator.getSignatures()) {
-            LOG.debug("Creating reports tree child element, parent signature id {}", signature.getId());
+            log.atDebug().log("Creating reports tree child element, parent signature id {}", signature.getId());
 
             // check if sign.getId() is already done -> go next
             if (signatureAlreadyProcessed.contains(signature.getId())) {
@@ -573,7 +557,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                  * Eccezioni (gestite) che avvengono sullo sbustato verranno ignorate. In questo caso particolare il
                  * validatore non è riuscito ad invidivuare un documento orginale (vedi caso dei P7S)
                  */
-                LOG.debug("Reports DTO Tree child signature id {} no orginal documents", signature.getId());
+                log.atDebug().log("Reports DTO Tree child signature id {} no orginal documents", signature.getId());
             }
         } // sign
     }
@@ -598,7 +582,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
              * Eccezioni (gestite) che avvengono sullo sbustato verranno ignorate. Elemento (child) aggiunto sarà
              * considerato quindi come "unsigned" (dato che la validazione non è andata a buon fine)
              */
-            LOG.debug("Reports tree child element doc {} is unsigned with mimetype {}", doc.getName(),
+            log.atDebug().log("Reports tree child element doc {} is unsigned with mimetype {}", doc.getName(),
                     doc.getMimeType() != null ? doc.getMimeType().getMimeTypeString() : "none");
             // build tree (mimetype is needed for validation) unsigned doc
             EidasWSReportsDTOTree child = new EidasWSReportsDTOTree(helper.detectMimeType(doc));
@@ -638,7 +622,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             signedDocValidator.setIncludeSemantics(dataToValidateMetadata.isIncludeSemanticTokenValues());
             //
             signedDocValidator.setCertificateVerifier(verifier);
-            LOG.debug("Signed Document Validator created class name: {}", signedDocValidator.getClass().getName());
+            log.atDebug().log("Signed Document Validator created class name: {}",
+                    signedDocValidator.getClass().getName());
             return signedDocValidator;
         } catch (Exception ex) {
             throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.EIDAS_ERROR)

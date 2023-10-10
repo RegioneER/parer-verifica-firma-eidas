@@ -1,4 +1,14 @@
 
+## 1.12.0 (29-09-2023)
+
+### Novità: 1
+- [#30417](https://parermine.regione.emilia-romagna.it/issues/30417) Utilizzo della modalità fluent di slf4j
+
+## 1.11.2 (26-09-2023)
+
+### Bugfix: 1
+- [#30312](https://parermine.regione.emilia-romagna.it/issues/30312) Correzione errori di recupero delle CRL 
+
 ## 1.11.1 (13-09-2023)
 
 ### Bugfix: 2

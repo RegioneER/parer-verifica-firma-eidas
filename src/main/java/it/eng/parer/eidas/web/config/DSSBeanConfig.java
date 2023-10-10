@@ -1,20 +1,3 @@
-/*
- * Engineering Ingegneria Informatica S.p.A.
- *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
- */
-
 package it.eng.parer.eidas.web.config;
 
 import java.io.File;
@@ -109,9 +92,6 @@ public class DSSBeanConfig {
     @Value("${oj.content.keystore.password}")
     private String ksPassword;
 
-    @Value("${dss.tsa.url}")
-    private String tsaUrl;
-
     @Value("${dss.server.signing.keystore.type}")
     private String serverSigningKeystoreType;
 
@@ -120,22 +100,6 @@ public class DSSBeanConfig {
 
     @Value("${dss.server.signing.keystore.password}")
     private String serverSigningKeystorePassword;
-
-    @Value("${dss.dataloader.timeoutconnection:60000}")
-    private int timeoutConnection;
-
-    @Value("${dss.dataloader.timeoutsocket:60000}")
-    private int timeoutSocket;
-
-    @Value("${dss.dataloader.connectionsmaxtotal:20}")
-    private int connectionsMaxTotal;
-
-    @Value("${dss.dataloader.connectionsmaxperroute:2}")
-    private int connectionsMaxPerRoute;
-
-    /* custom */
-    @Value("${dss.dataloader.ldaptimeoutconnection:60000}")
-    private String ldapTimeoutConnection;
 
     /* from 5.6 */
     @Value("${current.oj.url}")
@@ -150,16 +114,40 @@ public class DSSBeanConfig {
     @Autowired
     private TSPSource tspSource;
 
-    /* from 5.6 */
-    @Value("${dss.cachedCRLSource.defaultNextUpdateDelay:180}")
-    private long defaultNextUpdateDelay;
+    /* from 5.12 */
+    @Value("${cache.crl.default.next.update:0}")
+    private long crlDefaultNextUpdate;
+
+    @Value("${cache.crl.max.next.update:0}")
+    private long crlMaxNextUpdate;
+
+    @Value("${cache.ocsp.default.next.update:0}")
+    private long ocspDefaultNextUpdate;
+
+    @Value("${cache.ocsp.max.next.update:0}")
+    private long ocspMaxNextUpdate;
 
     /* custom */
-    @Value("${dss.revoke.data.loading.strategy.crl-first.enabled:true}")
+    @Value("${revoke.data.loading.strategy.crl-first.enabled:true}")
     private boolean revokeDataLoadingStratCrlFirst;
 
-    @Value("${dss.revoke.removeExpired.enabled:true}")
+    @Value("${revoke.removeExpired.enabled:true}")
     private boolean revokeRemoveExpired;
+
+    @Value("${dataloader.timeoutconnection:60000}")
+    private int timeoutConnection;
+
+    @Value("${dataloader.timeoutsocket:60000}")
+    private int timeoutSocket;
+
+    @Value("${dataloader.connectionsmaxtotal:20}")
+    private int connectionsMaxTotal;
+
+    @Value("${dataloader.connectionsmaxperroute:2}")
+    private int connectionsMaxPerRoute;
+
+    @Value("${dataloader.ldaptimeoutconnection:30000}")
+    private String ldapTimeoutConnection;
 
     @Bean
     public CommonsDataLoaderExt dataLoader() {
@@ -217,7 +205,8 @@ public class DSSBeanConfig {
         JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
         jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheCRLSource.setProxySource(onlineCRLSource());
-        jdbcCacheCRLSource.setDefaultNextUpdateDelay(defaultNextUpdateDelay); // 3 minutes
+        jdbcCacheCRLSource.setDefaultNextUpdateDelay(crlDefaultNextUpdate); // 0 (get new one every time)
+        jdbcCacheCRLSource.setMaxNextUpdateDelay(crlMaxNextUpdate); // 0 (get new one every time)
         // default = true
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
         jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
@@ -242,7 +231,8 @@ public class DSSBeanConfig {
         JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
         jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheOCSPSource.setProxySource(onlineOcspSource());
-        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(defaultNextUpdateDelay); // 3 minutes
+        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
+        jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
         jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
         return jdbcCacheOCSPSource;
@@ -426,11 +416,11 @@ public class DSSBeanConfig {
     /* from 5.6 */
     @Bean
     public DSSFileLoader onlineLoader() {
-        FileCacheDataLoader offlineFileLoader = new FileCacheDataLoader();
-        offlineFileLoader.setCacheExpirationTime(0);
-        offlineFileLoader.setDataLoader(dataLoader());
-        offlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
-        return offlineFileLoader;
+        FileCacheDataLoader onlineFileLoader = new FileCacheDataLoader();
+        onlineFileLoader.setCacheExpirationTime(0);
+        onlineFileLoader.setDataLoader(dataLoader());
+        onlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
+        return onlineFileLoader;
     }
 
     /* from 5.6 */
