@@ -93,7 +93,8 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             if (signedDocumentElab != null) {
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
                 //
-                log.atDebug().log("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, riferimento file {}",
+                        signedRemoteDocumentExt.getAbsolutePath());
                 // delete previous file
                 helper.deleteTmpFile(signedDocumentPath.toAbsolutePath().toString());
                 log.atDebug().log("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());
@@ -178,7 +179,8 @@ public class VerificaFirmaImpl implements IVerificaFirma {
                 // change file pointer
                 signedRemoteDocumentExt.setAbsolutePath(signedDocumentElab.toAbsolutePath().toString());
                 //
-                log.atDebug().log("Ascii Armor detected, riferimento file {}", signedRemoteDocumentExt.getAbsolutePath());
+                log.atDebug().log("Ascii Armor detected, riferimento file {}",
+                        signedRemoteDocumentExt.getAbsolutePath());
                 // delete previous file
                 helper.deleteTmpFile(signedDocumentPath.toAbsolutePath().toString());
                 log.atDebug().log("Ascii Armor detected, cancello file path {}", signedDocumentPath.toAbsolutePath());

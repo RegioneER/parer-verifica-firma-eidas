@@ -112,8 +112,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         //
         final LocalDateTime startValidation = LocalDateTime.now(ZoneId.systemDefault());
         //
-	log.atDebug().log("Inizio validazione documento con identificativo [{}] - data/ora inizio {}",
-		dataToValidateMetadata.getDocumentId(), startValidation);
+        log.atDebug().log("Inizio validazione documento con identificativo [{}] - data/ora inizio {}",
+                dataToValidateMetadata.getDocumentId(), startValidation);
         //
         String mimeTypeUnsigned = null;
         EidasWSReportsDTOTree root = new EidasWSReportsDTOTree();
@@ -250,8 +250,10 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                     originalDocument.setName(originalFile.getName());
                     log.atDebug().log("Original DSSDocument: as file path {}", originalFile.getAbsolutePath());
                 } else {
-                    log.atError().log("Original DSSDocument: check name of original file on multipartfile and metadata sent,  "
-                            + " original file declared name {}", originalFile.getName());
+                    log.atError().log(
+                            "Original DSSDocument: check name of original file on multipartfile and metadata sent,  "
+                                    + " original file declared name {}",
+                            originalFile.getName());
                     throw new EidasParerException(dataToValidateMetadata)
                             .withCode(ParerError.ErrorCode.BAD_FILENAME_MULTIPARTFILE_AND_METADATA).withMessage(
                                     "Il nome dichiarato su 'name' del metadata 'originalDocumentsExt' non coicide con nessuno dei multipart file caricati su originalFiles");
@@ -344,7 +346,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             // Timestamp
             validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getCryptographic()
                     .setLevel(Level.IGNORE);
-            log.atDebug().log("Validation policy: timestampConstraints/cryptographic constraint original level {}, to level {}",
+            log.atDebug().log(
+                    "Validation policy: timestampConstraints/cryptographic constraint original level {}, to level {}",
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints().getCryptographic()
                             .getLevel(),
                     Level.IGNORE);
@@ -636,7 +639,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             signedDocValidator.setIncludeSemantics(dataToValidateMetadata.isIncludeSemanticTokenValues());
             //
             signedDocValidator.setCertificateVerifier(verifier);
-            log.atDebug().log("Signed Document Validator created class name: {}", signedDocValidator.getClass().getName());
+            log.atDebug().log("Signed Document Validator created class name: {}",
+                    signedDocValidator.getClass().getName());
             return signedDocValidator;
         } catch (Exception ex) {
             throw new EidasParerException(dataToValidateMetadata, ex).withCode(ParerError.ErrorCode.EIDAS_ERROR)
