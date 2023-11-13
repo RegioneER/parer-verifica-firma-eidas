@@ -1,5 +1,4 @@
-## 1.12.0 (29-09-2023)
+## 1.13.0 (13-11-2023)
 
-### Novità: 2
-- [#30417](https://parermine.regione.emilia-romagna.it/issues/30417) Utilizzo della modalità fluent di slf4j
-- [#25402](https://parermine.regione.emilia-romagna.it/issues/25402) Aggiornamento jdk versione 11
+### Novità: 1
+- [#30839](https://parermine.regione.emilia-romagna.it/issues/30839) Aggiornamento documentazione di progetto

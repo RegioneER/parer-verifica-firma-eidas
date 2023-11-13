@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.web.config;
 
 import java.io.File;
@@ -133,7 +150,7 @@ public class DSSBeanConfig {
 
     @Value("${revoke.removeExpired.enabled:true}")
     private boolean revokeRemoveExpired;
-
+    
     @Value("${dataloader.timeoutconnection:60000}")
     private int timeoutConnection;
 
@@ -145,7 +162,7 @@ public class DSSBeanConfig {
 
     @Value("${dataloader.connectionsmaxperroute:2}")
     private int connectionsMaxPerRoute;
-
+   
     @Value("${dataloader.ldaptimeoutconnection:30000}")
     private String ldapTimeoutConnection;
 
@@ -231,7 +248,7 @@ public class DSSBeanConfig {
         JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
         jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
         jdbcCacheOCSPSource.setProxySource(onlineOcspSource());
-        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
+        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate);  // 0 (get new one every time)
         jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
         // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
         jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);

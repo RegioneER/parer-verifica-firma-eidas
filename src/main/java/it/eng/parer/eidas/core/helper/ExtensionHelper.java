@@ -1,3 +1,20 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.eng.parer.eidas.core.helper;
 
 import java.io.ByteArrayInputStream;
@@ -57,8 +74,8 @@ public class ExtensionHelper {
                 if (base64Encoded != null) {
                     ExtensionsDTO certificateExtension = new ExtensionsDTO();
                     certificateExtension.setAuthorityKeyIdentifier(extractAuthorityKeyIdentifier(base64Encoded));
-                    log.atDebug().log("AuthorityKeyIdentifier {}, id {}",
-                            certificateExtension.getAuthorityKeyIdentifier(), certificate.getId());
+                    log.atDebug().log("AuthorityKeyIdentifier {}, id {}", certificateExtension.getAuthorityKeyIdentifier(),
+                            certificate.getId());
 
                     certificateExtension.setSubjectKeyIdentifier(extractSubjectKeyIdentifier(base64Encoded));
                     log.atDebug().log("SubjectKeyIdentifier {}, id {}", certificateExtension.getSubjectKeyIdentifier(),
@@ -78,8 +95,7 @@ public class ExtensionHelper {
                         Long crlNumber = getCrlNumber(base64EncodedCrl);
                         crlExtension.setCrlNumber(crlNumber);
                         dto.getExtensions().put(certificateRevocation.getRevocation().getId(), crlExtension);
-                        log.atDebug().log("CrlNumber {}, id {}", crlNumber,
-                                certificateRevocation.getRevocation().getId());
+                        log.atDebug().log("CrlNumber {}, id {}", crlNumber, certificateRevocation.getRevocation().getId());
                     }
                 }
             }
