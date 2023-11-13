@@ -24,7 +24,7 @@ spring:
       maxLifeTime : 600000      
   jpa:
     open-in-view: false
-    database-platform: org.hibernate.dialect.Oracle12cDialect
+    database-platform: org.hibernate.dialect.OracleDialect
     show_sql: true
     hibernate:
       max_fetch_depth: 3
