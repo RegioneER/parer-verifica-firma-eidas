@@ -77,7 +77,7 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.15
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.18
 
 LABEL io.k8s.description="Microservizio verifica firma EIDAS (basato su immagine ubi RedHat)" \
       io.k8s.display-name="Verifica firma EIDAS" \
@@ -101,5 +101,7 @@ COPY --chown=185 target/*.jar /deployments/verifica-firma-eidas.jar
 
 EXPOSE 8080 8778 9779
 USER 185
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS_APPEND=""
 ENV JAVA_APP_JAR="/deployments/verifica-firma-eidas.jar"
+
+ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
