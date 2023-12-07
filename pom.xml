@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.13.1-SNAPSHOT</version>
+	<version>1.14.1-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -38,7 +38,7 @@
 		<font-awesome.version>6.4.0</font-awesome.version>
 		<fop.version>2.7</fop.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.7.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.8.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 

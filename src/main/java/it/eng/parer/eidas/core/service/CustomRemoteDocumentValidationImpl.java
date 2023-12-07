@@ -56,7 +56,6 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.ws.validation.dto.WSReportsDTO;
 import it.eng.parer.eidas.core.helper.EidasHelper;
-import it.eng.parer.eidas.core.helper.ExtensionHelper;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
@@ -77,9 +76,6 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
     @Autowired
     EidasHelper helper;
-
-    @Autowired
-    ExtensionHelper extension;
 
     /**
      * Definisce il CertificateVerifier di riferimento
@@ -520,9 +516,6 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         dto.setIdComponente(idComponente);
         // unsigned = NO signatures
         dto.setUnsigned(reports.getSimpleReport().getSignaturesCount() == 0);
-        // TOFIX: alcuni dei parametri estratti tra le estensioni sono già presenti sui
-        // reports EIDAS (vedi base64!)
-        extension.createExtensions(wsdto, dto);
 
         return dto;
     }
@@ -553,8 +546,6 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             if (signatureAlreadyProcessed.contains(signature.getId())) {
                 continue;
             }
-            //
-            extension.extractSignatureBytes(signature, parent);
             /**
              * Nota bene: EIDAS prevede l'estrazione di N documenti originali anche se di fatto, secondo la struttura
              * "classica" delle firme "imbustate" questa cardinalità è da vedere come "piatta" su un unico livello (più

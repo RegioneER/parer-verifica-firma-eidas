@@ -1,4 +1,4 @@
-## 1.13.0 (13-11-2023)
+## 1.14.0 (05-12-2023)
 
 ### Novità: 1
-- [#30839](https://parermine.regione.emilia-romagna.it/issues/30839) Aggiornamento documentazione di progetto
+- [#30720](https://parermine.regione.emilia-romagna.it/issues/30720) Eliminazione delle logiche custom per estrarre informazioni dal report Eidas
