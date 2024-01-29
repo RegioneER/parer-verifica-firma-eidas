@@ -23,6 +23,7 @@ import static it.eng.parer.eidas.web.util.EndPointCostants.URL_ADMIN_BASE;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -42,19 +43,21 @@ public class StrictSecurityConfig {
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-        http.csrf().disable() // disable csrf
-                .authorizeHttpRequests() // rule on single path
-                .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + RESOURCE_INFOS)).authenticated().and()
-                .httpBasic() // basic auth
-                .and().authorizeHttpRequests().requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + "/**"))
-                .denyAll() // deny admin
-                .and() // permit all
-                .authorizeHttpRequests().anyRequest().permitAll();
+        //
+        http.csrf(csrf -> csrf.disable()) // disable csrf
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + RESOURCE_INFOS)).authenticated()) // basic
+                                                                                                                      // auth
+                .httpBasic(Customizer.withDefaults())
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + "/**")).denyAll()) // deny all
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()); // permit
+                                                                                                                 // all
 
         /*
          * h2 console https://springframework.guru/using-the-h2-database-console-in-spring-boot- with-spring-security/
          */
-        http.headers().frameOptions().disable();
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }

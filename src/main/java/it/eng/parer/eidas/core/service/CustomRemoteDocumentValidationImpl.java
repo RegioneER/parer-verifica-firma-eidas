@@ -371,6 +371,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                     validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
                             .getReferenceDataIntact().getLevel(),
                     Level.IGNORE);
+
+            validationPolicyJaxb.getCryptographic().getAlgoExpirationDate().setLevel(Level.IGNORE);
+            log.atDebug().log(
+                    "Validation policy: cryptographic/getAlgoExpirationDate constraint original level {}, to level {}",
+                    validationPolicyJaxb.getCryptographic().getAlgoExpirationDate().getLevel(), Level.IGNORE);
         }
 
         if (controlloCatenaTrustIgnorato) {
@@ -626,7 +631,8 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             signedDocValidator.setTokenExtractionStrategy(TokenExtractionStrategy.fromParameters(
                     dataToValidateMetadata.isIncludeCertificateRevocationValues(),
                     dataToValidateMetadata.isIncludeTimestampTokenValues(),
-                    dataToValidateMetadata.isIncludeCertificateTokenValues()));
+                    dataToValidateMetadata.isIncludeCertificateTokenValues(),
+                    dataToValidateMetadata.isIncludEvidenceRecordValues()));
             signedDocValidator.setIncludeSemantics(dataToValidateMetadata.isIncludeSemanticTokenValues());
             //
             signedDocValidator.setCertificateVerifier(verifier);

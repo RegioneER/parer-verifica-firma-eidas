@@ -50,12 +50,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import eu.europa.esig.dss.DSSXmlErrorListener;
-import eu.europa.esig.dss.DomUtils;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
 import eu.europa.esig.dss.utils.Utils;
+import eu.europa.esig.dss.xml.utils.DSSXmlErrorListener;
+import eu.europa.esig.dss.xml.utils.DomUtils;
 import it.eng.parer.eidas.web.bean.VerificaFirmaResultBean;
 import jakarta.annotation.PostConstruct;
 
