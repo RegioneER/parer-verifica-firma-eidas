@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -129,9 +132,36 @@ class CustomRemoteDocumentValidationTest {
 
     }
 
+    @Test
+    void testCADESTWithDisableAllPolicy() throws Exception {
+
+        // data
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:CADES/CADEST.pdf.p7m").openStream();
+        // DataToValidateDTO Mock
+        EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
+        // set reference
+        dto.setDataDiRiferimento(Date.from(LocalDate.of(2017, 1, 17).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        // set policy
+        dto.setControlloCrittograficoIgnorato(true);
+        dto.setControlloCatenaTrustIgnorato(true);
+        dto.setControlloCertificatoIgnorato(true);
+        dto.setControlloRevocaIgnorato(true);
+
+        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
+        validateSignaturesCount(result, 1);
+        validateChildrenCount(result, 1);
+        // total_passed
+        validateSignaturesValidate(result, 1);
+    }
+
     private void validateSignaturesCount(EidasWSReportsDTOTree result, int countSigns) {
         assertNotNull(result.getReport());
         assertEquals(countSigns, result.getReport().getSimpleReport().getSignaturesCount());
+    }
+
+    private void validateSignaturesValidate(EidasWSReportsDTOTree result, int validSigns) {
+        assertNotNull(result.getReport());
+        assertEquals(validSigns, result.getReport().getSimpleReport().getValidSignaturesCount());
     }
 
     private void validateChildrenCount(EidasWSReportsDTOTree result, int countChilds) {

@@ -244,6 +244,7 @@ public class ValidationController {
             dataToValidate.setIncludeCertificateRevocationValues(verificaFirmaBean.isIncludiRaw());
             dataToValidate.setIncludeCertificateTokenValues(verificaFirmaBean.isIncludiRaw());
             dataToValidate.setIncludeTimestampTokenValues(verificaFirmaBean.isIncludiRaw());
+            dataToValidate.setIncludEvidenceRecordValues(verificaFirmaBean.isIncludiRaw());
 
             Date dataRiferimento = new Date();
             LocalDate dataRiferimentoForm = verificaFirmaBean.getDataRiferimento();

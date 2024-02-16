@@ -1,4 +1,15 @@
 
+## 1.15.1 (16-02-2024)
+
+### Bugfix: 1
+- [#31275](https://parermine.regione.emilia-romagna.it/issues/31275) Correzione errore PKI su https://elektroninisparasas.lt/LT-TSL.xml
+
+## 1.15.0 (29-01-2024)
+
+### Novità: 2
+- [#31006](https://parermine.regione.emilia-romagna.it/issues/31006) Introduzione PARER custom policy constraint.xml
+- [#30988](https://parermine.regione.emilia-romagna.it/issues/30988) Aggiornamento libreria DSS 5.13
+
 ## 1.14.0 (05-12-2023)
 
 ### Novità: 1

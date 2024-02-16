@@ -1,4 +1,4 @@
-## 1.14.0 (05-12-2023)
+## 1.15.1 (16-02-2024)
 
-### Novità: 1
-- [#30720](https://parermine.regione.emilia-romagna.it/issues/30720) Eliminazione delle logiche custom per estrarre informazioni dal report Eidas
+### Bugfix: 1
+- [#31275](https://parermine.regione.emilia-romagna.it/issues/31275) Correzione errore PKI su https://elektroninisparasas.lt/LT-TSL.xml

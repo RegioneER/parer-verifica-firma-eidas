@@ -87,7 +87,7 @@ cron:
     
 default:
   validation:
-    policy: "policy/constraint.xml"
+    policy: "policy/custom_constraint.xml"
 
 proxy:
   http:
@@ -118,7 +118,8 @@ parer:
   eidas:
     admin-ui:
       enabled: true
-      propstoskip: .*H2_USER.*|.*H2_PWD.*|.*ADMIN_USER.*|.*ADMIN_PWD.*|.*user.*|.*password.*|.*email.*      
+      env:
+        propstoskip: .*H2_USER.*|.*H2_PWD.*|.*ADMIN_USER.*|.*ADMIN_PWD.*|.*user.*|.*password.*|.*email.*      
     validation-ui:
       enabled: true
         
