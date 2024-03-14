@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +71,12 @@ public class AppInfosWs {
     Environment env;
 
     // default : all
-    @Value("${parer.eidas.admin-ui.propstoskip:}")
+    @Value("${parer.eidas.admin-ui.env.propstoskip:}")
     String propsToSkip;
+
+    // default : all
+    @Value("${parer.eidas.admin-ui.env.roottoskip:}")
+    String rootToSkip;
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Operation(summary = "Info", method = "Informazioni applicativo")
@@ -93,7 +96,9 @@ public class AppInfosWs {
                 .filter(propName -> propName.startsWith(ENV_FILTER_GIT))
                 .forEach(propName -> gitprops.setProperty(propName, getProperty(propName)));
 
-        infos.put(ENV_FILTER_GIT, new TreeMap<>((Map) gitprops));
+        if (!ENV_FILTER_GIT.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_GIT, new TreeMap<>((Map) gitprops));
+        }
 
         // dss
         Properties dssprops = new Properties();
@@ -103,7 +108,9 @@ public class AppInfosWs {
                 .filter(propName -> propName.startsWith(ENV_FILTER_DSS))
                 .forEach(propName -> dssprops.setProperty(propName, getProperty(propName)));
 
-        infos.put(ENV_FILTER_DSS, new TreeMap<>((Map) dssprops));
+        if (!ENV_FILTER_DSS.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_DSS, new TreeMap<>((Map) dssprops));
+        }
 
         // spring
         Properties springprops = new Properties();
@@ -113,18 +120,21 @@ public class AppInfosWs {
                 .filter(propName -> propName.startsWith(ENV_FILTER_SPRING))
                 .forEach(propName -> springprops.setProperty(propName, getProperty(propName)));
 
-        infos.put(ENV_FILTER_SPRING, new TreeMap<>((Map) springprops));
+        if (!ENV_FILTER_SPRING.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_SPRING, new TreeMap<>((Map) springprops));
+        }
 
         // others
-        List<String> allcurrkeys = infos.values().stream().map(Map::keySet).flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        List<String> allcurrkeys = infos.values().stream().map(Map::keySet).flatMap(Collection::stream).toList();
         Properties othersprops = new Properties();
         StreamSupport.stream(propSrcs.spliterator(), false).filter(MapPropertySource.class::isInstance)
                 .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames()).flatMap(Arrays::<String> stream)
                 .filter(propName -> !propName.matches(propsToSkip)).filter(propName -> !allcurrkeys.contains(propName))
                 .forEach(propName -> othersprops.setProperty(propName, getProperty(propName)));
 
-        infos.put(ENV_FILTER_OTHERS, new TreeMap<>((Map) othersprops));
+        if (!ENV_FILTER_OTHERS.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_OTHERS, new TreeMap<>((Map) othersprops));
+        }
 
         return ResponseEntity.ok().lastModified(LocalDateTime.now().atZone(ZoneId.systemDefault())).eTag(ETAG)
                 .body(infos);

@@ -59,8 +59,8 @@ import eu.europa.esig.dss.spi.client.http.IgnoreDataLoader;
 import eu.europa.esig.dss.spi.client.jdbc.JdbcCacheConnector;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
+import eu.europa.esig.dss.spi.x509.aia.AIASource;
 import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
-import eu.europa.esig.dss.spi.x509.aia.OnlineAIASource;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection;
 import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
@@ -392,7 +392,8 @@ public class DSSBeanConfig {
     @Bean
     public KeyStoreCertificateSource ojContentKeyStore() {
         try {
-            return new KeyStoreCertificateSource(ResourceUtils.getURL(ksFilename).openStream(), ksType, ksPassword);
+            return new KeyStoreCertificateSource(ResourceUtils.getURL(ksFilename).openStream(), ksType,
+                    ksPassword.toCharArray());
         } catch (IOException e) {
             throw new DSSException("Unable to load the file " + ksFilename, e);
         }
@@ -485,7 +486,7 @@ public class DSSBeanConfig {
     }
 
     @Bean
-    public OnlineAIASource onlineAIASource() {
+    public AIASource onlineAIASource() {
         return new DefaultAIASource(dataLoader());
     }
 

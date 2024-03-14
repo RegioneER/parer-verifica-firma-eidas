@@ -1,4 +1,4 @@
-## 1.14.0 (05-12-2023)
+## 1.16.0 (14-03-2024)
 
 ### Novità: 1
-- [#30720](https://parermine.regione.emilia-romagna.it/issues/30720) Eliminazione delle logiche custom per estrarre informazioni dal report Eidas
+- [#31419](https://parermine.regione.emilia-romagna.it/issues/31419) Attivazione statistiche per monitoraggio con prometheus
