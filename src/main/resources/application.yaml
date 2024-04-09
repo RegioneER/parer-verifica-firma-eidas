@@ -49,7 +49,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "info, health, jolokia, threaddump, scheduledtasks"
+        include: "info, health, jolokia, threaddump, scheduledtasks, prometheus"
         
 # DSS (sostituito rispetto dss.properties)
 dss: 
