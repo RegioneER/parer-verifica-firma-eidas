@@ -1,7 +1,19 @@
+
+## 1.17.0 (10-04-2024)
+
+### Novità: 2
+- [#31808](https://parermine.regione.emilia-romagna.it/issues/31808) Rilassamento vincoli con verifica OCSP e data certificato antecedenete a quella del responder
+- [#31709](https://parermine.regione.emilia-romagna.it/issues/31709) Gestione migliorata sorgenti revoche (cache / online)
+
 ## 1.16.0 (14-03-2024)
 
 ### Novità: 1
 - [#31419](https://parermine.regione.emilia-romagna.it/issues/31419) Attivazione statistiche per monitoraggio con prometheus
+
+## 1.15.1 (16-02-2024)
+
+### Bugfix: 1
+- [#31275](https://parermine.regione.emilia-romagna.it/issues/31275) Correzione errore PKI su https://elektroninisparasas.lt/LT-TSL.xml
 
 ## 1.15.0 (29-01-2024)
 

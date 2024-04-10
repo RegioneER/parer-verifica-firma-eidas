@@ -2,11 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.17.0</version>
+	<version>1.16.1-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
-	<url>https://nexus.ente.regione.emr.it/repository/parer-site/verifica-firma-eidas/${project.version}/</url>
 
 	<parent>
 		<groupId>it.eng.parer</groupId>
@@ -44,16 +43,23 @@
 	</properties>
 
     <scm>
-        <developerConnection>scm:git:git@gitlab.ente.regione.emr.it:parer/okd/verifica-firma-eidas.git</developerConnection>
-        <tag>verifica-firma-eidas-1.17.0</tag>
+	<developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
-        <site>
-            <id>site</id>
-            <url>dav:https://nexus.ente.regione.emr.it/repository/parer-site/verifica-firma-eidas/${project.version}</url>
-        </site>
+        <repository>
+	   <id>github</id>
+	   <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
+	 </repository>      
     </distributionManagement>
+
+     <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>            
+        </repository>               
+      </repositories>
 
 	<dependencyManagement>
 		<dependencies>
