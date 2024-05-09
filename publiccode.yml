@@ -41,7 +41,7 @@ description:
 
     shortDescription: |-
       Microservizio che implementa la verifica di documenti firmati attraverso
-      api DSS EIDAS utilizzato nell'ambito del processo di acquisizione gestito dal sistema SACER
+      api DSS EIDAS utilizzato dal sistema SACER nella fase di ingest
 developmentStatus: stable
 intendedAudience:
   countries:
