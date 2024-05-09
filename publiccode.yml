@@ -22,7 +22,7 @@ description:
     longDescription: |+
       Microservizio realizzato per effettuare verifica e validazione di
 
-      documenti con firma digitale.  Realizzato attraverso framework [Spring
+      documenti con firma digitale nell'ambito del processo di acquisizione gestito dal sistema SACER.  Realizzato attraverso framework [Spring
 
       Boot](https://spring.io/projects/spring-boot) (versione 3.x) e [OpenJDK
 
@@ -41,7 +41,7 @@ description:
 
     shortDescription: |-
       Microservizio che implementa la verifica di documenti firmati attraverso
-      api DSS EIDAS
+      api DSS EIDAS utilizzato nell'ambito del processo di acquisizione gestito dal sistema SACER
 developmentStatus: stable
 intendedAudience:
   countries:
@@ -79,7 +79,7 @@ maintenance:
     - name: ' Engineering Ingegneria Informatica S.p.A.'
       until: '2024-06-30'
   type: contract
-name: Verifica Firma Eidas
+name: Parer - Verifica Firma Eidas
 platforms:
   - linux
 releaseDate: '2023-11-13'
