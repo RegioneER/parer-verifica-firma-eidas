@@ -40,6 +40,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -47,7 +48,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -67,6 +75,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSUtils;
+import it.eng.parer.eidas.core.util.Constants.URIClientType;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.exception.EidasParerException;
@@ -94,17 +103,46 @@ public class EidasHelper {
     @Autowired
     BuildProperties buildProperties;
 
+    @Value("${parer.eidas.uriloader.client-type:httpclient}")
+    URIClientType uRIClientType;
+
+    /*
+     * Flux+Mono config
+     */
     // default 60 s
-    @Value("${parer.eidas.webclient.timeout:360}")
+    @Value("${parer.eidas.uriloader.webclient.timeout:60}")
     long webClientTimeout;
 
     // default 5 times
-    @Value("${parer.eidas.webclient.backoff:10}")
+    @Value("${parer.eidas.uriloader.webclient.backoff:5}")
     long webClientBackoff;
 
     // default 3 s
-    @Value("${parer.eidas.webclient.backofftime:3}")
+    @Value("${parer.eidas.uriloader.webclient.backofftime:3}")
     long webClientBackoffTime;
+
+    /*
+     * Standard httpclient
+     */
+    // default 60 s
+    @Value("${parer.eidas.uriloader.httpclient.timeout:60}")
+    long httpClientTimeout;
+
+    // default 60 s
+    @Value("${parer.eidas.uriloader.httpclient.timeoutsocket:60}")
+    int httpClientSocketTimeout;
+
+    // default 4
+    @Value("${parer.eidas.uriloader.httpclient.connectionsmaxperroute:4}")
+    int httpClientConnectionsmaxperroute;
+
+    // default 40
+    @Value("${parer.eidas.uriloader.httpclient.connectionsmax:40}")
+    int httpClientConnectionsmax;
+
+    // default 60s
+    @Value("${parer.eidas.uriloader.httpclient.timetolive:60}")
+    long httpClientTimeToLive;
 
     public String buildversion() {
         return env.getProperty(BUILD_VERSION);
@@ -383,18 +421,49 @@ public class EidasHelper {
     }
 
     public void getResourceFromURI(URI signedResource, Path localPath) throws IOException {
+        if (uRIClientType.equals(URIClientType.HTTPCLIENT)) {
+            getWithCommonHttpclient(signedResource, localPath);
+        } else {
+            getWithWebClient(signedResource, localPath);
+        }
+    }
+
+    private void getWithWebClient(URI signedResource, Path localPath) throws IOException {
         try {
-            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono essere problemi di conversione
+            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono
+            // essere problemi di conversione
             // dei
             // caratteri
             Flux<DataBuffer> dataBuffer = WebClient.create().get().uri(signedResource).retrieve()
                     .bodyToFlux(DataBuffer.class);
-            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un prova e l'altra
+            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un
+            // prova e l'altra
             DataBufferUtils.write(dataBuffer, localPath).timeout(Duration.ofSeconds(webClientTimeout))
                     .retryWhen(Retry.backoff(webClientBackoff, Duration.ofSeconds(webClientBackoffTime))).share()
                     .block();
         } catch (Exception ex) {
             throw new IOException("Impossibile recuperare il documento da URI", ex);
         }
+    }
+
+    private void getWithCommonHttpclient(URI signedResource, Path localPath) throws IOException {
+        // config
+        ConnectionConfig connConfig = ConnectionConfig.custom().setTimeToLive(httpClientTimeToLive, TimeUnit.SECONDS)
+                .setSocketTimeout(httpClientSocketTimeout, TimeUnit.SECONDS)
+                .setConnectTimeout(httpClientTimeout, TimeUnit.SECONDS).build();
+
+        // pool manager
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+        connManager.setDefaultConnectionConfig(connConfig); // set config
+        connManager.setDefaultMaxPerRoute(httpClientConnectionsmaxperroute);
+        connManager.setMaxTotal(httpClientConnectionsmax);
+
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connManager).build();
+                FileOutputStream out = new FileOutputStream(localPath.toFile());) {
+            //
+            ClassicHttpResponse response = httpClient.executeOpen(null, new HttpGet(signedResource), null);
+            IOUtils.copy(response.getEntity().getContent(), out);
+        }
+
     }
 }
