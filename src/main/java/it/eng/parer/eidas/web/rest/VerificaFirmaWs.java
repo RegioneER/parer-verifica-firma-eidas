@@ -22,6 +22,9 @@ import static it.eng.parer.eidas.web.util.EndPointCostants.URL_API_BASE;
 
 import java.util.Optional;
 
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -59,6 +62,9 @@ import jakarta.validation.Valid;
 @RequestMapping(URL_API_BASE)
 public class VerificaFirmaWs {
 
+    private static final Logger log = LoggerFactory.getLogger(VerificaFirmaWs.class);
+
+    
     /* constants */
     private static final String ETAG = "RVv1.0";
 
@@ -99,6 +105,10 @@ public class VerificaFirmaWs {
             HttpServletRequest request) {
         // LOG UUID
         MDC.put(Constants.UUID_LOG_MDC, metadata.getUuid());
+        // LOG BODY
+        if (log.isDebugEnabled()){ 
+            log.atDebug().log("RequestBody {}",  new JSONObject(metadata).toString());
+        }
         EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
         return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG).body(body);
     }
