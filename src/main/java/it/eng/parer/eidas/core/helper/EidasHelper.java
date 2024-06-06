@@ -47,7 +47,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -67,6 +70,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSUtils;
+import it.eng.parer.eidas.core.util.Constants.URIClientType;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.exception.EidasParerException;
@@ -94,16 +98,25 @@ public class EidasHelper {
     @Autowired
     BuildProperties buildProperties;
 
+    @Autowired
+    ApacheClientHelper apacheClientHelper;
+
+    @Value("${parer.eidas.uriloader.client-type:httpclient}")
+    URIClientType uRIClientType;
+
+    /*
+     * Flux+Mono config
+     */
     // default 60 s
-    @Value("${parer.eidas.webclient.timeout:360}")
+    @Value("${parer.eidas.uriloader.webclient.timeout:60}")
     long webClientTimeout;
 
     // default 5 times
-    @Value("${parer.eidas.webclient.backoff:10}")
+    @Value("${parer.eidas.uriloader.webclient.backoff:5}")
     long webClientBackoff;
 
     // default 3 s
-    @Value("${parer.eidas.webclient.backofftime:3}")
+    @Value("${parer.eidas.uriloader.webclient.backofftime:3}")
     long webClientBackoffTime;
 
     public String buildversion() {
@@ -383,13 +396,23 @@ public class EidasHelper {
     }
 
     public void getResourceFromURI(URI signedResource, Path localPath) throws IOException {
+        if (uRIClientType.equals(URIClientType.HTTPCLIENT)) {
+            getWithCommonHttpclient(signedResource, localPath);
+        } else {
+            getWithWebClient(signedResource, localPath);
+        }
+    }
+
+    private void getWithWebClient(URI signedResource, Path localPath) throws IOException {
         try {
-            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono essere problemi di conversione
+            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono
+            // essere problemi di conversione
             // dei
             // caratteri
             Flux<DataBuffer> dataBuffer = WebClient.create().get().uri(signedResource).retrieve()
                     .bodyToFlux(DataBuffer.class);
-            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un prova e l'altra
+            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un
+            // prova e l'altra
             DataBufferUtils.write(dataBuffer, localPath).timeout(Duration.ofSeconds(webClientTimeout))
                     .retryWhen(Retry.backoff(webClientBackoff, Duration.ofSeconds(webClientBackoffTime))).share()
                     .block();
@@ -397,4 +420,14 @@ public class EidasHelper {
             throw new IOException("Impossibile recuperare il documento da URI", ex);
         }
     }
+
+    private void getWithCommonHttpclient(URI signedResource, Path localPath) throws IOException {
+
+        try (ClassicHttpResponse response = apacheClientHelper.client().executeOpen(null, new HttpGet(signedResource),
+                null); FileOutputStream out = new FileOutputStream(localPath.toFile());) {
+            //
+            IOUtils.copy(response.getEntity().getContent(), out);
+        }
+    }
+
 }
