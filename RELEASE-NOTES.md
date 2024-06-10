@@ -1,4 +1,4 @@
-## 1.16.0 (14-03-2024)
+## 1.21.0 (10-06-2024)
 
 ### Novità: 1
-- [#31419](https://parermine.regione.emilia-romagna.it/issues/31419) Attivazione statistiche per monitoraggio con prometheus
+- [#32690](https://parermine.regione.emilia-romagna.it/issues/32690)  Introduzione di logica centralizzata per invocazione revocation URL via "single client instance" (DSS)

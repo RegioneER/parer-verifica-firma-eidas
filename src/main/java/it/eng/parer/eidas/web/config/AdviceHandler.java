@@ -54,8 +54,8 @@ public class AdviceHandler {
 
     /*
      * Aggiunto log al fine di loggare i casi di generiche eccezioni ossia generate dopo l'esecuzione del servizio di
-     * verifica firma (o prima quando si valuta la risposta del client), ma che comunque in generale non sono gestite
-     * (EidasParerException) all'interno dell'implementazione dell'endpoint.
+     * verifica firma (o prima quando si valuta la risposta del dataHttpClient), ma che comunque in generale non sono
+     * gestite (EidasParerException) all'interno dell'implementazione dell'endpoint.
      */
     private static final Logger log = LoggerFactory.getLogger(AdviceHandler.class);
 

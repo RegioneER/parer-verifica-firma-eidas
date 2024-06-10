@@ -37,9 +37,6 @@ public class Constants {
     public static final String BUILD_TIME = "git.commit.time";
     public static final String DSS_VERSION = "dss.version";
 
-    /* default configuration */
-    public static final String TIMEOUT_LDAP_CONNECTION = "6000";
-
     public static final String TMP_FILE_SUFFIX = "-eidasvf.tmp";
 
     /* default error message on advice handler */
