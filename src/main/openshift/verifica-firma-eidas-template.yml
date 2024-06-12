@@ -181,7 +181,6 @@ objects:
     labels:
       app: verificafirma-eidas
       group: it.eng.parer
-      registry: ${REGISTRY}
       gl_log_application: eidas
       gl_tags: ${AMBIENTE}
     name: verificafirma-eidas
@@ -206,7 +205,6 @@ objects:
         labels:
           app: verificafirma-eidas
           group: it.eng.parer
-          registry: ${REGISTRY}
           gl_log_application: eidas
           gl_tags: ${AMBIENTE}          
       spec:

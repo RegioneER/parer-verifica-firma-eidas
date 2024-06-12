@@ -37,7 +37,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +46,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
@@ -56,23 +58,18 @@ import org.apache.tika.mime.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSUtils;
+import it.eng.parer.eidas.core.bean.CommonsDataHttpClient;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasRemoteDocument;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
-import reactor.core.publisher.Flux;
-import reactor.util.retry.Retry;
 
 @Component
 public class EidasHelper {
@@ -94,17 +91,8 @@ public class EidasHelper {
     @Autowired
     BuildProperties buildProperties;
 
-    // default 60 s
-    @Value("${parer.eidas.webclient.timeout:360}")
-    long webClientTimeout;
-
-    // default 5 times
-    @Value("${parer.eidas.webclient.backoff:10}")
-    long webClientBackoff;
-
-    // default 3 s
-    @Value("${parer.eidas.webclient.backofftime:3}")
-    long webClientBackoffTime;
+    @Autowired
+    CommonsDataHttpClient dataHttpClient;
 
     public String buildversion() {
         return env.getProperty(BUILD_VERSION);
@@ -383,18 +371,12 @@ public class EidasHelper {
     }
 
     public void getResourceFromURI(URI signedResource, Path localPath) throws IOException {
-        try {
-            // Attenzione, se al posto dell'uri viene utilizzata una stringa ci possono essere problemi di conversione
-            // dei
-            // caratteri
-            Flux<DataBuffer> dataBuffer = WebClient.create().get().uri(signedResource).retrieve()
-                    .bodyToFlux(DataBuffer.class);
-            // scarica sul local path provando 5 volte aspettando almeno 3 secondi tra un prova e l'altra
-            DataBufferUtils.write(dataBuffer, localPath).timeout(Duration.ofSeconds(webClientTimeout))
-                    .retryWhen(Retry.backoff(webClientBackoff, Duration.ofSeconds(webClientBackoffTime))).share()
-                    .block();
-        } catch (Exception ex) {
-            throw new IOException("Impossibile recuperare il documento da URI", ex);
+
+        try (ClassicHttpResponse response = dataHttpClient.getHttpClient().executeOpen(null,
+                new HttpGet(signedResource), null); FileOutputStream out = new FileOutputStream(localPath.toFile());) {
+            //
+            IOUtils.copyLarge(response.getEntity().getContent(), out);
         }
     }
+
 }

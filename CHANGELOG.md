@@ -1,7 +1,44 @@
+
+## 1.22.0 (12-06-2024)
+
+### Novità: 1
+- [#32708](https://parermine.regione.emilia-romagna.it/issues/32708) Disattivazione PDF/PADES validation security checks (DSS)
+
+## 1.21.0 (10-06-2024)
+
+### Novità: 1
+- [#32690](https://parermine.regione.emilia-romagna.it/issues/32690)  Introduzione di logica centralizzata per invocazione revocation URL via "single client instance" (DSS)
+
+## 1.20.0 (06-06-2024)
+
+### Novità: 1
+- [#32661](https://parermine.regione.emilia-romagna.it/issues/32661) Ottimizzazione/Re-factor apache client utilizzato per recupero documento da verificare e parametro per disattivazione verifica SSL
+
+## 1.19.0 (31-05-2024)
+
+### Novità: 1
+- [#32644](https://parermine.regione.emilia-romagna.it/issues/32644) Introduzione logging JSON body request
+
+## 1.18.0 (22-05-2024)
+
+### Novità: 1
+- [#32595](https://parermine.regione.emilia-romagna.it/issues/32595) Introduzione Apache basic client "no-retry" per recupero oggetto da object storage
+
+## 1.17.0 (10-04-2024)
+
+### Novità: 2
+- [#31808](https://parermine.regione.emilia-romagna.it/issues/31808) Rilassamento vincoli con verifica OCSP e data certificato antecedenete a quella del responder
+- [#31709](https://parermine.regione.emilia-romagna.it/issues/31709) Gestione migliorata sorgenti revoche (cache / online)
+
 ## 1.16.0 (14-03-2024)
 
 ### Novità: 1
 - [#31419](https://parermine.regione.emilia-romagna.it/issues/31419) Attivazione statistiche per monitoraggio con prometheus
+
+## 1.15.1 (16-02-2024)
+
+### Bugfix: 1
+- [#31275](https://parermine.regione.emilia-romagna.it/issues/31275) Correzione errore PKI su https://elektroninisparasas.lt/LT-TSL.xml
 
 ## 1.15.0 (29-01-2024)
 

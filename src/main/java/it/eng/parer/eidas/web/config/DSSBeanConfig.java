@@ -20,9 +20,11 @@ package it.eng.parer.eidas.web.config;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore.PasswordProtection;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,8 @@ import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
 import eu.europa.esig.dss.spi.x509.aia.AIASource;
 import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
+import eu.europa.esig.dss.spi.x509.revocation.crl.CRLSource;
+import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPSource;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection;
 import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
@@ -74,6 +78,7 @@ import eu.europa.esig.dss.ws.signature.common.RemoteMultipleDocumentsSignatureSe
 import eu.europa.esig.dss.ws.signature.common.RemoteTrustedListSignatureServiceImpl;
 import eu.europa.esig.dss.ws.validation.common.RemoteDocumentValidationService;
 import eu.europa.esig.dss.xades.signature.XAdESService;
+import it.eng.parer.eidas.core.bean.CommonsDataHttpClient;
 import it.eng.parer.eidas.core.bean.CommonsDataLoaderExt;
 import it.eng.parer.eidas.core.bean.OCSPDataLoaderExt;
 import it.eng.parer.eidas.core.service.CustomRemoteDocumentValidationImpl;
@@ -122,7 +127,8 @@ public class DSSBeanConfig {
     @Value("${current.oj.url}")
     private String currentOjUrl;
 
-    @Autowired
+    /* custom DataSource possibile null in case DB is disable by configuration */
+    @Autowired(required = false)
     private DataSource dataSource;
 
     @Autowired(required = false)
@@ -144,38 +150,66 @@ public class DSSBeanConfig {
     @Value("${cache.ocsp.max.next.update:0}")
     private long ocspMaxNextUpdate;
 
+    /* from 5.13 */
+    @Value("${cache.expiration:0}")
+    private long cacheExpiration;
+
     /* custom */
-    @Value("${revoke.data.loading.strategy.crl-first.enabled:true}")
+    @Value("${revoke.data.loading.strategy.crl-first.enabled:false}")
     private boolean revokeDataLoadingStratCrlFirst;
 
     @Value("${revoke.removeExpired.enabled:true}")
     private boolean revokeRemoveExpired;
 
-    @Value("${dataloader.timeoutconnection:60000}")
+    /* in ms (5m) */
+    @Value("${dataloader.timeoutconnection:300000}")
     private int timeoutConnection;
 
-    @Value("${dataloader.timeoutsocket:60000}")
+    /* in ms (5m) */
+    @Value("${dataloader.timeoutsocket:300000}")
     private int timeoutSocket;
 
-    @Value("${dataloader.connectionsmaxtotal:20}")
+    @Value("${dataloader.connectionsmaxtotal:40}")
     private int connectionsMaxTotal;
 
-    @Value("${dataloader.connectionsmaxperroute:2}")
+    @Value("${dataloader.connectionsmaxperroute:4}")
     private int connectionsMaxPerRoute;
 
-    @Value("${dataloader.ldaptimeoutconnection:30000}")
+    /* in ms (5m) */
+    @Value("${dataloader.connectiontimetolive:300000}")
+    private int connectionTimeToLive;
+
+    /* in ms (5m) */
+    @Value("${dataloader.ldaptimeoutconnection:300000}")
     private String ldapTimeoutConnection;
+
+    @Value("${cache.enabled:true}")
+    private boolean cacheEnabled;
+
+    // default empty
+    @Value("${cache.file.path:}")
+    private String cacheFilePath;
+
+    /** CUSTOM HTTP CLIENT ! **/
+    @Bean(initMethod = "init", destroyMethod = "destroy")
+    public CommonsDataHttpClient dataHttpClient() {
+        CommonsDataHttpClient dataClient = new CommonsDataHttpClient();
+        // NOTA timeout impostabile (da configurazione!)
+        dataClient.setTimeoutConnection(timeoutConnection);
+        dataClient.setConnectionsMaxTotal(connectionsMaxTotal);
+        dataClient.setTimeoutSocket(timeoutSocket);
+        //
+        dataClient.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
+        dataClient.setConnectionTimeToLive(connectionTimeToLive);
+        //
+        return dataClient;
+    }
 
     @Bean
     public CommonsDataLoaderExt dataLoader() {
         CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+        dataLoader.setCommonsDataHttpClient(dataHttpClient());
         dataLoader.setProxyConfig(proxyConfig);
-        // NOTA timeout impostabile (da configurazione!)
-        dataLoader.setTimeoutConnection(timeoutConnection);
-        dataLoader.setConnectionsMaxTotal(connectionsMaxTotal);
-        dataLoader.setTimeoutSocket(timeoutSocket);
-        //
-        dataLoader.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
         //
         dataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
         return dataLoader;
@@ -184,24 +218,28 @@ public class DSSBeanConfig {
     @Bean
     public OCSPDataLoaderExt ocspDataLoader() {
         OCSPDataLoaderExt ocspDataLoader = new OCSPDataLoaderExt();
+        ocspDataLoader.setCommonsDataHttpClient(dataHttpClient());
         ocspDataLoader.setProxyConfig(proxyConfig);
-        // NOTA timeout impostabile (da configurazione!)
-        ocspDataLoader.setTimeoutConnection(timeoutConnection);
-        ocspDataLoader.setConnectionsMaxTotal(connectionsMaxTotal);
-        ocspDataLoader.setTimeoutSocket(timeoutSocket);
-        //
-        ocspDataLoader.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
-        //
         ocspDataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
         return ocspDataLoader;
     }
 
+    /* from 5.13 */
     @Bean
     public FileCacheDataLoader fileCacheDataLoader() {
+        FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+        fileCacheDataLoader.setCacheExpirationTime(cacheExpiration * 1000); // to millis
+        return fileCacheDataLoader;
+    }
+
+    private FileCacheDataLoader initFileCacheDataLoader() {
         FileCacheDataLoader fileCacheDataLoader = new FileCacheDataLoader();
         fileCacheDataLoader.setDataLoader(dataLoader());
         // Per default uses "java.io.tmpdir" property
         // fileCacheDataLoader.setFileCacheDirectory(new File("/tmp"));
+        if (StringUtils.isNotBlank(cacheFilePath)) {
+            fileCacheDataLoader.setFileCacheDirectory(new File(cacheFilePath));
+        }
         return fileCacheDataLoader;
     }
 
@@ -213,55 +251,136 @@ public class DSSBeanConfig {
     }
 
     /*
-     * destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che vengano create le tabelle ma
-     * non si vuole dropparle non appena il processo viene interrotto
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
+     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
+     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * 
+     * Visit
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
+     * config/DSSBeanConfig.java
+     * 
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
-    @Bean(initMethod = "initTable")
-    public JdbcCacheCRLSource cachedCRLSource() {
-        JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
-        jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
-        jdbcCacheCRLSource.setProxySource(onlineCRLSource());
-        jdbcCacheCRLSource.setDefaultNextUpdateDelay(crlDefaultNextUpdate); // 0 (get new one every time)
-        jdbcCacheCRLSource.setMaxNextUpdateDelay(crlMaxNextUpdate); // 0 (get new one every time)
-        // default = true
-        // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-        jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
-        return jdbcCacheCRLSource;
+    @Bean
+    public CRLSource defineCRLSource() {
+        if (cacheEnabled) {
+            if (dataSource != null) {
+                JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
+                jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
+                jdbcCacheCRLSource.setProxySource(onlineCRLSource());
+                jdbcCacheCRLSource.setDefaultNextUpdateDelay(crlDefaultNextUpdate); // 0 (get new one every time)
+                jdbcCacheCRLSource.setMaxNextUpdateDelay(crlMaxNextUpdate); // 0 (get new one every time)
+                // default = true
+                // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
+                jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
+                // create table if not exits
+                try {
+                    jdbcCacheCRLSource.initTable();
+                } catch (SQLException e) {
+                    throw new DSSException("Errore inizializzazione CRL JDBC cache", e);
+                }
+                return jdbcCacheCRLSource;
+            }
+            OnlineCRLSource onlineCRLSource = onlineCRLSource();
+            FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+            fileCacheDataLoader.setCacheExpirationTime(crlMaxNextUpdate * 1000); // to millis
+            onlineCRLSource.setDataLoader(fileCacheDataLoader);
+            return onlineCRLSource;
+        } else {
+            return onlineCRLSource();
+        }
+
     }
 
     @Bean
-    public OnlineOCSPSource onlineOcspSource() {
+    public OnlineOCSPSource onlineOCSPSource() {
         OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
         onlineOCSPSource.setDataLoader(ocspDataLoader());
         return onlineOCSPSource;
     }
 
     /*
-     * destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che vengano create le tabelle ma
-     * non si vuole dropparle non appena il processo viene interrotto
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
+     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
+     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * 
+     * Visit
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
+     * config/DSSBeanConfig.java
+     * 
+     * 
      */
-    /* from 5.6 */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
-    @Bean(initMethod = "initTable")
-    public JdbcCacheOCSPSource cachedOCSPSource() {
-        JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
-        jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
-        jdbcCacheOCSPSource.setProxySource(onlineOcspSource());
-        jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
-        jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
-        // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-        jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
-        return jdbcCacheOCSPSource;
+    @Bean
+    public OCSPSource defineOCSPSource() {
+        if (cacheEnabled) {
+            if (dataSource != null) {
+                JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
+                jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
+                jdbcCacheOCSPSource.setProxySource(onlineOCSPSource());
+                jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
+                jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
+                // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
+                jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
+                try {
+                    jdbcCacheOCSPSource.initTable();
+                } catch (SQLException e) {
+                    throw new DSSException("Errore inizializzazione OCSP JDBC cache", e);
+                }
+                return jdbcCacheOCSPSource;
+            }
+            OnlineOCSPSource onlineOCSPSource = onlineOCSPSource();
+            FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+            fileCacheDataLoader.setDataLoader(ocspDataLoader());
+            fileCacheDataLoader.setCacheExpirationTime(ocspMaxNextUpdate * 1000); // to millis
+            onlineOCSPSource.setDataLoader(fileCacheDataLoader);
+            return onlineOCSPSource;
+        } else {
+            return onlineOCSPSource();
+        }
+    }
+
+    /*
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
+     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
+     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * 
+     * 
+     * Visit
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
+     * config/DSSBeanConfig.java
+     * 
+     */
+    // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
+    @Bean
+    public AIASource defineAIASource() {
+        if (cacheEnabled) {
+            if (dataSource != null) {
+                JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
+                jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
+                jdbcCacheAIASource.setProxySource(onlineAIASource());
+                return jdbcCacheAIASource;
+            }
+            FileCacheDataLoader fileCacheDataLoader = fileCacheDataLoader();
+            return new DefaultAIASource(fileCacheDataLoader);
+        } else {
+            return onlineAIASource();
+        }
+    }
+
+    @Bean
+    public AIASource onlineAIASource() {
+        return new DefaultAIASource(dataLoader());
     }
 
     /* from 5.8 */
     @Bean
     public CertificateVerifier certificateVerifier() {
         CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        certificateVerifier.setCrlSource(cachedCRLSource());
-        certificateVerifier.setOcspSource(cachedOCSPSource());
-        certificateVerifier.setAIASource(cachedAIASource());
+        /* manage source */
+        certificateVerifier.setCrlSource(defineCRLSource());
+        certificateVerifier.setOcspSource(defineOCSPSource());
+        certificateVerifier.setAIASource(defineAIASource());
         certificateVerifier.setTrustedCertSources(trustedListSource());
 
         // Default configs
@@ -455,7 +574,8 @@ public class DSSBeanConfig {
     /* from 5.8 */
     @Bean
     public CommonsDataLoader trustAllDataLoader() {
-        CommonsDataLoader dataLoader = new CommonsDataLoader();
+        CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+        dataLoader.setCommonsDataHttpClient(dataHttpClient());
         dataLoader.setProxyConfig(proxyConfig);
         dataLoader.setTrustStrategy(new TrustAllStrategy());
         return dataLoader;
@@ -469,25 +589,6 @@ public class DSSBeanConfig {
         SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
         sslCertificateLoader.setCommonsDataLoader(trustAllDataLoader());
         return sslCertificateLoader;
-    }
-
-    /*
-     * destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che vengano create le tabelle ma
-     * non si vuole dropparle non appena il processo viene interrotto
-     */
-    /* from 5.10.1 */
-    // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
-    @Bean(initMethod = "initTable")
-    public JdbcCacheAIASource cachedAIASource() {
-        JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
-        jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
-        jdbcCacheAIASource.setProxySource(onlineAIASource());
-        return jdbcCacheAIASource;
-    }
-
-    @Bean
-    public AIASource onlineAIASource() {
-        return new DefaultAIASource(dataLoader());
     }
 
     @Bean

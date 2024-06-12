@@ -1,4 +1,4 @@
-## 1.16.0 (14-03-2024)
+## 1.22.0 (12-06-2024)
 
 ### Novità: 1
-- [#31419](https://parermine.regione.emilia-romagna.it/issues/31419) Attivazione statistiche per monitoraggio con prometheus
+- [#32708](https://parermine.regione.emilia-romagna.it/issues/32708) Disattivazione PDF/PADES validation security checks (DSS)
