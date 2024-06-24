@@ -45,6 +45,11 @@ import eu.europa.esig.dss.enumerations.TokenExtractionStrategy;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.pades.validation.PDFDocumentValidator;
+import eu.europa.esig.dss.pdf.IPdfObjFactory;
+import eu.europa.esig.dss.pdf.ServiceLoaderPdfObjFactory;
+import eu.europa.esig.dss.pdf.modifications.DefaultPdfDifferencesFinder;
+import eu.europa.esig.dss.pdf.modifications.DefaultPdfObjectModificationsFinder;
 import eu.europa.esig.dss.policy.ValidationPolicy;
 import eu.europa.esig.dss.policy.ValidationPolicyFacade;
 import eu.europa.esig.dss.policy.jaxb.Level;
@@ -511,7 +516,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         /**
          * Vedi issue <a>https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/issues/7</a>
          * 
-         * Per il momento il validation report non viene restituito al client
+         * Per il momento il validation report non viene restituito al dataHttpClient
          */
         WSReportsDTO wsdto = new WSReportsDTO(reports.getDiagnosticDataJaxb(), reports.getSimpleReportJaxb(),
                 reports.getDetailedReportJaxb());
@@ -636,6 +641,10 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             signedDocValidator.setIncludeSemantics(dataToValidateMetadata.isIncludeSemanticTokenValues());
             //
             signedDocValidator.setCertificateVerifier(verifier);
+
+            //
+            disablePDFComparisonsCheck(signedDocValidator);
+
             log.atDebug().log("Signed Document Validator created class name: {}",
                     signedDocValidator.getClass().getName());
             return signedDocValidator;
@@ -644,6 +653,34 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
                     .withMessage("Formato del documento non riconosciuto / gestito");
         }
 
+    }
+
+    /*
+     * PdfObjectModificationsFinder customization
+     * 
+     * check :
+     * https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#DisablingPdfComparison
+     */
+    private void disablePDFComparisonsCheck(SignedDocumentValidator signedDocValidator) {
+        if (signedDocValidator instanceof PDFDocumentValidator pdfDocumentValidator) {
+            // Create a IPdfObjFactory
+            IPdfObjFactory pdfObjFactory = new ServiceLoaderPdfObjFactory();
+
+            // Configure DefaultPdfDifferencesFinder responsible for visual document comparison
+            DefaultPdfDifferencesFinder pdfDifferencesFinder = new DefaultPdfDifferencesFinder();
+            // NOTE: To skip the visual comparison '0' value should be set
+            pdfDifferencesFinder.setMaximalPagesAmountForVisualComparison(0);
+            pdfObjFactory.setPdfDifferencesFinder(pdfDifferencesFinder);
+
+            // Configure DefaultPdfObjectModificationsFinder responsible for object comparison between PDF revisions
+            DefaultPdfObjectModificationsFinder pdfObjectModificationsFinder = new DefaultPdfObjectModificationsFinder();
+            // NOTE: To skip the visual comparison '0' value should be set
+            pdfObjectModificationsFinder.setMaximumObjectVerificationDeepness(0);
+            pdfObjFactory.setPdfObjectModificationsFinder(pdfObjectModificationsFinder);
+
+            // Set the factory to the DocumentValidator
+            pdfDocumentValidator.setPdfObjFactory(pdfObjFactory);
+        }
     }
 
 }

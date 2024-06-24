@@ -18,8 +18,10 @@
 package it.eng.parer.eidas.web.config;
 
 import static it.eng.parer.eidas.core.util.Constants.STD_MSG_APP_ERROR;
+import static it.eng.parer.eidas.core.util.Constants.STD_MSG_APP_WARN;
 import static it.eng.parer.eidas.core.util.Constants.STD_MSG_GENERIC_ERROR;
 import static it.eng.parer.eidas.core.util.Constants.STD_MSG_VALIDATION_ERROR;
+import static it.eng.parer.eidas.model.exception.ParerError.ErrorCode.EIDAS_ERROR;
 
 import java.util.Arrays;
 
@@ -54,16 +56,22 @@ public class AdviceHandler {
 
     /*
      * Aggiunto log al fine di loggare i casi di generiche eccezioni ossia generate dopo l'esecuzione del servizio di
-     * verifica firma (o prima quando si valuta la risposta del client), ma che comunque in generale non sono gestite
-     * (EidasParerException) all'interno dell'implementazione dell'endpoint.
+     * verifica firma (o prima quando si valuta la risposta del dataHttpClient), ma che comunque in generale non sono
+     * gestite (EidasParerException) all'interno dell'implementazione dell'endpoint.
      */
     private static final Logger log = LoggerFactory.getLogger(AdviceHandler.class);
 
     @ExceptionHandler(EidasParerException.class)
     public final ResponseEntity<RestExceptionResponse> handleEidasParerException(EidasParerException ex,
             WebRequest request) {
-        // log error
-        log.atError().log(STD_MSG_APP_ERROR, ex);
+        // log code based
+        if (ex.getCode().equals(EIDAS_ERROR)) {
+            // log warn
+            log.atWarn().log(STD_MSG_APP_WARN, ex);
+        } else {
+            // log error
+            log.atError().log(STD_MSG_APP_ERROR, ex);
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(RestUtil.buildParerResponseEntity(ex, request), headers,

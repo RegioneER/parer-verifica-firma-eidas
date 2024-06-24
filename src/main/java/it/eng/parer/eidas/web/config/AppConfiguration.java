@@ -91,7 +91,7 @@ public class AppConfiguration implements WebMvcConfigurer {
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(
                 mapper);
-        // Aggiungo i media type text/plain per supportare client come jmeter
+        // Aggiungo i media type text/plain per supportare dataHttpClient come jmeter
         List<MediaType> supportedMediaTypes = new ArrayList<>(
                 mappingJackson2HttpMessageConverter.getSupportedMediaTypes());
         supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
