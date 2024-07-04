@@ -40,6 +40,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -118,6 +119,29 @@ public class EidasHelper {
     // default 3 s
     @Value("${parer.eidas.uriloader.webclient.backofftime:3}")
     long webClientBackoffTime;
+
+    /*
+     * Standard httpclient
+     */
+    // default 60 s
+    @Value("${parer.eidas.uriloader.httpclient.timeout:60}")
+    long httpClientTimeout;
+
+    // default 60 s
+    @Value("${parer.eidas.uriloader.httpclient.timeoutsocket:60}")
+    int httpClientSocketTimeout;
+
+    // default 4
+    @Value("${parer.eidas.uriloader.httpclient.connectionsmaxperroute:4}")
+    int httpClientConnectionsmaxperroute;
+
+    // default 40
+    @Value("${parer.eidas.uriloader.httpclient.connectionsmax:40}")
+    int httpClientConnectionsmax;
+
+    // default 60s
+    @Value("${parer.eidas.uriloader.httpclient.timetolive:60}")
+    long httpClientTimeToLive;
 
     public String buildversion() {
         return env.getProperty(BUILD_VERSION);
