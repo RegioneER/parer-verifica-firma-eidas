@@ -6,7 +6,8 @@ on:
       - '*' # every new tag
   pull_request:
     branches:
-      - main      
+      - main
+      - master
 jobs:
   release:
     uses: RegioneER/parer-github-template/.github/workflows/github-release.yml@v1
