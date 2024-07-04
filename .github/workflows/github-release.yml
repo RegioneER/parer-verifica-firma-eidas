@@ -1,9 +1,11 @@
 name: GitHub Release
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
+      - main
       - master
-      - main        
 jobs:
   release:
     uses: RegioneER/parer-github-template/.github/workflows/github-release.yml@v1
