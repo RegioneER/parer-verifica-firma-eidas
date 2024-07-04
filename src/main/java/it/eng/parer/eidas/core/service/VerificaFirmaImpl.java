@@ -36,8 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import it.eng.parer.eidas.core.helper.EidasHelper;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
-import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.EidasRemoteDocument;
+import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
 import jakarta.servlet.http.HttpServletRequest;
@@ -205,12 +205,12 @@ public class VerificaFirmaImpl implements IVerificaFirma {
                 // set file path
                 policyDocumentExt.setAbsolutePath(validationPolicyPath.toAbsolutePath().toString());
             }
-        } catch (IOException ex) {
+        } catch (IOException ioex) {
             // clean from files
             helper.deleteTmpDocExtFiles(dataToValidateDTO.getRemoteSignedDocument(),
                     dataToValidateDTO.getRemoteOriginalDocuments(), dataToValidateDTO.getPolicyExt());
 
-            throw new EidasParerException(dataToValidateDTO, ex).withCode(ParerError.ErrorCode.IO_ERROR)
+            throw new EidasParerException(dataToValidateDTO, ioex).withCode(ParerError.ErrorCode.IO_ERROR)
                     .withMessage("Errore durante elaborazione richiesta");
         }
     }

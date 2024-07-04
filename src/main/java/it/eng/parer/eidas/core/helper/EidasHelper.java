@@ -51,10 +51,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.Detector;
@@ -102,6 +98,9 @@ public class EidasHelper {
 
     @Autowired
     BuildProperties buildProperties;
+
+    @Autowired
+    ApacheClientHelper apacheClientHelper;
 
     @Value("${parer.eidas.uriloader.client-type:httpclient}")
     URIClientType uRIClientType;
@@ -447,23 +446,12 @@ public class EidasHelper {
     }
 
     private void getWithCommonHttpclient(URI signedResource, Path localPath) throws IOException {
-        // config
-        ConnectionConfig connConfig = ConnectionConfig.custom().setTimeToLive(httpClientTimeToLive, TimeUnit.SECONDS)
-                .setSocketTimeout(httpClientSocketTimeout, TimeUnit.SECONDS)
-                .setConnectTimeout(httpClientTimeout, TimeUnit.SECONDS).build();
 
-        // pool manager
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultConnectionConfig(connConfig); // set config
-        connManager.setDefaultMaxPerRoute(httpClientConnectionsmaxperroute);
-        connManager.setMaxTotal(httpClientConnectionsmax);
-
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connManager).build();
-                FileOutputStream out = new FileOutputStream(localPath.toFile());) {
+        try (ClassicHttpResponse response = apacheClientHelper.client().executeOpen(null, new HttpGet(signedResource),
+                null); FileOutputStream out = new FileOutputStream(localPath.toFile());) {
             //
-            ClassicHttpResponse response = httpClient.executeOpen(null, new HttpGet(signedResource), null);
             IOUtils.copy(response.getEntity().getContent(), out);
         }
-
     }
+
 }

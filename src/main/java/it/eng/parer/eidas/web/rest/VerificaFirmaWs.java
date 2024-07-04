@@ -64,7 +64,6 @@ public class VerificaFirmaWs {
 
     private static final Logger log = LoggerFactory.getLogger(VerificaFirmaWs.class);
 
-    
     /* constants */
     private static final String ETAG = "RVv1.0";
 
@@ -106,8 +105,8 @@ public class VerificaFirmaWs {
         // LOG UUID
         MDC.put(Constants.UUID_LOG_MDC, metadata.getUuid());
         // LOG BODY
-        if (log.isDebugEnabled()){ 
-            log.atDebug().log("RequestBody {}",  new JSONObject(metadata).toString());
+        if (log.isDebugEnabled()) {
+            log.atDebug().log("RequestBody {}", new JSONObject(metadata).toString());
         }
         EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
         return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG).body(body);
