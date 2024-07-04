@@ -1,5 +1,4 @@
-## 1.17.0 (10-04-2024)
+## 1.18.0 (22-05-2024)
 
-### Novità: 2
-- [#31808](https://parermine.regione.emilia-romagna.it/issues/31808) Rilassamento vincoli con verifica OCSP e data certificato antecedenete a quella del responder
-- [#31709](https://parermine.regione.emilia-romagna.it/issues/31709) Gestione migliorata sorgenti revoche (cache / online)
+### Novità: 1
+- [#32595](https://parermine.regione.emilia-romagna.it/issues/32595) Introduzione Apache basic client "no-retry" per recupero oggetto da object storage

@@ -1,8 +1,10 @@
 ## Container scan evidence CVE
 <strong>Image name:</strong> registry.ente.regione.emr.it/parer/okd/verifica-firma-eidas:sast
-<br/><strong>Run date:</strong> Wed Apr 10 16:45:14 CEST 2024
-<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/216130">Job</a>
-<br/><strong>CVE founded:</strong> 1
+<br/><strong>Run date:</strong> Wed May 22 15:30:46 CEST 2024
+<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/243866">Job</a>
+<br/><strong>CVE founded:</strong> 3
 | CVE | Description | Severity | Solution | 
 |:---:|:---|:---:|:---|
-| [CVE-2024-28182](https://access.redhat.com/security/cve/CVE-2024-28182)|A vulnerability was found in how nghttp2 implements the HTTP/2 protocol. There are insufficient limitations placed on the amount of CONTINUATION frames that can be sent within a single stream. This issue could allow an unauthenticated remote attacker to send packets to vulnerable servers, which could use up compute or memory resources to cause a Denial of Service.|High|No solution provided|
+| [CVE-2024-2961](http://www.openwall.com/lists/oss-security/2024/04/17/9)|The iconv() function in the GNU C Library versions 2.39 and older may overflow the output buffer passed to it by up to 4 bytes when converting strings to the ISO-2022-CN-EXT character set, which may be used to crash an application or overwrite a neighbouring variable.|High|Upgrade glibc to 2.28-236.el8_9.13|
+| [CVE-2024-2961](http://www.openwall.com/lists/oss-security/2024/04/17/9)|The iconv() function in the GNU C Library versions 2.39 and older may overflow the output buffer passed to it by up to 4 bytes when converting strings to the ISO-2022-CN-EXT character set, which may be used to crash an application or overwrite a neighbouring variable.|High|Upgrade glibc-common to 2.28-236.el8_9.13|
+| [CVE-2024-2961](http://www.openwall.com/lists/oss-security/2024/04/17/9)|The iconv() function in the GNU C Library versions 2.39 and older may overflow the output buffer passed to it by up to 4 bytes when converting strings to the ISO-2022-CN-EXT character set, which may be used to crash an application or overwrite a neighbouring variable.|High|Upgrade glibc-minimal-langpack to 2.28-236.el8_9.13|
