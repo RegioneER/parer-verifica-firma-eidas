@@ -1,9 +1,6 @@
 name: GitHub Release
 on:
   push:
-    # Pattern matched against refs/tags
-    tags:        
-      - '*' # every new tag
     branches:
       - master
       - main        
