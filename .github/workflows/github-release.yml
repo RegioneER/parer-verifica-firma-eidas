@@ -1,9 +1,9 @@
 name: GitHub Release
 on:
-  push:
-    # Pattern matched against refs/tags
-    tags:        
-      - '*' # every new tag  
+  pull_request:
+    branches:
+      - main
+      - master
 jobs:
   release:
     uses: RegioneER/parer-github-template/.github/workflows/github-release.yml@v1
