@@ -195,7 +195,7 @@ public class CommonsDataHttpClient implements Serializable {
     }
 
     /**
-     *  init method
+     * init method
      */
     public void init() {
         if (client == null) {
@@ -203,11 +203,12 @@ public class CommonsDataHttpClient implements Serializable {
         }
     }
 
-   /**
-    * destroy method 
-    * 
-    * @throws IOException generic exception
-    */
+    /**
+     * destroy method
+     * 
+     * @throws IOException
+     *             generic exception
+     */
     public void destroy() throws IOException {
         if (client != null) {
             client.close();
