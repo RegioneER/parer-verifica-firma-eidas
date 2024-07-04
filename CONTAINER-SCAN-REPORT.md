@@ -1,7 +1,7 @@
 ## Container scan evidence CVE
 <strong>Image name:</strong> registry.ente.regione.emr.it/parer/okd/verifica-firma-eidas:sast
-<br/><strong>Run date:</strong> Thu Jun 6 18:35:21 CEST 2024
-<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/257879">Job</a>
+<br/><strong>Run date:</strong> Mon Jun 10 17:26:01 CEST 2024
+<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/261607">Job</a>
 <br/><strong>CVE founded:</strong> 8
 | CVE | Description | Severity | Solution | 
 |:---:|:---|:---:|:---|

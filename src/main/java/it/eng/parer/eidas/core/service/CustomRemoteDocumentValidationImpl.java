@@ -511,7 +511,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
         /**
          * Vedi issue <a>https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/issues/7</a>
          * 
-         * Per il momento il validation report non viene restituito al client
+         * Per il momento il validation report non viene restituito al dataHttpClient
          */
         WSReportsDTO wsdto = new WSReportsDTO(reports.getDiagnosticDataJaxb(), reports.getSimpleReportJaxb(),
                 reports.getDetailedReportJaxb());

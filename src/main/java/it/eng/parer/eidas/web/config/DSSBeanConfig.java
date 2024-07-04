@@ -78,6 +78,7 @@ import eu.europa.esig.dss.ws.signature.common.RemoteMultipleDocumentsSignatureSe
 import eu.europa.esig.dss.ws.signature.common.RemoteTrustedListSignatureServiceImpl;
 import eu.europa.esig.dss.ws.validation.common.RemoteDocumentValidationService;
 import eu.europa.esig.dss.xades.signature.XAdESService;
+import it.eng.parer.eidas.core.bean.CommonsDataHttpClient;
 import it.eng.parer.eidas.core.bean.CommonsDataLoaderExt;
 import it.eng.parer.eidas.core.bean.OCSPDataLoaderExt;
 import it.eng.parer.eidas.core.service.CustomRemoteDocumentValidationImpl;
@@ -160,12 +161,12 @@ public class DSSBeanConfig {
     @Value("${revoke.removeExpired.enabled:true}")
     private boolean revokeRemoveExpired;
 
-    /* in ms */
-    @Value("${dataloader.timeoutconnection:120000}")
+    /* in ms (5m) */
+    @Value("${dataloader.timeoutconnection:300000}")
     private int timeoutConnection;
 
-    /* in ms */
-    @Value("${dataloader.timeoutsocket:120000}")
+    /* in ms (5m) */
+    @Value("${dataloader.timeoutsocket:300000}")
     private int timeoutSocket;
 
     @Value("${dataloader.connectionsmaxtotal:40}")
@@ -174,12 +175,12 @@ public class DSSBeanConfig {
     @Value("${dataloader.connectionsmaxperroute:4}")
     private int connectionsMaxPerRoute;
 
-    /* in ms */
-    @Value("${dataloader.connectiontimetolive:120000}")
+    /* in ms (5m) */
+    @Value("${dataloader.connectiontimetolive:300000}")
     private int connectionTimeToLive;
 
-    /* in ms */
-    @Value("${dataloader.ldaptimeoutconnection:120000}")
+    /* in ms (5m) */
+    @Value("${dataloader.ldaptimeoutconnection:300000}")
     private String ldapTimeoutConnection;
 
     @Value("${cache.enabled:true}")
@@ -189,17 +190,26 @@ public class DSSBeanConfig {
     @Value("${cache.file.path:}")
     private String cacheFilePath;
 
+    /** CUSTOM HTTP CLIENT ! **/
+    @Bean(initMethod = "init", destroyMethod = "destroy")
+    public CommonsDataHttpClient dataHttpClient() {
+        CommonsDataHttpClient dataClient = new CommonsDataHttpClient();
+        // NOTA timeout impostabile (da configurazione!)
+        dataClient.setTimeoutConnection(timeoutConnection);
+        dataClient.setConnectionsMaxTotal(connectionsMaxTotal);
+        dataClient.setTimeoutSocket(timeoutSocket);
+        //
+        dataClient.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
+        dataClient.setConnectionTimeToLive(connectionTimeToLive);
+        //
+        return dataClient;
+    }
+
     @Bean
     public CommonsDataLoaderExt dataLoader() {
         CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+        dataLoader.setCommonsDataHttpClient(dataHttpClient());
         dataLoader.setProxyConfig(proxyConfig);
-        // NOTA timeout impostabile (da configurazione!)
-        dataLoader.setTimeoutConnection(timeoutConnection);
-        dataLoader.setConnectionsMaxTotal(connectionsMaxTotal);
-        dataLoader.setTimeoutSocket(timeoutSocket);
-        //
-        dataLoader.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
-        dataLoader.setConnectionTimeToLive(connectionTimeToLive);
         //
         dataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
         return dataLoader;
@@ -208,14 +218,8 @@ public class DSSBeanConfig {
     @Bean
     public OCSPDataLoaderExt ocspDataLoader() {
         OCSPDataLoaderExt ocspDataLoader = new OCSPDataLoaderExt();
+        ocspDataLoader.setCommonsDataHttpClient(dataHttpClient());
         ocspDataLoader.setProxyConfig(proxyConfig);
-        // NOTA timeout impostabile (da configurazione!)
-        ocspDataLoader.setTimeoutConnection(timeoutConnection);
-        ocspDataLoader.setConnectionsMaxTotal(connectionsMaxTotal);
-        ocspDataLoader.setTimeoutSocket(timeoutSocket);
-        //
-        ocspDataLoader.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
-        //
         ocspDataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
         return ocspDataLoader;
     }
@@ -570,7 +574,8 @@ public class DSSBeanConfig {
     /* from 5.8 */
     @Bean
     public CommonsDataLoader trustAllDataLoader() {
-        CommonsDataLoader dataLoader = new CommonsDataLoader();
+        CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+        dataLoader.setCommonsDataHttpClient(dataHttpClient());
         dataLoader.setProxyConfig(proxyConfig);
         dataLoader.setTrustStrategy(new TrustAllStrategy());
         return dataLoader;

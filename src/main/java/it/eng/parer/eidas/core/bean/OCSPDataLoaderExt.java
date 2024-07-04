@@ -17,8 +17,14 @@
 
 package it.eng.parer.eidas.core.bean;
 
+import java.io.IOException;
+
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.europa.esig.dss.service.http.commons.OCSPDataLoader;
-import it.eng.parer.eidas.core.util.Constants;
 
 public class OCSPDataLoaderExt extends OCSPDataLoader implements CustomDataLoaderExt {
 
@@ -27,7 +33,12 @@ public class OCSPDataLoaderExt extends OCSPDataLoader implements CustomDataLoade
      */
     private static final long serialVersionUID = 2497778964600711396L;
 
-    private String ldapTimeoutConnection = Constants.TIMEOUT_LDAP_CONNECTION;
+    private static final Logger LOG = LoggerFactory.getLogger(OCSPDataLoaderExt.class);
+
+    private String ldapTimeoutConnection = TIMEOUT_LDAP_CONNECTION;
+
+    /** The Commons HTTP dataHttpClient */
+    private CommonsDataHttpClient dataHttpClient;
 
     /**
      * Extendend OCSPDataLoader method, not implemented TIMEOUT on LDAP call
@@ -53,6 +64,38 @@ public class OCSPDataLoaderExt extends OCSPDataLoader implements CustomDataLoade
 
     public void setLdapTimeoutConnection(String ldapTimeoutConnection) {
         this.ldapTimeoutConnection = ldapTimeoutConnection;
+    }
+
+    /* HTTP GET */
+    @Override
+    protected byte[] httpGet(String url) {
+        return customHttpGet(url);
+    }
+
+    /* HTTP POST */
+    @Override
+    public byte[] post(String url, byte[] content) {
+        return customPost(url, content);
+    }
+
+    @Override
+    public byte[] execute(CloseableHttpClient client, HttpUriRequest httpRequest) throws IOException {
+        return super.execute(client, httpRequest);
+    }
+
+    @Override
+    public void setCommonsDataHttpClient(CommonsDataHttpClient dataHttpClient) {
+        this.dataHttpClient = dataHttpClient;
+    }
+
+    @Override
+    public CommonsDataHttpClient getCommonsDataHttpClient() {
+        return dataHttpClient;
+    }
+
+    @Override
+    public Logger logger() {
+        return LOG;
     }
 
 }
