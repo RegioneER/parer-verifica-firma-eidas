@@ -161,11 +161,11 @@ public class DSSBeanConfig {
     private boolean revokeRemoveExpired;
 
     /* in ms */
-    @Value("${dataloader.timeoutconnection:1200000}")
+    @Value("${dataloader.timeoutconnection:120000}")
     private int timeoutConnection;
 
     /* in ms */
-    @Value("${dataloader.timeoutsocket:1200000}")
+    @Value("${dataloader.timeoutsocket:120000}")
     private int timeoutSocket;
 
     @Value("${dataloader.connectionsmaxtotal:40}")
@@ -175,11 +175,11 @@ public class DSSBeanConfig {
     private int connectionsMaxPerRoute;
 
     /* in ms */
-    @Value("${dataloader.connectiontimetolive:1200000}")
+    @Value("${dataloader.connectiontimetolive:120000}")
     private int connectionTimeToLive;
 
     /* in ms */
-    @Value("${dataloader.ldaptimeoutconnection:1200000}")
+    @Value("${dataloader.ldaptimeoutconnection:120000}")
     private String ldapTimeoutConnection;
 
     @Value("${cache.enabled:true}")
