@@ -45,4 +45,7 @@ public class Constants {
     public static final String STD_MSG_GENERIC_ERROR = "Errore generico";
     public static final String STD_MSG_VALIDATION_ERROR = "Chiamata non valida";
 
+    public enum URIClientType {
+        HTTPCLIENT, WEBCLIENT
+    }
 }
