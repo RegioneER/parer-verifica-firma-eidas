@@ -1,0 +1,9 @@
+name: GitHub Release
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+jobs:
+  release:
+    uses: RegioneER/parer-github-template/.github/workflows/github-release.yml@v1
