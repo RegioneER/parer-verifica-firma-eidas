@@ -41,6 +41,7 @@ public class Constants {
 
     /* default error message on advice handler */
     public static final String STD_MSG_APP_ERROR = "Errore applicativo";
+    public static final String STD_MSG_APP_WARN = "Avviso errore";
     public static final String STD_MSG_GENERIC_ERROR = "Errore generico";
     public static final String STD_MSG_VALIDATION_ERROR = "Chiamata non valida";
 

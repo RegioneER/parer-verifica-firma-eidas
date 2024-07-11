@@ -1,3 +1,19 @@
+/*
+ * Engineering Ingegneria Informatica S.p.A.
+ *
+ * Copyright (C) 2023 Regione Emilia-Romagna
+ * <p/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of
+ * the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ * <p/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ * <p/>
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package it.eng.parer.eidas.core.bean;
 
@@ -763,8 +779,9 @@ public class CommonsDataHttpClient implements Serializable {
         final PoolingHttpClientConnectionManager connectionManager = builder.build();
         connectionManager.setDefaultConnectionConfig(connectionConfigBuilder.build());
 
-        LOG.debug("PoolingHttpClientConnectionManager: max total: {}", connectionManager.getMaxTotal());
-        LOG.debug("PoolingHttpClientConnectionManager: max per route: {}", connectionManager.getDefaultMaxPerRoute());
+        LOG.atDebug().log("PoolingHttpClientConnectionManager: max total: {}", connectionManager.getMaxTotal());
+        LOG.atDebug().log("PoolingHttpClientConnectionManager: max per route: {}",
+                connectionManager.getDefaultMaxPerRoute());
 
         return connectionManager;
     }
@@ -782,22 +799,22 @@ public class CommonsDataHttpClient implements Serializable {
 
             final TrustStrategy trustStrategy = getTrustStrategy();
             if (trustStrategy != null) {
-                LOG.debug("Set the TrustStrategy");
+                LOG.atDebug().log("Set the TrustStrategy");
                 sslContextBuilder.loadTrustMaterial(null, trustStrategy);
             }
 
             final KeyStore sslTrustStore = getSSLTrustStore();
             if (sslTrustStore != null) {
-                LOG.debug("Set the SSL trust store as trust materials");
+                LOG.atDebug().log("Set the SSL trust store as trust materials");
                 sslContextBuilder.loadTrustMaterial(sslTrustStore, trustStrategy);
             }
 
             final KeyStore sslKeystore = getSSLKeyStore();
             if (sslKeystore != null) {
-                LOG.debug("Set the SSL keystore as key materials");
+                LOG.atDebug().log("Set the SSL keystore as key materials");
                 sslContextBuilder.loadKeyMaterial(sslKeystore, sslKeystorePassword);
                 if (loadKeyStoreAsTrustMaterial) {
-                    LOG.debug("Set the SSL keystore as trust materials");
+                    LOG.atDebug().log("Set the SSL keystore as trust materials");
                     sslContextBuilder.loadTrustMaterial(sslKeystore, trustStrategy);
                 }
             }

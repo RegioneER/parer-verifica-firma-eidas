@@ -1,4 +1,14 @@
 
+## 1.22.1 (24-06-2024)
+
+### Bugfix: 1
+- [#32811](https://parermine.regione.emilia-romagna.it/issues/32811)  Correzione gestione "log level error" nei casi di errori "non previsti" da "gestiti in verifica firma digitale"
+
+## 1.22.0 (12-06-2024)
+
+### Novità: 1
+- [#32708](https://parermine.regione.emilia-romagna.it/issues/32708) Disattivazione PDF/PADES validation security checks (DSS)
+
 ## 1.21.0 (10-06-2024)
 
 ### Novità: 1

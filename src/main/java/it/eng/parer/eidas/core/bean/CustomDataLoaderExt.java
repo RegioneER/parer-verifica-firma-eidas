@@ -120,7 +120,7 @@ public interface CustomDataLoaderExt {
     /* apache dataHttpClient management */
 
     default byte[] customPost(String url, byte[] content) {
-        logger().debug("Fetching data via POST from url {}", url);
+        logger().atDebug().log("Fetching data via POST from url {}", url);
 
         HttpPost httpRequest = null;
         // The length for the InputStreamEntity is needed, because some receivers (on
@@ -156,6 +156,8 @@ public interface CustomDataLoaderExt {
     }
 
     default byte[] customHttpGet(String url) {
+        logger().atDebug().log("Fetching data via GET from url {}", url);
+
         HttpGet httpRequest = null;
 
         try {
@@ -189,7 +191,7 @@ public interface CustomDataLoaderExt {
     public Logger logger();
 
     /*
-     * define standard getter & setter (inherint from {@link CommonsDataLoader})
+     * define standard getter & setter (inherit from {@link CommonsDataLoader})
      */
 
     public byte[] execute(final CloseableHttpClient client, final HttpUriRequest httpRequest) throws IOException;

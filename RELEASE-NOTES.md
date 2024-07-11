@@ -1,4 +1,4 @@
-## 1.21.0 (10-06-2024)
+## 1.22.1 (24-06-2024)
 
-### Novità: 1
-- [#32690](https://parermine.regione.emilia-romagna.it/issues/32690)  Introduzione di logica centralizzata per invocazione revocation URL via "single client instance" (DSS)
+### Bugfix: 1
+- [#32811](https://parermine.regione.emilia-romagna.it/issues/32811)  Correzione gestione "log level error" nei casi di errori "non previsti" da "gestiti in verifica firma digitale"
