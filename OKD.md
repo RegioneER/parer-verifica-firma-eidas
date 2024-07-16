@@ -216,4 +216,3 @@ Sono inoltre configurati i due probe per liveness e readiness:
 # Conclusioni
 
 Sulla base delle rotte impostate, l'applicazione sarà raggiungibile su indirizzo del tipo https://verifica-firma-eidas-svil.parer-apps.ente.regione.emr.it/.
-
