@@ -16,7 +16,7 @@
  */
 
 /**
- * 
+ *
  */
 package it.eng.parer.eidas.core.service;
 
@@ -31,7 +31,7 @@ public interface ICustomRemoteDocumentValidation {
 
     /**
      * Definisce il CertificateVerifier di riferimento
-     * 
+     *
      * @param verifier
      *            oggetto standard DSS CertificateVerifier
      */
@@ -42,7 +42,7 @@ public interface ICustomRemoteDocumentValidation {
      * policy/constraint.xml di default rilasciato con le librerie DSS Scenario 2 : possibile effettuare diversa
      * configurazione attraverso un file xml implementato secondo specificia EIDAS, supportato il caricamento da
      * filesystem e via classloading (e.g. file su classpath o su resources)
-     * 
+     *
      * @param defaultValidationPolicy
      *            risorsa con file di constraint da utilizzare
      */

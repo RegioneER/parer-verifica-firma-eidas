@@ -30,11 +30,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /*
- * since spring boot 2.7.0 
+ * since spring boot 3.x
  * https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
- * 
+ *
  * Note: questa configurazione (default) gestisce la sicurezza legata alla API/UI esposte
- * Le regole su URI pattern match definiscono la "catena" dei permessi, quindi l'ordine è importante.  
+ * Le regole su URI pattern match definiscono la "catena" dei permessi, quindi l'ordine è importante.
  */
 @Configuration
 @ConditionalOnProperty(name = "parer.eidas.admin-ui.enabled", havingValue = "true", matchIfMissing = true)
@@ -56,7 +56,7 @@ public class BaseSecurityConfig {
                                                                                                                // admin
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()) // permit
                                                                                                                 // all
-                .formLogin(formLogin -> formLogin.defaultSuccessUrl(URL_ADMIN_BASE).permitAll()) // login
+                .formLogin(formLogin -> formLogin.defaultSuccessUrl(URL_ADMIN_BASE).permitAll()) // login form
                 .logout(logout -> logout.deleteCookies("JSESSIONID").logoutSuccessUrl("/").permitAll()); // logout
         /*
          * h2 console https://springframework.guru/using-the-h2-database-console-in-spring-boot- with-spring-security/

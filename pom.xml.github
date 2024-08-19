@@ -2,16 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.23.0</version>
+	<version>1.22.2-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
-	<url>https://nexus.ente.regione.emr.it/repository/parer-site/verifica-firma-eidas/${project.version}/</url>
 
 	<parent>
 		<groupId>it.eng.parer</groupId>
 		<artifactId>parer-pom</artifactId>
-		<version>6.4.0</version>
+		<version>5.2.1</version>
 	</parent>
 
     <properties>
@@ -23,38 +22,44 @@
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
 		<dss.version>5.13</dss.version>
-		<springboot.version>3.3.1</springboot.version>
-		<springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>		
+		<springboot.version>3.1.7</springboot.version>
+		<springdoc-openapi-starter-webmvc-ui.version>2.1.0</springdoc-openapi-starter-webmvc-ui.version>		
 		<logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-		<tika.version>2.9.2</tika.version>
-		<jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
-		<httpcore5.version>5.2.5</httpcore5.version>
+		<tika.version>2.8.0</tika.version>
+		<jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
+		<httpcore5.version>5.2.2</httpcore5.version>
 		<jaxb-api.version>2.3.1</jaxb-api.version>
-		<bootstrap.version>4.6.2</bootstrap.version>
-		<popper.js.version>1.16.1</popper.js.version>
-		<jquery.version>3.7.1</jquery.version>
-		<jquery-ui.version>1.13.3</jquery-ui.version>
+		<bootstrap.version>4.6.1</bootstrap.version>
+		<popper.js.version>1.16.0</popper.js.version>
+		<jquery.version>3.6.4</jquery.version>
+		<jquery-ui.version>1.13.2</jquery-ui.version>
 		<highlightjs.version>11.5.0</highlightjs.version>
 		<highlightjs-badgejs.version>0.0.5</highlightjs-badgejs.version>
-		<font-awesome.version>6.5.2</font-awesome.version>
-		<fop.version>2.9</fop.version>
-		<commons-io.version>2.16.1</commons-io.version>
+		<font-awesome.version>6.4.0</font-awesome.version>
+		<fop.version>2.7</fop.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.10.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.9.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
     <scm>
-        <developerConnection>scm:git:git@gitlab.ente.regione.emr.it:parer/okd/verifica-firma-eidas.git</developerConnection>
-        <tag>verifica-firma-eidas-1.23.0</tag>
+	<developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
-        <site>
-            <id>site</id>
-            <url>dav:https://nexus.ente.regione.emr.it/repository/parer-site/verifica-firma-eidas/${project.version}</url>
-        </site>
+        <repository>
+	   <id>github</id>
+	   <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
+	 </repository>      
     </distributionManagement>
+
+     <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>            
+        </repository>               
+      </repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -120,12 +125,7 @@
 			    <artifactId>httpcore5</artifactId>
 			    <version>${httpcore5.version}</version>
 			</dependency>
-			<!-- commons -->
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
-			</dependency>
+
         </dependencies>          
     </dependencyManagement>
 
@@ -358,12 +358,6 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>
 			<version>${bootstrap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.webjars</groupId>
-					<artifactId>popper.js</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.webjars.npm/popper.js -->
 		<dependency>
@@ -474,16 +468,6 @@
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${springboot.version}</version>
 				</plugin>
-				<!-- OWASP -->
-				<plugin>
-					<groupId>org.owasp</groupId>
-					<artifactId>dependency-check-maven</artifactId>
-					<configuration>
-					    <suppressionFiles>
-					     	<suppressionFile>src/site/owasp/suppress.xml</suppressionFile>
-					    </suppressionFiles>
-					</configuration>
-				</plugin> 
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -491,7 +475,7 @@
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-compiler-plugin</artifactId>
 			    <configuration>
-			        <release>21</release>
+			        <release>17</release>
 			    </configuration>
 			</plugin>
 			<plugin>

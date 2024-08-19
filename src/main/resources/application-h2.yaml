@@ -39,5 +39,10 @@ spring:
       path: /admin/h2-console
   main:
     allow-bean-definition-overriding: true
-     
-     
+
+# DSS custom properties (local for dev)
+dataloader:
+   timeoutconnection: 6000
+   timeoutsocket: 6000
+   connectiontimetolive: 6000
+   ldapTimeoutConnection: 6000

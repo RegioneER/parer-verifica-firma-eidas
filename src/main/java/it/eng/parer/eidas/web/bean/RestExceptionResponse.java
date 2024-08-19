@@ -45,7 +45,7 @@ public class RestExceptionResponse extends EidasParerException {
     private final LocalDateTime datetime = LocalDateTime.now();
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 225598790808095611L;
 

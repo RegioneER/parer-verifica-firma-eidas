@@ -34,9 +34,9 @@ public class ErrorCodeManagerImpl implements IErrorCodeManager {
 
     /**
      * Escluse il codice "particolare" NOT_FOUND
-     * 
+     *
      * @return lista di errori
-     * 
+     *
      */
     @Override
     public List<ErrorCode> get() {
@@ -54,7 +54,7 @@ public class ErrorCodeManagerImpl implements IErrorCodeManager {
      *
      * @param type
      *            tipologia di errore
-     * 
+     *
      * @return decodifica della tipologia. Non viene mai restituito null.
      */
     private String decodeType(ParerError.ExceptionType type) {

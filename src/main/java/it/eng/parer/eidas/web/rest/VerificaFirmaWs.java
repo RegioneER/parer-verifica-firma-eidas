@@ -88,7 +88,7 @@ public class VerificaFirmaWs {
      *            oggetto json con i dati da validare
      * @param request
      *            oggetto standard contente la request
-     * 
+     *
      * @return EidasWSReportsDTOTree oggetto custom tree con risultati della verifica
      */
     @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta un JSON con i metadati relativi alla verifica. La risorsa ottenuta da questa chiamata è il report di verifica")
@@ -125,7 +125,7 @@ public class VerificaFirmaWs {
      *            file policy standard eidas
      * @param request
      *            oggetto standard contente la request
-     * 
+     *
      * @return EidasWSReportsDTOTree
      */
     @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta chiamata POST con multipart/form-data. La risorsa ottenuta da questa chiamata è il report di verifica")

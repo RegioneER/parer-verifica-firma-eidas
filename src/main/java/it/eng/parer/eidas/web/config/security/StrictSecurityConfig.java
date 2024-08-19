@@ -29,12 +29,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /*
- * since spring boot 2.7.0 
+ * since spring boot 3.x
  * https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter
- * 
+ *
  * Note: questa configurazione gestisce la sicurezza legata alla API esposte.
  * Valida se disattivata la console web dell'admin (parer.eidas.admin-ui.enabled = false).
- * Le regole su URI pattern match definiscono la "catena" dei permessi, quindi l'ordine è importante.  
+ * Le regole su URI pattern match definiscono la "catena" dei permessi, quindi l'ordine è importante.
  */
 @Configuration
 @ConditionalOnProperty(name = "parer.eidas.admin-ui.enabled", havingValue = "false")
@@ -46,9 +46,8 @@ public class StrictSecurityConfig {
         //
         http.csrf(csrf -> csrf.disable()) // disable csrf
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + RESOURCE_INFOS)).authenticated()) // basic
-                                                                                                                      // auth
-                .httpBasic(Customizer.withDefaults())
+                        .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + RESOURCE_INFOS)).authenticated())
+                .httpBasic(Customizer.withDefaults()) // basic auth
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + "/**")).denyAll()) // deny all
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()); // permit

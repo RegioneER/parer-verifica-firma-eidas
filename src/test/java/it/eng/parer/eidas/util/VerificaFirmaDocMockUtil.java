@@ -36,9 +36,9 @@ import it.eng.parer.eidas.model.EidasRemoteDocument;
  * </p>
  *
  * @author stefano
- * 
+ *
  * @version $Id: $Id
- * 
+ *
  * @since 1.10.1
  */
 public class VerificaFirmaDocMockUtil {
@@ -50,9 +50,9 @@ public class VerificaFirmaDocMockUtil {
      *
      * @param fileWithSignature
      *            a {@link java.io.InputStream} object
-     * 
+     *
      * @return a {@link it.eng.parer.eidas.model.EidasDataToValidateMetadata} object
-     * 
+     *
      * @throws java.io.IOException
      *             if any.
      * @throws java.net.URISyntaxException
