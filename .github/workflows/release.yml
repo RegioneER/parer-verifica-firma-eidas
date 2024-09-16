@@ -11,4 +11,4 @@ jobs:
     uses: RegioneER/parer-github-template/.github/workflows/release.yml@v1
     with:
       version: ${{ inputs.version }}
-      java: '17'
+      java: '21'

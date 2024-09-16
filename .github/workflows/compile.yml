@@ -4,4 +4,4 @@ jobs:
   compile:
     uses: RegioneER/parer-github-template/.github/workflows/compile.yml@v1
     with:
-      java: '17'
+      java: '21'
