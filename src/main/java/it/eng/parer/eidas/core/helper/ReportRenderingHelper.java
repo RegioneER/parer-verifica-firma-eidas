@@ -127,7 +127,7 @@ public class ReportRenderingHelper {
      *            simpleReport in xml
      * @param os
      *            outputstream
-     * 
+     *
      * @throws FOPException
      *             errore su trasformazione lib FOP
      * @throws TransformerException
@@ -149,7 +149,7 @@ public class ReportRenderingHelper {
      *            detailedReport in xml
      * @param os
      *            outputstream su cui scriverlo
-     * 
+     *
      * @throws FOPException
      *             errore su trasformazione lib FOP
      * @throws TransformerException
@@ -169,7 +169,7 @@ public class ReportRenderingHelper {
      *
      * @param report
      *            simple report della DSS
-     * 
+     *
      * @return html sotto forma di stringa
      */
     public String generateSimpleReport(XmlSimpleReport report) {
@@ -187,7 +187,7 @@ public class ReportRenderingHelper {
      *
      * @param report
      *            detailed report della DSS
-     * 
+     *
      * @return html sotto forma di stringa
      */
     public String generateDetailedReport(XmlDetailedReport report) {
@@ -206,7 +206,7 @@ public class ReportRenderingHelper {
      *
      * @param report
      *            diagnostic tree
-     * 
+     *
      * @return xml del report
      */
     public String generateDiagnosticData(XmlDiagnosticData report) {
@@ -223,7 +223,7 @@ public class ReportRenderingHelper {
      *
      * @param simpleReport
      *            simple report
-     * 
+     *
      * @return xml del simple report
      */
     public String marshallSimpleReport(XmlSimpleReport simpleReport) {
@@ -244,7 +244,7 @@ public class ReportRenderingHelper {
      *
      * @param detailedReport
      *            detailed report
-     * 
+     *
      * @return xml del detailed report
      */
     public String marshallDetailedReport(XmlDetailedReport detailedReport) {

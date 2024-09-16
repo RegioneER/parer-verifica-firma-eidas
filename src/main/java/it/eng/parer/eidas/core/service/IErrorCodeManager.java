@@ -16,7 +16,7 @@
  */
 
 /**
- * 
+ *
  */
 package it.eng.parer.eidas.core.service;
 
@@ -28,9 +28,9 @@ public interface IErrorCodeManager {
 
     /**
      * Escluse il codice "particolare" NOT_FOUND
-     * 
+     *
      * @return lista di errori
-     * 
+     *
      */
     List<ErrorCode> get();
 

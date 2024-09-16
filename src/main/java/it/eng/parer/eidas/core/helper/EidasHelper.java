@@ -107,7 +107,7 @@ public class EidasHelper {
      *
      * @param document
      *            documento DSS, sia esso un inMemory sia con path assoluto
-     * 
+     *
      * @return il mime type identificato o null se il contenuto non risulta leggibile.
      */
     public String detectMimeType(DSSDocument document) {
@@ -193,15 +193,15 @@ public class EidasHelper {
 
     /**
      * Verifica contenuto array di byte. 1. verifica se ASCII armor 2. verifica se base64 encoded
-     * 
+     *
      * @param dataToValidateMetadata
      *            metadati forniti al servizio di validazione
-     * 
+     *
      * @param prefix
      *            prefisso del file da utilizzare per la generazione del risultato
      * @param signedBytes
      *            array di byte con contenuto del file sottoposto a verifica
-     * 
+     *
      * @return file risultato dell'elaborazione o null se non rientra nei due casi
      */
     public Path verifyAndExtractFileContent(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
@@ -223,15 +223,15 @@ public class EidasHelper {
 
     /**
      * Verifica contenuto path relativo al file su disco. 1. verifica se ASCII armor 2. verifica se base64 encoded
-     * 
+     *
      * @param dataToValidateMetadata
      *            metadati forniti al servizio di validazione
-     * 
+     *
      * @param prefix
      *            prefisso del file da utilizzare per la generazione del risultato
      * @param signedFile
      *            path file sottoposto a verifica
-     * 
+     *
      * @return file risultato dell'elaborazione o null se non rientra nei due casi
      */
     public Path verifyAndExtractFileContent(EidasDataToValidateMetadata dataToValidateMetadata, String prefix,
@@ -270,7 +270,7 @@ public class EidasHelper {
      *
      * Verifica se il file passato è un ASCII-Armor, in quel caso si ottiene come risultato il Path di un nuovo file
      * contenente la decodifica in Base64 del file originale.
-     * 
+     *
      */
     private Path detectASCIIArmor(EidasDataToValidateMetadata dataToValidateMetadata, String prefix, Path signedFile) {
         try (InputStream is = new FileInputStream(signedFile.toFile())) {

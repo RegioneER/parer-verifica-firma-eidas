@@ -36,9 +36,9 @@ import it.eng.parer.eidas.web.VerificaFirmaEidasApplication;
  * </p>
  *
  * @author stefano
- * 
+ *
  * @version $Id: $Id
- * 
+ *
  * @since 1.10.1
  */
 @SpringBootTest(classes = VerificaFirmaEidasApplication.class, properties = { "logging.level.root=INFO",

@@ -254,11 +254,11 @@ public class DSSBeanConfig {
      * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
      * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
      * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
-     * 
+     *
      * Visit
      * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
      * config/DSSBeanConfig.java
-     * 
+     *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean
@@ -303,12 +303,12 @@ public class DSSBeanConfig {
      * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
      * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
      * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
-     * 
+     *
      * Visit
      * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
      * config/DSSBeanConfig.java
-     * 
-     * 
+     *
+     *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean
@@ -344,12 +344,12 @@ public class DSSBeanConfig {
      * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
      * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
      * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
-     * 
-     * 
+     *
+     *
      * Visit
      * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
      * config/DSSBeanConfig.java
-     * 
+     *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean

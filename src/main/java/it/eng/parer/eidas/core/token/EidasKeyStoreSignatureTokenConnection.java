@@ -24,7 +24,7 @@ import org.springframework.util.ResourceUtils;
 
 /**
  * KeyStoreSignatureTokenConnection TSP check file tsp-config.xml
- * 
+ *
  * KeyStoreSignatureTokenConnection extend for managing ResourceUtils.getURL(ksFile) as classpath file
  */
 

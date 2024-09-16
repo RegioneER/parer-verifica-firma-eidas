@@ -39,9 +39,9 @@ import it.eng.parer.eidas.model.exception.EidasParerException;
  * </p>
  *
  * @author stefano
- * 
+ *
  * @version $Id: $Id
- * 
+ *
  * @since 1.10.1
  */
 @Component
@@ -68,7 +68,7 @@ public class RestTemplateErrorHandler implements ResponseErrorHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.web.client.ResponseErrorHandler#handleError(java.net.URI,
      * org.springframework.http.HttpMethod, org.springframework.http.client.ClientHttpResponse)
      */

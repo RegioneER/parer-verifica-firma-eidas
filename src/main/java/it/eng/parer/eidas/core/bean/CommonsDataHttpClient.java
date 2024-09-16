@@ -221,7 +221,7 @@ public class CommonsDataHttpClient implements Serializable {
 
     /**
      * destroy method
-     * 
+     *
      * @throws IOException
      *             generic exception
      */
@@ -547,7 +547,7 @@ public class CommonsDataHttpClient implements Serializable {
      *            host connection details
      * @param userCredentials
      *            user login credentials
-     * 
+     *
      * @return this (for fluent addAuthentication)
      */
     public CommonsDataHttpClient addAuthentication(HostConnection hostConnection, UserCredentials userCredentials) {
@@ -582,7 +582,7 @@ public class CommonsDataHttpClient implements Serializable {
      *            login
      * @param password
      *            password
-     * 
+     *
      * @return this (for fluent addAuthentication)
      */
     public CommonsDataHttpClient addAuthentication(final String host, final int port, final String scheme,
@@ -704,7 +704,7 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * @param httpRequest
      *            {@link HttpUriRequest}
-     * 
+     *
      * @return {@link HttpHost}
      */
     protected HttpHost getHttpHost(final HttpUriRequest httpRequest) {
@@ -721,7 +721,7 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * @param httpHost
      *            {@link HttpHost}
-     * 
+     *
      * @return {@link HttpContext}
      */
     protected HttpContext getHttpContext(HttpHost httpHost) {
@@ -737,7 +737,7 @@ public class CommonsDataHttpClient implements Serializable {
      *            {@link HttpClientContext}
      * @param httpHost
      *            {@link HttpHost}
-     * 
+     *
      * @return {@link HttpClientContext}
      */
     protected HttpClientContext configurePreemptiveAuthentication(HttpClientContext localContext, HttpHost httpHost) {
@@ -833,7 +833,7 @@ public class CommonsDataHttpClient implements Serializable {
      * Gets the SSL KeyStore
      *
      * @return {@link KeyStore}
-     * 
+     *
      * @throws IOException
      *             if IOException occurs
      * @throws GeneralSecurityException
@@ -847,7 +847,7 @@ public class CommonsDataHttpClient implements Serializable {
      * Gets the SSL Trusted KeyStore
      *
      * @return {@link KeyStore}
-     * 
+     *
      * @throws IOException
      *             if IOException occurs
      * @throws GeneralSecurityException
@@ -873,7 +873,7 @@ public class CommonsDataHttpClient implements Serializable {
     /**
      * Gets the {@code HttpClientBuilder}
      *
-     * 
+     *
      * @return {@link HttpClientBuilder}
      */
     protected HttpClientBuilder getHttpClientBuilder() {
@@ -911,7 +911,7 @@ public class CommonsDataHttpClient implements Serializable {
      *            {@link HttpClientBuilder}
      * @param url
      *            {@link String}
-     * 
+     *
      * @return {@link HttpClientBuilder}
      */
     private HttpClientBuilder configCredentials(HttpClientBuilder httpClientBuilder) {
@@ -954,7 +954,7 @@ public class CommonsDataHttpClient implements Serializable {
 
     /**
      * Standard HTTP Apache Client
-     * 
+     *
      * @return dataHttpClient
      */
     public CloseableHttpClient getHttpClient() {

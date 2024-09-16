@@ -104,10 +104,10 @@ public class AppConfiguration implements WebMvcConfigurer {
 
     /*
      * Since spring boot 3.x.
-     * 
+     *
      * Con l'introduzione dello standard jakarta.* necessario introdurre apposito converter per la gestione di
      * marshalling/unmarshalling del dto EidasWSReportsDTOTree.zs
-     * 
+     *
      */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> messageConverters) {

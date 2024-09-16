@@ -84,7 +84,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
     /**
      * Definisce il CertificateVerifier di riferimento
-     * 
+     *
      * @param verifier
      *            oggetto standard DSS CertificateVerifier
      */
@@ -98,7 +98,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      * policy/constraint.xml di default rilasciato con le librerie DSS Scenario 2 : possibile effettuare diversa
      * configurazione attraverso un file xml implementato secondo specificia EIDAS, supportato il caricamento da
      * filesystem e via classloading (e.g. file su classpath o su resources)
-     * 
+     *
      * @param defaultValidationPolicy
      *            risorsa con file di constraint da utilizzare
      */
@@ -270,7 +270,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
     /*
      * Modifica le policy di validazione predefinite.
-     * 
+     *
      * Modificati i default https://github.com/esig/dss/blob/5.8.x/dss-policy-jaxb/src/main/resources/
      * policy/constraint.xml sulla base dei flag passati al servizio
      *
@@ -413,7 +413,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
          * IGNORE il controllo eseguito, in quanto, la logica delle librerie DSS prevede (vedere
          * eu.europa.esig.dss.validation.process.bbb.xcv.rac.checks. RevocationConsistentCheck) il controllo di
          * "consistenza" dei dati legati alla revoca, processo di cui, non si riesce ad impostare un livello specifico.
-         * 
+         *
          */
         if (controlloRevocaIgnorato) {
             log.atDebug().log("Validation policy controlloCRLIgnorato set to level {}", Level.IGNORE);
@@ -507,7 +507,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      * @param signedDocument
      * @param reports
      * @param idComponente
-     * 
+     *
      * @return
      */
     private EidasWSReportsDTOTree createRoot(DSSDocument signedDocument, Reports reports, String idComponente) {
@@ -515,7 +515,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
         /**
          * Vedi issue <a>https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/issues/7</a>
-         * 
+         *
          * Per il momento il validation report non viene restituito al dataHttpClient
          */
         WSReportsDTO wsdto = new WSReportsDTO(reports.getDiagnosticDataJaxb(), reports.getSimpleReportJaxb(),
@@ -533,7 +533,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
     /**
      * Crea, ricorsivamente, l'output del processo di verifica in cui in ogni "strato" è presente un livello di
      * annidamento.
-     * 
+     *
      * @param dataToValidateMetadata
      *            metadati
      * @param parent
@@ -619,7 +619,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      *            documento da verificare
      * @param dataToValidateMetadata
      *            data a cui deve essere effettuata la validazione (opzionale)
-     * 
+     *
      * @return validatore per il documento
      */
     private SignedDocumentValidator buildValidator(DSSDocument signedDocument,
@@ -657,7 +657,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 
     /*
      * PdfObjectModificationsFinder customization
-     * 
+     *
      * check :
      * https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#DisablingPdfComparison
      */
