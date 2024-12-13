@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.23.1-SNAPSHOT</version>
+	<version>1.24.0</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>it.eng.parer</groupId>
 		<artifactId>parer-pom</artifactId>
-		<version>6.4.0</version>
+		<version>6.5.0</version>
 	</parent>
 
     <properties>
@@ -21,13 +21,12 @@
 		<!-- Applied for jdk11 bug -->
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
-		<dss.version>5.13</dss.version>
-		<springboot.version>3.3.1</springboot.version>
+		<dss.version>6.0</dss.version>
+		<springboot.version>3.3.5</springboot.version>
 		<springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>		
 		<logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-		<tika.version>2.9.2</tika.version>
-		<jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
-		<httpcore5.version>5.2.5</httpcore5.version>
+		<tika.version>3.0.0</tika.version>
+		<httpcore5.version>5.3.1</httpcore5.version>
 		<jaxb-api.version>2.3.1</jaxb-api.version>
 		<bootstrap.version>4.6.2</bootstrap.version>
 		<popper.js.version>1.16.1</popper.js.version>
@@ -37,25 +36,25 @@
 		<highlightjs-badgejs.version>0.0.5</highlightjs-badgejs.version>
 		<font-awesome.version>6.5.2</font-awesome.version>
 		<fop.version>2.9</fop.version>
-		<commons-io.version>2.16.1</commons-io.version>
+		<commons-io.version>2.17.0</commons-io.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.10.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.11.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
-    <scm>
+<scm>
 	<developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
-    <distributionManagement>
+<distributionManagement>
         <repository>
 	   <id>github</id>
 	   <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
 	 </repository>      
     </distributionManagement>
 
-     <repositories>
+<repositories>
         <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>            
@@ -115,12 +114,6 @@
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback-encoder.version}</version>
             </dependency>
-			<!-- Jakarta -->
-			<dependency>
-			    <groupId>jakarta.xml.bind</groupId>
-			    <artifactId>jakarta.xml.bind-api</artifactId>
-			    <version>${jakarta.xml.bind-api.version}</version>
-			</dependency>
 			<dependency>
 			    <groupId>org.apache.httpcomponents.core5</groupId>
 			    <artifactId>httpcore5</artifactId>
@@ -344,10 +337,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- javax.xml.bind da mantenere per un problema legato alla componente di configurazione Hibernate -->
+		<!-- WARN Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: javax/xml/bind/annotation/XmlElement  -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb-api.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<!-- Solve javadoc WARN problem:  -->
 		<!-- [WARNING] Javadoc Warnings -->
@@ -468,9 +464,7 @@
 			<artifactId>junit-platform-launcher</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
-
 
 	<build>
 		<pluginManagement>

@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -45,13 +44,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import it.eng.parer.eidas.web.converter.CustomJaxb2RootElementHttpMessageConverter;
 
-//https://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/htmlsingle/#boot-features-external-config-application-property-files
-//SEE 24.6.4 YAML shortcomings
-//@PropertySource("classpath:application.yaml")
-//https://stackoverflow.com/questions/51008382/why-spring-boot-application-doesnt-require-enablewebmvc
-//@EnableWebMvc
 @Configuration
 @ComponentScan("it.eng.parer.eidas.core")
 @PropertySource("classpath:git.properties")
@@ -100,18 +93,6 @@ public class AppConfiguration implements WebMvcConfigurer {
         mappingJackson2HttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
 
         return mappingJackson2HttpMessageConverter;
-    }
-
-    /*
-     * Since spring boot 3.x.
-     *
-     * Con l'introduzione dello standard jakarta.* necessario introdurre apposito converter per la gestione di
-     * marshalling/unmarshalling del dto EidasWSReportsDTOTree.zs
-     *
-     */
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-        messageConverters.add(new CustomJaxb2RootElementHttpMessageConverter());
     }
 
     @Bean

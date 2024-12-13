@@ -175,8 +175,8 @@ objects:
       name: verificafirma-eidas
       weight: 100
     wildcardPolicy: None
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: apps/v1
+  kind: Deployment
   metadata:
     labels:
       app: verificafirma-eidas
@@ -187,7 +187,8 @@ objects:
   spec:
     replicas: 1
     selector:
-      app: verificafirma-eidas
+      matchLabels:
+        app: verificafirma-eidas
     strategy:
       rollingParams:
         intervalSeconds: 1
@@ -199,7 +200,7 @@ objects:
         maxUnavailable: 25%
         timeoutSeconds: 3600
         updatePeriodSeconds: 1
-      type: Rolling
+      type: RollingUpdate
     template:
       metadata:
         labels:
@@ -312,6 +313,9 @@ objects:
         schedulerName: default-scheduler
         securityContext: {}
         terminationGracePeriodSeconds: 30
+        securityContext:
+          runAsUser: 1000660000
+          fsGroup: 1000660000        
         volumes:
         - configMap:
             defaultMode: 420

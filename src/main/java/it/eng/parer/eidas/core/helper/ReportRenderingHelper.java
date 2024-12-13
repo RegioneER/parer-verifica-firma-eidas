@@ -27,10 +27,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.transform.Result;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
@@ -58,6 +54,10 @@ import eu.europa.esig.dss.xml.utils.DSSXmlErrorListener;
 import eu.europa.esig.dss.xml.utils.DomUtils;
 import it.eng.parer.eidas.web.bean.VerificaFirmaResultBean;
 import jakarta.annotation.PostConstruct;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 @Component
 public class ReportRenderingHelper {
