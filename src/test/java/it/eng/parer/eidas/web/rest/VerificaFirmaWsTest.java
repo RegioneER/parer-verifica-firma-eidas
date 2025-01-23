@@ -51,7 +51,6 @@ import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError.ErrorCode;
 import it.eng.parer.eidas.util.RestTemplateErrorHandler;
-import it.eng.parer.eidas.web.converter.CustomJaxb2RootElementHttpMessageConverter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1", "logging.level.root=INFO",
@@ -65,8 +64,6 @@ class VerificaFirmaWsTest {
     @BeforeAll
     public void init() throws IOException {
         restTemplate.getRestTemplate().setErrorHandler(new RestTemplateErrorHandler());
-        // add custcom converter
-        restTemplate.getRestTemplate().getMessageConverters().add(new CustomJaxb2RootElementHttpMessageConverter());
     }
 
     @Test

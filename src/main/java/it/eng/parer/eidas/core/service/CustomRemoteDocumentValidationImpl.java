@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,6 +66,7 @@ import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.xml.bind.JAXBException;
 
 public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocumentValidation {
 
