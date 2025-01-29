@@ -1,6 +1,6 @@
 # Custom constraint policy rules
 
-Il file [custom_constraint.xml](custom_constraint.xml) è ricavato dal file [constraint.xml](https://github.com/esig/dss/blob/6.0/dss-policy-jaxb/src/main/resources/policy/constraint.xml) alla versione **6.0** delle librerie DSS.
+Il file [custom_constraint.xml](custom_constraint.xml) è ricavato dal file [constraint.xml](https://github.com/esig/dss/blob/6.1/dss-policy-jaxb/src/main/resources/policy/constraint.xml) alla versione **6.1** delle librerie DSS.
 
 ## Nota bene
 

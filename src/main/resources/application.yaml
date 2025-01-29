@@ -51,7 +51,7 @@ management:
       exposure:
         include: "info, health, jolokia, threaddump, scheduledtasks, prometheus"
         
-# DSS (sostituito rispetto dss.properties)
+# DSS (sostituito dss.properties)
 dss: 
  server:
   signing:
@@ -60,6 +60,7 @@ dss:
       filename: classpath:user_a_rsa.p12
       password: password
 
+# EU LOTL config
 oj:
   content:
     keystore:

@@ -1,4 +1,4 @@
-## 1.24.0 (12-12-2024)
+## 1.25.0 (29-01-2025)
 
 ### Novità: 1
-- [#34662](https://parermine.regione.emilia-romagna.it/issues/34662) Aggiornamento libreria DSS 6.0
+- [#34663](https://parermine.regione.emilia-romagna.it/issues/34663) Aggiornamento libreria DSS 6.1

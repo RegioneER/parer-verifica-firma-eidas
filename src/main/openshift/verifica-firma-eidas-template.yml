@@ -6,11 +6,11 @@ labels:
 metadata:
   annotations:
     description: |-
-      Template microservizio verifica firma EIDAS JDK17 OracleDB (vedere https://gitlab.ente.regione.emr.it/parer/okd/verificafirma-eidas.git)
+      Template microservizio verifica firma eIDAS (https://gitlab.ente.regione.emr.it/parer/okd/verificafirma-eidas.git)
     iconClass: icon-spring
     openshift.io/display-name: Microservice EIDAS 
     openshift.io/documentation-url: https://gitlab.ente.regione.emr.it/parer/okd/verificafirma-eidas
-    openshift.io/long-description: Il template fornisce la creazione del microservizio EIDAS (effimero DB H2 su disco)
+    openshift.io/long-description: Il template fornisce la creazione del microservizio verifica firma eIDAS
     openshift.io/provider-display-name: Parer (Regione Emilia Romagna)
     openshift.io/support-url: https://gitlab.ente.regione.emr.it/parer
     tags: springboot,eidas
@@ -298,8 +298,6 @@ objects:
             limits:
               cpu: 800m
               memory: 2500Mi
-          securityContext:
-            privileged: false
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
@@ -312,10 +310,7 @@ objects:
         restartPolicy: Always
         schedulerName: default-scheduler
         securityContext: {}
-        terminationGracePeriodSeconds: 30
-        securityContext:
-          runAsUser: 1000660000
-          fsGroup: 1000660000        
+        terminationGracePeriodSeconds: 30      
         volumes:
         - configMap:
             defaultMode: 420
