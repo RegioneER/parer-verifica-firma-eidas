@@ -9,7 +9,7 @@ Fonte template redazione documento:  https://www.makeareadme.com/.
 # Descrizione
 
 Microservizio realizzato per effettuare verifica e validazione di documenti con firma digitale. <br/>
-Realizzato attraverso framework [Spring Boot](https://spring.io/projects/spring-boot) (versione 3.x) e [OpenJDK 17](https://openjdk.org/projects/jdk/17/), utilizza la versione <b>6.0</b> del progetto [DSS](https://ec.europa.eu/digital-building-blocks/wikis/display/DIGITAL/Digital+Signature+Service+-++DSS).
+Realizzato attraverso framework [Spring Boot](https://spring.io/projects/spring-boot) (versione 3.x) e [OpenJDK 17](https://openjdk.org/projects/jdk/17/), utilizza la versione <b>6.1</b> del progetto [DSS](https://ec.europa.eu/digital-building-blocks/wikis/display/DIGITAL/Digital+Signature+Service+-++DSS).
 
 # Installazione
 

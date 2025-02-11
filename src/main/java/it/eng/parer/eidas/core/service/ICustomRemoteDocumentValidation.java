@@ -22,7 +22,7 @@ package it.eng.parer.eidas.core.service;
 
 import org.springframework.core.io.Resource;
 
-import eu.europa.esig.dss.validation.CertificateVerifier;
+import eu.europa.esig.dss.spi.validation.CertificateVerifier;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import jakarta.servlet.http.HttpServletRequest;
