@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.25.1-SNAPSHOT</version>
+	<version>1.26.0</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -22,7 +22,7 @@
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
 		<dss.version>6.1</dss.version>
-		<springboot.version>3.4.1</springboot.version>
+		<springboot.version>3.4.3</springboot.version>
 		<springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>		
 		<logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
 		<tika.version>3.0.0</tika.version>
@@ -65,19 +65,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-		    <!-- DSS bom -->
-		    <dependency>
-				<groupId>eu.europa.ec.joinup.sd-dss</groupId>
-				<artifactId>sd-dss</artifactId>
-				<version>${dss.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-                <groupId>it.eng.parer</groupId>
-                <artifactId>verificafirma-eidas-beans</artifactId>
-                <version>${verificafirma-eidas-beans.version}</version>
-            </dependency>
+		    <!-- Spring Boot -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
@@ -91,6 +79,20 @@
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 				<version>${springdoc-openapi-starter-webmvc-ui.version}</version>
 			</dependency>
+		    <!-- DSS bom -->
+		    <dependency>
+				<groupId>eu.europa.ec.joinup.sd-dss</groupId>
+				<artifactId>sd-dss</artifactId>
+				<version>${dss.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+                <groupId>it.eng.parer</groupId>
+                <artifactId>verificafirma-eidas-beans</artifactId>
+                <version>${verificafirma-eidas-beans.version}</version>
+            </dependency>
+			<!-- Tika -->
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
@@ -131,7 +133,7 @@
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
-			</dependency>
+			</dependency>		
         </dependencies>          
     </dependencyManagement>
 
@@ -244,7 +246,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -269,10 +270,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>

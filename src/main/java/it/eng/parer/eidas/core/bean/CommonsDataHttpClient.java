@@ -770,8 +770,7 @@ public class CommonsDataHttpClient implements Serializable {
 
     private HttpClientConnectionManager getConnectionManager() {
         final PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder.create()
-        	.setTlsSocketStrategy(getClientTlsStrategy())
-        	.setDefaultSocketConfig(getSocketConfig())
+                .setTlsSocketStrategy(getClientTlsStrategy()).setDefaultSocketConfig(getSocketConfig())
                 .setMaxConnTotal(getConnectionsMaxTotal()).setMaxConnPerRoute(getConnectionsMaxPerRoute());
 
         final ConnectionConfig.Builder connectionConfigBuilder = ConnectionConfig.custom()
@@ -820,10 +819,10 @@ public class CommonsDataHttpClient implements Serializable {
                 }
             }
 
-	    DefaultClientTlsStrategy defaultClientTlsStrategy = new DefaultClientTlsStrategy(sslContextBuilder.build(),
-		    getSupportedSSLProtocols(), getSupportedSSLCipherSuites(), SSLBufferMode.STATIC,
-		    getHostnameVerifier());
-	    return defaultClientTlsStrategy;           
+            DefaultClientTlsStrategy defaultClientTlsStrategy = new DefaultClientTlsStrategy(sslContextBuilder.build(),
+                    getSupportedSSLProtocols(), getSupportedSSLCipherSuites(), SSLBufferMode.STATIC,
+                    getHostnameVerifier());
+            return defaultClientTlsStrategy;
         } catch (final Exception e) {
             throw new IllegalArgumentException("Unable to configure the SSLContext/SSLConnectionSocketFactory", e);
         }

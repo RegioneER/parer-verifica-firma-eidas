@@ -11,6 +11,16 @@ Fonte template redazione documento:  https://www.makeareadme.com/.
 Microservizio realizzato per effettuare verifica e validazione di documenti con firma digitale. <br/>
 Realizzato attraverso framework [Spring Boot](https://spring.io/projects/spring-boot) (versione 3.x) e [OpenJDK 17](https://openjdk.org/projects/jdk/17/), utilizza la versione <b>6.1</b> del progetto [DSS](https://ec.europa.eu/digital-building-blocks/wikis/display/DIGITAL/Digital+Signature+Service+-++DSS).
 
+## Esposizione locale dell'applicazione 
+
+Data la seguente configurazione: 
+
+```bash
+server.servlet.context-path = /verificafirma-eidas
+```
+
+l'applicazione viene esposta al seguente indirizzo (in locale): ``http://localhost:8090/verificafirma-eidas``.
+
 # Installazione
 
 Di seguito verranno riportati sotto alcuni paragrafi, le modalità possibili con cui è possibile rendere operativo il microservizio. 
