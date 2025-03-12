@@ -8,7 +8,7 @@ server:
     whitelabel:
       enabled: false
   servlet: 
-    context-path: /
+    context-path: /verificafirma-eidas
   shutdown: graceful
 
 # SPRING BASE   

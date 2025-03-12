@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -34,23 +34,31 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europa.esig.dss.ws.validation.dto.WSReportsDTO;
 import it.eng.parer.eidas.core.util.Constants;
 import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError.ErrorCode;
-import it.eng.parer.eidas.util.RestTemplateErrorHandler;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1", "logging.level.root=INFO",
@@ -62,12 +70,12 @@ class VerificaFirmaWsTest {
     private TestRestTemplate restTemplate;
 
     @BeforeAll
-    public void init() throws IOException {
-        restTemplate.getRestTemplate().setErrorHandler(new RestTemplateErrorHandler());
+    void init() {
+        restTemplate.getRestTemplate().setErrorHandler(new EidasErrorHandler());
     }
 
     @Test
-    void testVerificaFirmaWsPadesBesMultipart() throws IOException, URISyntaxException {
+    void testVerificaFirmaWsPadesBesMultipart() throws IOException {
 
         // mock
         InputStream fileWithSignature = ResourceUtils.getURL("classpath:PADES/PADES_BES.PDF").openStream();
@@ -121,7 +129,7 @@ class VerificaFirmaWsTest {
     }
 
     @Test
-    void testVerificaFirmaWsMultipartWith400Error() throws Exception {
+    void testVerificaFirmaWsMultipartWith400Error() {
         //
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -158,5 +166,28 @@ class VerificaFirmaWsTest {
         assertNotNull(result.getSimpleReport());
         assertEquals(firmeAttese, result.getSimpleReport().getSignaturesCount());
     }
+    
+    private class EidasErrorHandler extends DefaultResponseErrorHandler {
+
+	    private static final Logger LOG = LoggerFactory.getLogger(EidasErrorHandler.class);
+
+	    /** {@inheritDoc} */
+	    @Override
+	    public boolean hasError(ClientHttpResponse response) throws IOException {
+		return (response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR
+			|| response.getStatusCode() == HttpStatus.BAD_REQUEST);
+	    }
+
+	    @Override
+	    public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		EidasParerException exe = mapper.readValue(response.getBody(), EidasParerException.class);
+		LOG.error("Eccezione registrata {} con codice {}", exe, exe.getCode());
+		throw exe;
+	    }
+
+	}
+
 
 }
