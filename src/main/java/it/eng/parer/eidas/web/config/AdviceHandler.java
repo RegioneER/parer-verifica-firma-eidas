@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.web.config;
@@ -54,106 +50,112 @@ import it.eng.parer.eidas.web.util.RestUtil;
  *
  * @author sinatti_s
  */
-@ControllerAdvice(basePackages = { "it.eng.parer.eidas.web.rest" })
+@ControllerAdvice(basePackages = {
+	"it.eng.parer.eidas.web.rest" })
 @RequestMapping(produces = MediaType.APPLICATION_PROBLEM_JSON_VALUE)
 public class AdviceHandler {
 
     /*
-     * Aggiunto log al fine di loggare i casi di generiche eccezioni ossia generate dopo l'esecuzione del servizio di
-     * verifica firma (o prima quando si valuta la risposta del dataHttpClient), ma che comunque in generale non sono
-     * gestite (EidasParerException) all'interno dell'implementazione dell'endpoint.
+     * Aggiunto log al fine di loggare i casi di generiche eccezioni ossia generate dopo
+     * l'esecuzione del servizio di verifica firma (o prima quando si valuta la risposta del
+     * dataHttpClient), ma che comunque in generale non sono gestite (EidasParerException)
+     * all'interno dell'implementazione dell'endpoint.
      */
     private static final Logger log = LoggerFactory.getLogger(AdviceHandler.class);
 
     @ExceptionHandler(EidasParerException.class)
-    public final ResponseEntity<RestExceptionResponse> handleEidasParerException(EidasParerException ex,
-            WebRequest request) {
-        // log code based
-        if (ex.getCode().equals(EIDAS_ERROR)) {
-            // log warn
-            log.atWarn().log(STD_MSG_APP_WARN, ex);
-        } else {
-            // log error
-            log.atError().log(STD_MSG_APP_ERROR, ex);
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(RestUtil.buildParerResponseEntity(ex, request), headers,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+    public final ResponseEntity<RestExceptionResponse> handleEidasParerException(
+	    EidasParerException ex, WebRequest request) {
+	// log code based
+	if (ex.getCode().equals(EIDAS_ERROR)) {
+	    // log warn
+	    log.atWarn().log(STD_MSG_APP_WARN, ex);
+	} else {
+	    // log error
+	    log.atError().log(STD_MSG_APP_ERROR, ex);
+	}
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(RestUtil.buildParerResponseEntity(ex, request), headers,
+		HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public final ResponseEntity<RestExceptionResponse> handleMediaTypeException(HttpMediaTypeNotSupportedException ex,
-            WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(
-                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, Arrays.asList(ex.getBody().getDetail())),
-                headers, HttpStatus.BAD_REQUEST);
+    public final ResponseEntity<RestExceptionResponse> handleMediaTypeException(
+	    HttpMediaTypeNotSupportedException ex, WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+		Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public final ResponseEntity<RestExceptionResponse> handleValidationException(MethodArgumentNotValidException ex,
-            WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        // details
-        List<String> details = new ArrayList<>();
-        Stream.of(Arrays.asList(ex.getBody().getDetail()),
-                ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList()).forEach(details::addAll);
-        //
-        return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, details), headers,
-                HttpStatus.BAD_REQUEST);
+    public final ResponseEntity<RestExceptionResponse> handleValidationException(
+	    MethodArgumentNotValidException ex, WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	// details
+	List<String> details = new ArrayList<>();
+	Stream.of(Arrays.asList(ex.getBody().getDetail()),
+		ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList())
+		.forEach(details::addAll);
+	//
+	return new ResponseEntity<>(
+		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, details), headers,
+		HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageConversionException.class)
-    public ResponseEntity<RestExceptionResponse> handleHttpMessageConversionException(HttpMessageConversionException ex,
-            WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-                Arrays.asList("Contenuto di metadata non corretto")), headers, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<RestExceptionResponse> handleHttpMessageConversionException(
+	    HttpMessageConversionException ex, WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(
+		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+			Arrays.asList("Contenuto di metadata non corretto")),
+		headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<RestExceptionResponse> handleMissingServletRequestPartException(
-            MissingServletRequestPartException ex, WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(
-                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, Arrays.asList(ex.getBody().getDetail())),
-                headers, HttpStatus.BAD_REQUEST);
+	    MissingServletRequestPartException ex, WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+		Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<RestExceptionResponse> handleMaxSizeException(MaxUploadSizeExceededException ex,
-            WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(
-                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-                        Arrays.asList("Dimensione massima consentita di upload " + ex.getMaxUploadSize() + " MB")),
-                headers, HttpStatus.EXPECTATION_FAILED);
+    public ResponseEntity<RestExceptionResponse> handleMaxSizeException(
+	    MaxUploadSizeExceededException ex, WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(
+		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+			Arrays.asList("Dimensione massima consentita di upload "
+				+ ex.getMaxUploadSize() + " MB")),
+		headers, HttpStatus.EXPECTATION_FAILED);
     }
 
     @ExceptionHandler(Throwable.class)
-    public final ResponseEntity<RestExceptionResponse> handleGenericException(Exception ex, WebRequest request) {
-        // log generic exception
-        log.atError().log(STD_MSG_GENERIC_ERROR, ex);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(RestUtil.buildGenericResponseEntity(request), headers,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+    public final ResponseEntity<RestExceptionResponse> handleGenericException(Exception ex,
+	    WebRequest request) {
+	// log generic exception
+	log.atError().log(STD_MSG_GENERIC_ERROR, ex);
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_JSON);
+	return new ResponseEntity<>(RestUtil.buildGenericResponseEntity(request), headers,
+		HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

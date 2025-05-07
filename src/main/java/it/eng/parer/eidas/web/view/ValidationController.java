@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.web.view;
@@ -69,7 +65,8 @@ import jakarta.validation.Valid;
  * @author Snidero_L
  */
 @Controller
-@SessionAttributes({ "validationModel", "validationResultPaginator" })
+@SessionAttributes({
+	"validationModel", "validationResultPaginator" })
 @ConditionalOnProperty(name = "parer.eidas.validation-ui.enabled", havingValue = "true", matchIfMissing = true)
 public class ValidationController {
 
@@ -95,234 +92,246 @@ public class ValidationController {
 
     @GetMapping("/validation")
     public ModelAndView verifica(Model model) {
-        model.addAttribute("verificafirmaBean", new VerificaFirmaBean());
-        return new ModelAndView(MW_VERIFY);
+	model.addAttribute("verificafirmaBean", new VerificaFirmaBean());
+	return new ModelAndView(MW_VERIFY);
     }
 
     @PostMapping("/validation/clean")
     public ModelAndView reset(SessionStatus status) {
-        status.setComplete();
-        return new ModelAndView("redirect:/validation");
+	status.setComplete();
+	return new ModelAndView("redirect:/validation");
     }
 
     @PostMapping(value = "/validation", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ModelAndView verifica(@ModelAttribute @Valid VerificaFirmaBean verificafirmaBean, BindingResult errors,
-            Model model, HttpServletRequest request) {
-        VerificaFirmaResultPaginatorBean paginator = new VerificaFirmaResultPaginatorBean();
-        VerificaFirmaResultBean risultato = new VerificaFirmaResultBean();
-        try {
-            EidasDataToValidateMetadata metadata = convert(verificafirmaBean);
-            EidasWSReportsDTOTree validateSignature = service.validateSignatureOnMultipart(metadata, request,
-                    verificafirmaBean.getFileDaVerificare(),
-                    verificafirmaBean.getFileOriginali().toArray(new MultipartFile[0]),
-                    verificafirmaBean.getFileDssPolicy());
+    public ModelAndView verifica(@ModelAttribute @Valid VerificaFirmaBean verificafirmaBean,
+	    BindingResult errors, Model model, HttpServletRequest request) {
+	VerificaFirmaResultPaginatorBean paginator = new VerificaFirmaResultPaginatorBean();
+	VerificaFirmaResultBean risultato = new VerificaFirmaResultBean();
+	try {
+	    EidasDataToValidateMetadata metadata = convert(verificafirmaBean);
+	    EidasWSReportsDTOTree validateSignature = service.validateSignatureOnMultipart(metadata,
+		    request, verificafirmaBean.getFileDaVerificare(),
+		    verificafirmaBean.getFileOriginali().toArray(new MultipartFile[0]),
+		    verificafirmaBean.getFileDssPolicy());
 
-            risultato.setLivello(1);
-            risultato.setBusta(1);
+	    risultato.setLivello(1);
+	    risultato.setBusta(1);
 
-            compilaOutput(validateSignature, risultato, paginator);
-        } catch (Exception e) {
-            LOG.error("Errore durante la fase di verifica", e);
-            risultato.setWithErrors(true);
-        }
-        model.addAttribute(RESULT_BEAN, risultato);
-        model.addAttribute(RESULT_PAGINATOR, paginator);
-        return new ModelAndView(MW_VERIFYRESULT);
+	    compilaOutput(validateSignature, risultato, paginator);
+	} catch (Exception e) {
+	    LOG.error("Errore durante la fase di verifica", e);
+	    risultato.setWithErrors(true);
+	}
+	model.addAttribute(RESULT_BEAN, risultato);
+	model.addAttribute(RESULT_PAGINATOR, paginator);
+	return new ModelAndView(MW_VERIFYRESULT);
     }
 
     @GetMapping(value = "/validation/nav/{dir}")
     public ModelAndView navdir(@PathVariable("dir") String dir,
-            @ModelAttribute @Valid VerificaFirmaBean verificafirmaBean, BindingResult errors, Model model) {
+	    @ModelAttribute @Valid VerificaFirmaBean verificafirmaBean, BindingResult errors,
+	    Model model) {
 
-        // get result
-        VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) model.getAttribute(RESULT_BEAN);
+	// get result
+	VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) model
+		.getAttribute(RESULT_BEAN);
 
-        VerificaFirmaResultBean risultatoVerificaByLivelloBusta = renderingService.navNextBusta(dir, risultatoVerifica,
-                risultatoVerifica.getLivello(), risultatoVerifica.getBusta());
+	VerificaFirmaResultBean risultatoVerificaByLivelloBusta = renderingService.navNextBusta(dir,
+		risultatoVerifica, risultatoVerifica.getLivello(), risultatoVerifica.getBusta());
 
-        // update paginator
-        VerificaFirmaResultPaginatorBean paginator = (VerificaFirmaResultPaginatorBean) model
-                .getAttribute(RESULT_PAGINATOR);
-        paginator.setCurPage(risultatoVerificaByLivelloBusta.getBusta());
+	// update paginator
+	VerificaFirmaResultPaginatorBean paginator = (VerificaFirmaResultPaginatorBean) model
+		.getAttribute(RESULT_PAGINATOR);
+	paginator.setCurPage(risultatoVerificaByLivelloBusta.getBusta());
 
-        // update model
-        model.addAttribute(RESULT_BEAN, risultatoVerificaByLivelloBusta);
-        model.addAttribute(RESULT_PAGINATOR, paginator);
-        return new ModelAndView(MW_VERIFYRESULT);
+	// update model
+	model.addAttribute(RESULT_BEAN, risultatoVerificaByLivelloBusta);
+	model.addAttribute(RESULT_PAGINATOR, paginator);
+	return new ModelAndView(MW_VERIFYRESULT);
     }
 
     @GetMapping(value = "/validation/download-simple-report/{busta}/{livello}")
-    public void downloadSimpleReport(@PathVariable("busta") int busta, @PathVariable("livello") int livello,
-            HttpSession session, HttpServletResponse response) {
-        try {
-            VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) session.getAttribute(RESULT_BEAN);
-            VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
-            String simpleReport = ricerca.getSimpleReportXml();
+    public void downloadSimpleReport(@PathVariable("busta") int busta,
+	    @PathVariable("livello") int livello, HttpSession session,
+	    HttpServletResponse response) {
+	try {
+	    VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) session
+		    .getAttribute(RESULT_BEAN);
+	    VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
+	    String simpleReport = ricerca.getSimpleReportXml();
 
-            response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
-            response.setHeader("Content-Disposition", "attachment; filename=DSS-Simple-report.pdf");
+	    response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
+	    response.setHeader("Content-Disposition", "attachment; filename=DSS-Simple-report.pdf");
 
-            renderingService.generateSimpleReportPdf(simpleReport, response.getOutputStream());
-        } catch (Exception e) {
-            LOG.error("An error occured while generating pdf for simple report", e);
-        }
+	    renderingService.generateSimpleReportPdf(simpleReport, response.getOutputStream());
+	} catch (Exception e) {
+	    LOG.error("An error occured while generating pdf for simple report", e);
+	}
 
     }
 
     @GetMapping(value = "/validation/download-detailed-report/{busta}/{livello}")
-    public void downloadDetailedReport(@PathVariable("busta") int busta, @PathVariable("livello") int livello,
-            HttpSession session, HttpServletResponse response) {
-        try {
-            VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) session.getAttribute(RESULT_BEAN);
-            VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
-            String simpleReport = ricerca.getDetailedReportXml();
+    public void downloadDetailedReport(@PathVariable("busta") int busta,
+	    @PathVariable("livello") int livello, HttpSession session,
+	    HttpServletResponse response) {
+	try {
+	    VerificaFirmaResultBean risultatoVerifica = (VerificaFirmaResultBean) session
+		    .getAttribute(RESULT_BEAN);
+	    VerificaFirmaResultBean ricerca = risultatoVerifica.ricerca(livello, busta);
+	    String simpleReport = ricerca.getDetailedReportXml();
 
-            response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
-            response.setHeader("Content-Disposition", "attachment; filename=DSS-Detailed-report.pdf");
+	    response.setContentType(MimeTypeEnum.PDF.getMimeTypeString());
+	    response.setHeader("Content-Disposition",
+		    "attachment; filename=DSS-Detailed-report.pdf");
 
-            renderingService.generateDetailedReportPdf(simpleReport, response.getOutputStream());
-        } catch (Exception e) {
-            LOG.error("An error occured while generating pdf for simple report", e);
-        }
+	    renderingService.generateDetailedReportPdf(simpleReport, response.getOutputStream());
+	} catch (Exception e) {
+	    LOG.error("An error occured while generating pdf for simple report", e);
+	}
     }
 
     /**
-     * Crea l'oggetto da utilizzare per la view contenente l'esito della verifica. <strong>Nota bene:</strong> il
-     * popolamento ricorsivo
+     * Crea l'oggetto da utilizzare per la view contenente l'esito della verifica. <strong>Nota
+     * bene:</strong> il popolamento ricorsivo
      *
-     * @param validateSignature
-     *            esito verifica firma
-     * @param risultato
-     *            oggetto view rappresentante l'esito.
+     * @param validateSignature esito verifica firma
+     * @param risultato         oggetto view rappresentante l'esito.
      * @param paginator
      * @param nrBuste
      * @param nrrisultati
      */
-    private void compilaOutput(EidasWSReportsDTOTree validateSignature, VerificaFirmaResultBean risultato,
-            VerificaFirmaResultPaginatorBean paginator) {
-        WSReportsDTO report = validateSignature.getReport();
-        String simpleReport = renderingService.generateSimpleReport(report.getSimpleReport());
-        String detailedReport = renderingService.generateDetailedReport(report.getDetailedReport());
-        String diagnosticData = renderingService.generateDiagnosticData(report.getDiagnosticData());
+    private void compilaOutput(EidasWSReportsDTOTree validateSignature,
+	    VerificaFirmaResultBean risultato, VerificaFirmaResultPaginatorBean paginator) {
+	WSReportsDTO report = validateSignature.getReport();
+	String simpleReport = renderingService.generateSimpleReport(report.getSimpleReport());
+	String detailedReport = renderingService.generateDetailedReport(report.getDetailedReport());
+	String diagnosticData = renderingService.generateDiagnosticData(report.getDiagnosticData());
 
-        // memorizzarli eventualmente in sessione.
-        String simpleReportXml = renderingService.marshallSimpleReport(report.getSimpleReport());
-        String detailedReportXml = renderingService.marshallDetailedReport(report.getDetailedReport());
+	// memorizzarli eventualmente in sessione.
+	String simpleReportXml = renderingService.marshallSimpleReport(report.getSimpleReport());
+	String detailedReportXml = renderingService
+		.marshallDetailedReport(report.getDetailedReport());
 
-        risultato.setSimpleReportXml(simpleReportXml);
-        risultato.setDetailedReportXml(detailedReportXml);
+	risultato.setSimpleReportXml(simpleReportXml);
+	risultato.setDetailedReportXml(detailedReportXml);
 
-        risultato.setSimpleReport(simpleReport);
-        risultato.setDetailedReport(detailedReport);
-        risultato.setDiagnosticData(diagnosticData);
+	risultato.setSimpleReport(simpleReport);
+	risultato.setDetailedReport(detailedReport);
+	risultato.setDiagnosticData(diagnosticData);
 
-        if (validateSignature.getChildren() != null) {
-            for (int indice = 0; indice < validateSignature.getChildren().size(); indice++) {
-                EidasWSReportsDTOTree child = validateSignature.getChildren().get(indice);
-                if (!child.isUnsigned()) {
-                    VerificaFirmaResultBean figlio = new VerificaFirmaResultBean();
-                    figlio.setBusta(risultato.getBusta() + 1);
-                    figlio.setLivello(indice + 1);
-                    // parent
-                    figlio.setParent(risultato);
-                    paginator.incNrResult();
-                    compilaOutput(child, figlio, paginator);
-                    risultato.add(figlio);
-                }
-            }
-        }
+	if (validateSignature.getChildren() != null) {
+	    for (int indice = 0; indice < validateSignature.getChildren().size(); indice++) {
+		EidasWSReportsDTOTree child = validateSignature.getChildren().get(indice);
+		if (!child.isUnsigned()) {
+		    VerificaFirmaResultBean figlio = new VerificaFirmaResultBean();
+		    figlio.setBusta(risultato.getBusta() + 1);
+		    figlio.setLivello(indice + 1);
+		    // parent
+		    figlio.setParent(risultato);
+		    paginator.incNrResult();
+		    compilaOutput(child, figlio, paginator);
+		    risultato.add(figlio);
+		}
+	    }
+	}
     }
 
     private static EidasDataToValidateMetadata convert(VerificaFirmaBean verificaFirmaBean) {
-        EidasDataToValidateMetadata dataToValidate = new EidasDataToValidateMetadata();
-        try {
-            dataToValidate.setControlloRevocaIgnorato(!verificaFirmaBean.isAbilitaControlloRevoca());
-            dataToValidate.setControlloCatenaTrustIgnorato(!verificaFirmaBean.isAbilitaControlloCatenaTrusted());
-            dataToValidate.setControlloCertificatoIgnorato(!verificaFirmaBean.isAbilitaControlloCa());
-            dataToValidate.setControlloCrittograficoIgnorato(!verificaFirmaBean.isAbilitaControlloCrittografico());
-            // include raw
-            dataToValidate.setIncludeCertificateRevocationValues(verificaFirmaBean.isIncludiRaw());
-            dataToValidate.setIncludeCertificateTokenValues(verificaFirmaBean.isIncludiRaw());
-            dataToValidate.setIncludeTimestampTokenValues(verificaFirmaBean.isIncludiRaw());
-            dataToValidate.setIncludEvidenceRecordValues(verificaFirmaBean.isIncludiRaw());
+	EidasDataToValidateMetadata dataToValidate = new EidasDataToValidateMetadata();
+	try {
+	    dataToValidate
+		    .setControlloRevocaIgnorato(!verificaFirmaBean.isAbilitaControlloRevoca());
+	    dataToValidate.setControlloCatenaTrustIgnorato(
+		    !verificaFirmaBean.isAbilitaControlloCatenaTrusted());
+	    dataToValidate
+		    .setControlloCertificatoIgnorato(!verificaFirmaBean.isAbilitaControlloCa());
+	    dataToValidate.setControlloCrittograficoIgnorato(
+		    !verificaFirmaBean.isAbilitaControlloCrittografico());
+	    // include raw
+	    dataToValidate.setIncludeCertificateRevocationValues(verificaFirmaBean.isIncludiRaw());
+	    dataToValidate.setIncludeCertificateTokenValues(verificaFirmaBean.isIncludiRaw());
+	    dataToValidate.setIncludeTimestampTokenValues(verificaFirmaBean.isIncludiRaw());
+	    dataToValidate.setIncludEvidenceRecordValues(verificaFirmaBean.isIncludiRaw());
 
-            Date dataRiferimento = new Date();
-            LocalDate dataRiferimentoForm = verificaFirmaBean.getDataRiferimento();
-            LocalTime oraRiferimentoForm = verificaFirmaBean.getOraRiferimento();
+	    Date dataRiferimento = new Date();
+	    LocalDate dataRiferimentoForm = verificaFirmaBean.getDataRiferimento();
+	    LocalTime oraRiferimentoForm = verificaFirmaBean.getOraRiferimento();
 
-            if (dataRiferimentoForm != null) {
-                if (oraRiferimentoForm == null) {
-                    oraRiferimentoForm = LocalTime.MIN;
-                }
-                LocalDateTime atDate = oraRiferimentoForm.atDate(dataRiferimentoForm);
-                ZonedDateTime zatDate = atDate.atZone(ZoneId.systemDefault());
-                dataRiferimento = Date.from(zatDate.toInstant());
-            }
+	    if (dataRiferimentoForm != null) {
+		if (oraRiferimentoForm == null) {
+		    oraRiferimentoForm = LocalTime.MIN;
+		}
+		LocalDateTime atDate = oraRiferimentoForm.atDate(dataRiferimentoForm);
+		ZonedDateTime zatDate = atDate.atZone(ZoneId.systemDefault());
+		dataRiferimento = Date.from(zatDate.toInstant());
+	    }
 
-            dataToValidate.setDataDiRiferimento(dataRiferimento);
+	    dataToValidate.setDataDiRiferimento(dataRiferimento);
 
-            MultipartFile fileDaVerificare = verificaFirmaBean.getFileDaVerificare();
+	    MultipartFile fileDaVerificare = verificaFirmaBean.getFileDaVerificare();
 
-            dataToValidate.setDocumentId(fileDaVerificare.getName());
-            dataToValidate.setUuid(UUID.randomUUID().toString());
+	    dataToValidate.setDocumentId(fileDaVerificare.getName());
+	    dataToValidate.setUuid(UUID.randomUUID().toString());
 
-            EidasRemoteDocument signedDocument = buildDocument(fileDaVerificare);
-            // Documento firmato
-            dataToValidate.setRemoteSignedDocument(signedDocument);
+	    EidasRemoteDocument signedDocument = buildDocument(fileDaVerificare);
+	    // Documento firmato
+	    dataToValidate.setRemoteSignedDocument(signedDocument);
 
-            MultipartFile policy = verificaFirmaBean.getFileDssPolicy();
-            if (policy != null && !policy.isEmpty()) {
-                EidasRemoteDocument policyDocument = buildDocument(policy);
-                // Custom policy DSS
-                dataToValidate.setPolicyExt(policyDocument);
-            }
+	    MultipartFile policy = verificaFirmaBean.getFileDssPolicy();
+	    if (policy != null && !policy.isEmpty()) {
+		EidasRemoteDocument policyDocument = buildDocument(policy);
+		// Custom policy DSS
+		dataToValidate.setPolicyExt(policyDocument);
+	    }
 
-            List<MultipartFile> documentiOriginali = verificaFirmaBean.getFileOriginali();
-            if (documentiOriginali != null) {
-                for (MultipartFile documentoOriginale : documentiOriginali) {
-                    if (!documentoOriginale.isEmpty()) {
-                        EidasRemoteDocument originalDocument = buildDocument(documentoOriginale);
-                        if (dataToValidate.getRemoteOriginalDocuments() == null) {
-                            dataToValidate.setRemoteOriginalDocuments(new ArrayList<EidasRemoteDocument>());
-                        }
-                        // Original Documents
-                        dataToValidate.getRemoteOriginalDocuments().add(originalDocument);
-                    }
-                }
-            }
+	    List<MultipartFile> documentiOriginali = verificaFirmaBean.getFileOriginali();
+	    if (documentiOriginali != null) {
+		for (MultipartFile documentoOriginale : documentiOriginali) {
+		    if (!documentoOriginale.isEmpty()) {
+			EidasRemoteDocument originalDocument = buildDocument(documentoOriginale);
+			if (dataToValidate.getRemoteOriginalDocuments() == null) {
+			    dataToValidate.setRemoteOriginalDocuments(
+				    new ArrayList<EidasRemoteDocument>());
+			}
+			// Original Documents
+			dataToValidate.getRemoteOriginalDocuments().add(originalDocument);
+		    }
+		}
+	    }
 
-        } catch (IOException e) {
-            LOG.error("Errore durante la compilazione del dto di input", e);
-        }
-        return dataToValidate;
+	} catch (IOException e) {
+	    LOG.error("Errore durante la compilazione del dto di input", e);
+	}
+	return dataToValidate;
     }
 
-    private static EidasRemoteDocument buildDocument(MultipartFile fileUploaded) throws IOException {
-        EidasRemoteDocument policyDocument = new EidasRemoteDocument();
-        policyDocument.setName(fileUploaded.getName());
-        policyDocument.setAbsolutePath(fileUploaded.getOriginalFilename());
-        policyDocument.setBytes(fileUploaded.getBytes());
-        return policyDocument;
+    private static EidasRemoteDocument buildDocument(MultipartFile fileUploaded)
+	    throws IOException {
+	EidasRemoteDocument policyDocument = new EidasRemoteDocument();
+	policyDocument.setName(fileUploaded.getName());
+	policyDocument.setAbsolutePath(fileUploaded.getOriginalFilename());
+	policyDocument.setBytes(fileUploaded.getBytes());
+	return policyDocument;
 
     }
 
     @ModelAttribute("version")
     public String getVersion() {
-        return env.getProperty(Constants.BUILD_VERSION);
+	return env.getProperty(Constants.BUILD_VERSION);
     }
 
     @ModelAttribute("builddate")
     public String getBuilddate() {
-        return env.getProperty(Constants.BUILD_TIME);
+	return env.getProperty(Constants.BUILD_TIME);
     }
 
     @ModelAttribute("dss")
     public String getDss() {
-        return buildProperties.get(Constants.DSS_VERSION);
+	return buildProperties.get(Constants.DSS_VERSION);
     }
 
     @ModelAttribute("displayDownloadPdf")
     public boolean isDisplayDownloadPdf() {
-        return true;
+	return true;
     }
 }

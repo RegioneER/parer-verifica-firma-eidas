@@ -1,9 +1,8 @@
 ## Container scan evidence CVE
 <strong>Image name:</strong> registry.ente.regione.emr.it/parer/okd/verifica-firma-eidas:sast
-<br/><strong>Run date:</strong> Fri Mar 7 16:01:27 CET 2025
-<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/540796">Job</a>
-<br/><strong>CVE founded:</strong> 2
+<br/><strong>Run date:</strong> Wed May 7 13:00:29 CEST 2025
+<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/612321">Job</a>
+<br/><strong>CVE founded:</strong> 1
 | CVE | Description | Severity | Solution | 
 |:---:|:---|:---:|:---|
-| [CVE-2024-56171](https://access.redhat.com/security/cve/CVE-2024-56171)|libxml2 before 2.12.10 and 2.13.x before 2.13.6 has a use-after-free in xmlSchemaIDCFillNodeTables and xmlSchemaBubbleIDCNodeTables in xmlschemas.c. To exploit this, a crafted XML document must be validated against an XML schema with certain identity constraints, or a crafted XML schema must be used.|High|No solution provided|
-| [CVE-2025-24928](https://access.redhat.com/security/cve/CVE-2025-24928)|libxml2 before 2.12.10 and 2.13.x before 2.13.6 has a stack-based buffer overflow in xmlSnprintfElements in valid.c. To exploit this, DTD validation must occur for an untrusted document or untrusted DTD. NOTE: this is similar to CVE-2017-9047.|High|No solution provided|
+| [CVE-2025-27363](http://www.openwall.com/lists/oss-security/2025/03/13/1)|An out of bounds write exists in FreeType versions 2.13.0 and below (newer versions of FreeType are not vulnerable) when attempting to parse font subglyph structures related to TrueType GX and variable font files. The vulnerable code assigns a signed short value to an unsigned long and then adds a static value causing it to wrap around and allocate too small of a heap buffer. The code then writes up to 6 signed long integers out of bounds relative to this buffer. This may result in arbitrary code execution. This vulnerability may have been exploited in the wild.|High|No solution provided|

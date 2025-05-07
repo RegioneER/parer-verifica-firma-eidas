@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.web.config;
@@ -86,9 +82,12 @@ import it.eng.parer.eidas.core.service.ICustomRemoteDocumentValidation;
 
 @Configuration
 // @PropertySource("classpath:dss.properties")
-@Import({ SchedulingConfig.class })
-@ComponentScan(basePackages = { "eu.europa.esig.dss.web.job", "eu.europa.esig.dss.web.service" })
-@ImportResource({ "${tsp-source}" })
+@Import({
+	SchedulingConfig.class })
+@ComponentScan(basePackages = {
+	"eu.europa.esig.dss.web.job", "eu.europa.esig.dss.web.service" })
+@ImportResource({
+	"${tsp-source}" })
 public class DSSBeanConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(DSSBeanConfig.class);
@@ -193,392 +192,405 @@ public class DSSBeanConfig {
     /** CUSTOM HTTP CLIENT ! **/
     @Bean(initMethod = "init", destroyMethod = "destroy")
     public CommonsDataHttpClient dataHttpClient() {
-        CommonsDataHttpClient dataClient = new CommonsDataHttpClient();
-        // NOTA timeout impostabile (da configurazione!)
-        dataClient.setTimeoutConnection(timeoutConnection);
-        dataClient.setConnectionsMaxTotal(connectionsMaxTotal);
-        dataClient.setTimeoutSocket(timeoutSocket);
-        //
-        dataClient.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
-        dataClient.setConnectionTimeToLive(connectionTimeToLive);
-        //
-        return dataClient;
+	CommonsDataHttpClient dataClient = new CommonsDataHttpClient();
+	// NOTA timeout impostabile (da configurazione!)
+	dataClient.setTimeoutConnection(timeoutConnection);
+	dataClient.setConnectionsMaxTotal(connectionsMaxTotal);
+	dataClient.setTimeoutSocket(timeoutSocket);
+	//
+	dataClient.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
+	dataClient.setConnectionTimeToLive(connectionTimeToLive);
+	//
+	return dataClient;
     }
 
     @Bean
     public CommonsDataLoaderExt dataLoader() {
-        CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
-        dataLoader.setCommonsDataHttpClient(dataHttpClient());
-        dataLoader.setProxyConfig(proxyConfig);
-        //
-        dataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
-        return dataLoader;
+	CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+	dataLoader.setCommonsDataHttpClient(dataHttpClient());
+	dataLoader.setProxyConfig(proxyConfig);
+	//
+	dataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
+	return dataLoader;
     }
 
     @Bean
     public OCSPDataLoaderExt ocspDataLoader() {
-        OCSPDataLoaderExt ocspDataLoader = new OCSPDataLoaderExt();
-        ocspDataLoader.setCommonsDataHttpClient(dataHttpClient());
-        ocspDataLoader.setProxyConfig(proxyConfig);
-        ocspDataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
-        return ocspDataLoader;
+	OCSPDataLoaderExt ocspDataLoader = new OCSPDataLoaderExt();
+	ocspDataLoader.setCommonsDataHttpClient(dataHttpClient());
+	ocspDataLoader.setProxyConfig(proxyConfig);
+	ocspDataLoader.setLdapTimeoutConnection(ldapTimeoutConnection);
+	return ocspDataLoader;
     }
 
     /* from 5.13 */
     @Bean
     public FileCacheDataLoader fileCacheDataLoader() {
-        FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
-        fileCacheDataLoader.setCacheExpirationTime(cacheExpiration * 1000); // to millis
-        return fileCacheDataLoader;
+	FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+	fileCacheDataLoader.setCacheExpirationTime(cacheExpiration * 1000); // to millis
+	return fileCacheDataLoader;
     }
 
     private FileCacheDataLoader initFileCacheDataLoader() {
-        FileCacheDataLoader fileCacheDataLoader = new FileCacheDataLoader();
-        fileCacheDataLoader.setDataLoader(dataLoader());
-        // Per default uses "java.io.tmpdir" property
-        // fileCacheDataLoader.setFileCacheDirectory(new File("/tmp"));
-        if (StringUtils.isNotBlank(cacheFilePath)) {
-            fileCacheDataLoader.setFileCacheDirectory(new File(cacheFilePath));
-        }
-        return fileCacheDataLoader;
+	FileCacheDataLoader fileCacheDataLoader = new FileCacheDataLoader();
+	fileCacheDataLoader.setDataLoader(dataLoader());
+	// Per default uses "java.io.tmpdir" property
+	// fileCacheDataLoader.setFileCacheDirectory(new File("/tmp"));
+	if (StringUtils.isNotBlank(cacheFilePath)) {
+	    fileCacheDataLoader.setFileCacheDirectory(new File(cacheFilePath));
+	}
+	return fileCacheDataLoader;
     }
 
     @Bean
     public OnlineCRLSource onlineCRLSource() {
-        OnlineCRLSource onlineCRLSource = new OnlineCRLSource();
-        onlineCRLSource.setDataLoader(dataLoader());
-        return onlineCRLSource;
+	OnlineCRLSource onlineCRLSource = new OnlineCRLSource();
+	onlineCRLSource.setDataLoader(dataLoader());
+	return onlineCRLSource;
     }
 
     /*
-     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
-     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
-     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean
+     * gestione logica doppio "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP
+     * TABLE non desisedarata corretto che vengano create le tabelle ma non si vuole dropparle non
+     * appena il processo viene interrotto
      *
      * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
-     * config/DSSBeanConfig.java
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
+     * europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean
     public CRLSource defineCRLSource() {
-        if (cacheEnabled) {
-            if (dataSource != null) {
-                JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
-                jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
-                jdbcCacheCRLSource.setProxySource(onlineCRLSource());
-                jdbcCacheCRLSource.setDefaultNextUpdateDelay(crlDefaultNextUpdate); // 0 (get new one every time)
-                jdbcCacheCRLSource.setMaxNextUpdateDelay(crlMaxNextUpdate); // 0 (get new one every time)
-                // default = true
-                // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-                jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
-                // create table if not exits
-                try {
-                    jdbcCacheCRLSource.initTable();
-                } catch (SQLException e) {
-                    throw new DSSException("Errore inizializzazione CRL JDBC cache", e);
-                }
-                return jdbcCacheCRLSource;
-            }
-            OnlineCRLSource onlineCRLSource = onlineCRLSource();
-            FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
-            fileCacheDataLoader.setCacheExpirationTime(crlMaxNextUpdate * 1000); // to millis
-            onlineCRLSource.setDataLoader(fileCacheDataLoader);
-            return onlineCRLSource;
-        } else {
-            return onlineCRLSource();
-        }
+	if (cacheEnabled) {
+	    if (dataSource != null) {
+		JdbcCacheCRLSource jdbcCacheCRLSource = new JdbcCacheCRLSource();
+		jdbcCacheCRLSource.setJdbcCacheConnector(jdbcCacheConnector());
+		jdbcCacheCRLSource.setProxySource(onlineCRLSource());
+		jdbcCacheCRLSource.setDefaultNextUpdateDelay(crlDefaultNextUpdate); // 0 (get new
+										    // one every
+										    // time)
+		jdbcCacheCRLSource.setMaxNextUpdateDelay(crlMaxNextUpdate); // 0 (get new one every
+									    // time)
+		// default = true
+		// questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
+		jdbcCacheCRLSource.setRemoveExpired(revokeRemoveExpired);
+		// create table if not exits
+		try {
+		    jdbcCacheCRLSource.initTable();
+		} catch (SQLException e) {
+		    throw new DSSException("Errore inizializzazione CRL JDBC cache", e);
+		}
+		return jdbcCacheCRLSource;
+	    }
+	    OnlineCRLSource onlineCRLSource = onlineCRLSource();
+	    FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+	    fileCacheDataLoader.setCacheExpirationTime(crlMaxNextUpdate * 1000); // to millis
+	    onlineCRLSource.setDataLoader(fileCacheDataLoader);
+	    return onlineCRLSource;
+	} else {
+	    return onlineCRLSource();
+	}
 
     }
 
     @Bean
     public OnlineOCSPSource onlineOCSPSource() {
-        OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
-        onlineOCSPSource.setDataLoader(ocspDataLoader());
-        return onlineOCSPSource;
+	OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
+	onlineOCSPSource.setDataLoader(ocspDataLoader());
+	return onlineOCSPSource;
     }
 
     /*
-     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
-     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
-     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean
+     * gestione logica doppio "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP
+     * TABLE non desisedarata corretto che vengano create le tabelle ma non si vuole dropparle non
+     * appena il processo viene interrotto
      *
      * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
-     * config/DSSBeanConfig.java
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
+     * europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean
     public OCSPSource defineOCSPSource() {
-        if (cacheEnabled) {
-            if (dataSource != null) {
-                JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
-                jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
-                jdbcCacheOCSPSource.setProxySource(onlineOCSPSource());
-                jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new one every time)
-                jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one every time)
-                // questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
-                jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
-                try {
-                    jdbcCacheOCSPSource.initTable();
-                } catch (SQLException e) {
-                    throw new DSSException("Errore inizializzazione OCSP JDBC cache", e);
-                }
-                return jdbcCacheOCSPSource;
-            }
-            OnlineOCSPSource onlineOCSPSource = onlineOCSPSource();
-            FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
-            fileCacheDataLoader.setDataLoader(ocspDataLoader());
-            fileCacheDataLoader.setCacheExpirationTime(ocspMaxNextUpdate * 1000); // to millis
-            onlineOCSPSource.setDataLoader(fileCacheDataLoader);
-            return onlineOCSPSource;
-        } else {
-            return onlineOCSPSource();
-        }
+	if (cacheEnabled) {
+	    if (dataSource != null) {
+		JdbcCacheOCSPSource jdbcCacheOCSPSource = new JdbcCacheOCSPSource();
+		jdbcCacheOCSPSource.setJdbcCacheConnector(jdbcCacheConnector());
+		jdbcCacheOCSPSource.setProxySource(onlineOCSPSource());
+		jdbcCacheOCSPSource.setDefaultNextUpdateDelay(ocspDefaultNextUpdate); // 0 (get new
+										      // one every
+										      // time)
+		jdbcCacheOCSPSource.setMaxNextUpdateDelay(ocspMaxNextUpdate); // 0 (get new one
+									      // every time)
+		// questo permette di mantenere il dato su DB aggiornandolo se risulta *expired*
+		jdbcCacheOCSPSource.setRemoveExpired(revokeRemoveExpired);
+		try {
+		    jdbcCacheOCSPSource.initTable();
+		} catch (SQLException e) {
+		    throw new DSSException("Errore inizializzazione OCSP JDBC cache", e);
+		}
+		return jdbcCacheOCSPSource;
+	    }
+	    OnlineOCSPSource onlineOCSPSource = onlineOCSPSource();
+	    FileCacheDataLoader fileCacheDataLoader = initFileCacheDataLoader();
+	    fileCacheDataLoader.setDataLoader(ocspDataLoader());
+	    fileCacheDataLoader.setCacheExpirationTime(ocspMaxNextUpdate * 1000); // to millis
+	    onlineOCSPSource.setDataLoader(fileCacheDataLoader);
+	    return onlineOCSPSource;
+	} else {
+	    return onlineOCSPSource();
+	}
     }
 
     /*
-     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean gestione logica doppio
-     * "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP TABLE non desisedarata corretto che
-     * vengano create le tabelle ma non si vuole dropparle non appena il processo viene interrotto
+     * initMethod = "initTable" esecuzione CREATE table gestita in fase di creazione del bean
+     * gestione logica doppio "source" JDBC vs FILE destroyMethod = "destroyTable" = esecuzione DROP
+     * TABLE non desisedarata corretto che vengano create le tabelle ma non si vuole dropparle non
+     * appena il processo viene interrotto
      *
      *
      * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/europa/esig/dss/web/
-     * config/DSSBeanConfig.java
+     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
+     * europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
     @Bean
     public AIASource defineAIASource() {
-        if (cacheEnabled) {
-            if (dataSource != null) {
-                JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
-                jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
-                jdbcCacheAIASource.setProxySource(onlineAIASource());
-                return jdbcCacheAIASource;
-            }
-            FileCacheDataLoader fileCacheDataLoader = fileCacheDataLoader();
-            return new DefaultAIASource(fileCacheDataLoader);
-        } else {
-            return onlineAIASource();
-        }
+	if (cacheEnabled) {
+	    if (dataSource != null) {
+		JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
+		jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
+		jdbcCacheAIASource.setProxySource(onlineAIASource());
+		return jdbcCacheAIASource;
+	    }
+	    FileCacheDataLoader fileCacheDataLoader = fileCacheDataLoader();
+	    return new DefaultAIASource(fileCacheDataLoader);
+	} else {
+	    return onlineAIASource();
+	}
     }
 
     @Bean
     public AIASource onlineAIASource() {
-        return new DefaultAIASource(dataLoader());
+	return new DefaultAIASource(dataLoader());
     }
 
     /* from 5.8 */
     @Bean
     public CertificateVerifier certificateVerifier() {
-        CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        /* manage source */
-        certificateVerifier.setCrlSource(defineCRLSource());
-        certificateVerifier.setOcspSource(defineOCSPSource());
-        certificateVerifier.setAIASource(defineAIASource());
-        certificateVerifier.setTrustedCertSources(trustedListSource());
+	CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
+	/* manage source */
+	certificateVerifier.setCrlSource(defineCRLSource());
+	certificateVerifier.setOcspSource(defineOCSPSource());
+	certificateVerifier.setAIASource(defineAIASource());
+	certificateVerifier.setTrustedCertSources(trustedListSource());
 
-        // Default configs
-        certificateVerifier.setAlertOnMissingRevocationData(new ExceptionOnStatusAlert());
-        certificateVerifier.setCheckRevocationForUntrustedChains(false);
+	// Default configs
+	certificateVerifier.setAlertOnMissingRevocationData(new ExceptionOnStatusAlert());
+	certificateVerifier.setCheckRevocationForUntrustedChains(false);
 
-        // Revocation strategy (CRL first)
-        if (revokeDataLoadingStratCrlFirst) {
-            certificateVerifier
-                    .setRevocationDataLoadingStrategyFactory(new CRLFirstRevocationDataLoadingStrategyFactory());
-        }
+	// Revocation strategy (CRL first)
+	if (revokeDataLoadingStratCrlFirst) {
+	    certificateVerifier.setRevocationDataLoadingStrategyFactory(
+		    new CRLFirstRevocationDataLoadingStrategyFactory());
+	}
 
-        return certificateVerifier;
+	return certificateVerifier;
     }
 
     @Bean
     public Resource defaultPolicy() {
-        Resource resource = new FileSystemResource(defaultValidationPolicy);
-        if (!resource.exists()) {
-            resource = new ClassPathResource(defaultValidationPolicy);
-        }
-        return resource;
+	Resource resource = new FileSystemResource(defaultValidationPolicy);
+	if (!resource.exists()) {
+	    resource = new ClassPathResource(defaultValidationPolicy);
+	}
+	return resource;
     }
 
     @Bean
     public CAdESService cadesService() {
-        CAdESService service = new CAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	CAdESService service = new CAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     @Bean
     public XAdESService xadesService() {
-        XAdESService service = new XAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	XAdESService service = new XAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     @Bean
     public PAdESService padesService() {
-        PAdESService service = new PAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	PAdESService service = new PAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     @Bean
     public ASiCWithCAdESService asicWithCadesService() {
-        ASiCWithCAdESService service = new ASiCWithCAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	ASiCWithCAdESService service = new ASiCWithCAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     @Bean
     public ASiCWithXAdESService asicWithXadesService() {
-        ASiCWithXAdESService service = new ASiCWithXAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	ASiCWithXAdESService service = new ASiCWithXAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     /* from 5.8 */
     @Bean
     public JAdESService jadesService() {
-        JAdESService service = new JAdESService(certificateVerifier());
-        service.setTspSource(tspSource);
-        return service;
+	JAdESService service = new JAdESService(certificateVerifier());
+	service.setTspSource(tspSource);
+	return service;
     }
 
     /* from 5.8 */
     @Bean
     public RemoteDocumentSignatureServiceImpl remoteSignatureService() {
-        RemoteDocumentSignatureServiceImpl service = new RemoteDocumentSignatureServiceImpl();
-        service.setAsicWithCAdESService(asicWithCadesService());
-        service.setAsicWithXAdESService(asicWithXadesService());
-        service.setCadesService(cadesService());
-        service.setXadesService(xadesService());
-        service.setPadesService(padesService());
-        service.setJadesService(jadesService());
-        return service;
+	RemoteDocumentSignatureServiceImpl service = new RemoteDocumentSignatureServiceImpl();
+	service.setAsicWithCAdESService(asicWithCadesService());
+	service.setAsicWithXAdESService(asicWithXadesService());
+	service.setCadesService(cadesService());
+	service.setXadesService(xadesService());
+	service.setPadesService(padesService());
+	service.setJadesService(jadesService());
+	return service;
     }
 
     /* from 5.8 */
     @Bean
     public RemoteMultipleDocumentsSignatureServiceImpl remoteMultipleDocumentsSignatureService() {
-        RemoteMultipleDocumentsSignatureServiceImpl service = new RemoteMultipleDocumentsSignatureServiceImpl();
-        service.setAsicWithCAdESService(asicWithCadesService());
-        service.setAsicWithXAdESService(asicWithXadesService());
-        service.setXadesService(xadesService());
-        service.setJadesService(jadesService());
-        return service;
+	RemoteMultipleDocumentsSignatureServiceImpl service = new RemoteMultipleDocumentsSignatureServiceImpl();
+	service.setAsicWithCAdESService(asicWithCadesService());
+	service.setAsicWithXAdESService(asicWithXadesService());
+	service.setXadesService(xadesService());
+	service.setJadesService(jadesService());
+	return service;
     }
 
     @Bean
     public RemoteDocumentValidationService remoteValidationService() {
-        RemoteDocumentValidationService service = new RemoteDocumentValidationService();
-        service.setVerifier(certificateVerifier());
-        return service;
+	RemoteDocumentValidationService service = new RemoteDocumentValidationService();
+	service.setVerifier(certificateVerifier());
+	return service;
     }
 
     /* from 5.11 */
     @Bean
     public RemoteTrustedListSignatureServiceImpl remoteTrustedListSignatureService() {
-        RemoteTrustedListSignatureServiceImpl service = new RemoteTrustedListSignatureServiceImpl();
-        service.setXadesService(xadesService());
-        return service;
+	RemoteTrustedListSignatureServiceImpl service = new RemoteTrustedListSignatureServiceImpl();
+	service.setXadesService(xadesService());
+	return service;
     }
 
     /* from 5.6 */
     @Bean
     public KeyStoreSignatureTokenConnection remoteToken() throws IOException {
-        return new KeyStoreSignatureTokenConnection(ResourceUtils.getURL(serverSigningKeystoreFilename).openStream(),
-                serverSigningKeystoreType, new PasswordProtection(serverSigningKeystorePassword.toCharArray()));
+	return new KeyStoreSignatureTokenConnection(
+		ResourceUtils.getURL(serverSigningKeystoreFilename).openStream(),
+		serverSigningKeystoreType,
+		new PasswordProtection(serverSigningKeystorePassword.toCharArray()));
     }
 
     @Bean
     public ICustomRemoteDocumentValidation customRemoteValidationService() {
-        ICustomRemoteDocumentValidation service = new CustomRemoteDocumentValidationImpl();
-        service.setVerifier(certificateVerifier());
-        service.setDefaultValidationPolicy(defaultPolicy());
-        return service;
+	ICustomRemoteDocumentValidation service = new CustomRemoteDocumentValidationImpl();
+	service.setVerifier(certificateVerifier());
+	service.setDefaultValidationPolicy(defaultPolicy());
+	return service;
     }
 
     @Bean(name = "european-trusted-list-certificate-source")
     public TrustedListsCertificateSource trustedListSource() {
-        return new TrustedListsCertificateSource();
+	return new TrustedListsCertificateSource();
     }
 
     /* from 5.6 */
     @Bean
     public KeyStoreCertificateSource ojContentKeyStore() {
-        try {
-            return new KeyStoreCertificateSource(ResourceUtils.getURL(ksFilename).openStream(), ksType,
-                    ksPassword.toCharArray());
-        } catch (IOException e) {
-            throw new DSSException("Unable to load the file " + ksFilename, e);
-        }
+	try {
+	    return new KeyStoreCertificateSource(ResourceUtils.getURL(ksFilename).openStream(),
+		    ksType, ksPassword.toCharArray());
+	} catch (IOException e) {
+	    throw new DSSException("Unable to load the file " + ksFilename, e);
+	}
     }
 
     /* from 5.6 */
     @Bean(name = "european-lotl-source")
     public LOTLSource europeanLOTL() {
-        LOTLSource lotlSource = new LOTLSource();
-        lotlSource.setUrl(lotlUrl);
-        lotlSource.setCertificateSource(ojContentKeyStore());
-        lotlSource.setSigningCertificatesAnnouncementPredicate(new OfficialJournalSchemeInformationURI(currentOjUrl));
-        lotlSource.setPivotSupport(true);
-        return lotlSource;
+	LOTLSource lotlSource = new LOTLSource();
+	lotlSource.setUrl(lotlUrl);
+	lotlSource.setCertificateSource(ojContentKeyStore());
+	lotlSource.setSigningCertificatesAnnouncementPredicate(
+		new OfficialJournalSchemeInformationURI(currentOjUrl));
+	lotlSource.setPivotSupport(true);
+	return lotlSource;
     }
 
     /* from 5.6 */
     @Bean
     public File tlCacheDirectory() {
-        File rootFolder = new File(System.getProperty("java.io.tmpdir"));
-        File tslCache = new File(rootFolder, "dss-tsl-loader");
-        if (tslCache.mkdirs()) {
-            LOG.info("TL Cache folder : {}", tslCache.getAbsolutePath());
-        }
-        return tslCache;
+	File rootFolder = new File(System.getProperty("java.io.tmpdir"));
+	File tslCache = new File(rootFolder, "dss-tsl-loader");
+	if (tslCache.mkdirs()) {
+	    LOG.info("TL Cache folder : {}", tslCache.getAbsolutePath());
+	}
+	return tslCache;
     }
 
     /* from 5.6 */
     @Bean
     public DSSFileLoader offlineLoader() {
-        FileCacheDataLoader offlineFileLoader = new FileCacheDataLoader();
-        offlineFileLoader.setCacheExpirationTime(-1); // negative value means cache never expires (from 5.10)
-        offlineFileLoader.setDataLoader(new IgnoreDataLoader());
-        offlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
-        return offlineFileLoader;
+	FileCacheDataLoader offlineFileLoader = new FileCacheDataLoader();
+	offlineFileLoader.setCacheExpirationTime(-1); // negative value means cache never expires
+						      // (from 5.10)
+	offlineFileLoader.setDataLoader(new IgnoreDataLoader());
+	offlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
+	return offlineFileLoader;
     }
 
     /* from 5.6 */
     @Bean
     public DSSFileLoader onlineLoader() {
-        FileCacheDataLoader onlineFileLoader = new FileCacheDataLoader();
-        onlineFileLoader.setCacheExpirationTime(0);
-        onlineFileLoader.setDataLoader(dataLoader());
-        onlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
-        return onlineFileLoader;
+	FileCacheDataLoader onlineFileLoader = new FileCacheDataLoader();
+	onlineFileLoader.setCacheExpirationTime(0);
+	onlineFileLoader.setDataLoader(dataLoader());
+	onlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
+	return onlineFileLoader;
     }
 
     /* from 5.6 */
     @Bean
     public TLValidationJob job() {
-        TLValidationJob job = new TLValidationJob();
-        job.setTrustedListCertificateSource(trustedListSource());
-        job.setListOfTrustedListSources(europeanLOTL());
-        job.setOfflineDataLoader(offlineLoader());
-        job.setOnlineDataLoader(onlineLoader());
-        return job;
+	TLValidationJob job = new TLValidationJob();
+	job.setTrustedListCertificateSource(trustedListSource());
+	job.setListOfTrustedListSources(europeanLOTL());
+	job.setOfflineDataLoader(offlineLoader());
+	job.setOnlineDataLoader(onlineLoader());
+	return job;
     }
 
     /* from 5.8 */
     @Bean
     public CommonsDataLoader trustAllDataLoader() {
-        CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
-        dataLoader.setCommonsDataHttpClient(dataHttpClient());
-        dataLoader.setProxyConfig(proxyConfig);
-        dataLoader.setTrustStrategy(new TrustAllStrategy());
-        return dataLoader;
+	CommonsDataLoaderExt dataLoader = new CommonsDataLoaderExt();
+	dataLoader.setCommonsDataHttpClient(dataHttpClient());
+	dataLoader.setProxyConfig(proxyConfig);
+	dataLoader.setTrustStrategy(new TrustAllStrategy());
+	return dataLoader;
     }
 
     /* from 5.8 */
@@ -586,14 +598,14 @@ public class DSSBeanConfig {
 
     @Bean
     public SSLCertificateLoader sslCertificateLoader() {
-        SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
-        sslCertificateLoader.setCommonsDataLoader(trustAllDataLoader());
-        return sslCertificateLoader;
+	SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
+	sslCertificateLoader.setCommonsDataLoader(trustAllDataLoader());
+	return sslCertificateLoader;
     }
 
     @Bean
     public JdbcCacheConnector jdbcCacheConnector() {
-        return new JdbcCacheConnector(dataSource);
+	return new JdbcCacheConnector(dataSource);
     }
 
 }
