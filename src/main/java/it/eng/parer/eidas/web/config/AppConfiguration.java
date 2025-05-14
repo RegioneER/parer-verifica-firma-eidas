@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.web.config;
@@ -55,54 +51,56 @@ public class AppConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // static resources
-        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-        // swagger
-        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+	// static resources
+	registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+	// swagger
+	registry.addResourceHandler("swagger-ui.html")
+		.addResourceLocations("classpath:/META-INF/resources/");
+	registry.addResourceHandler("/webjars/**")
+		.addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     /**
-     * Note: introdotto l'introspector Jaxb in modo tale da gestire correttamente sia in fase di serialiazzione che
-     * deserializzazione il report DSS (Jaxb Object)
+     * Note: introdotto l'introspector Jaxb in modo tale da gestire correttamente sia in fase di
+     * serialiazzione che deserializzazione il report DSS (Jaxb Object)
      *
      * @return MappingJackson2HttpMessageConverter
      */
     @Bean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        ObjectMapper mapper = new ObjectMapper();
-        TypeFactory typeFactory = TypeFactory.defaultInstance();
-        AnnotationIntrospector introspector = new JaxbAnnotationIntrospector(typeFactory);
-        // make deserializer use JAXB annotations (only)
-        mapper.getDeserializationConfig().with(introspector);
-        // make serializer use JAXB annotations (only)
-        mapper.getSerializationConfig().with(introspector);
-        // since spring boot 2.5.0 (need com.fasterxml.jackson.datatype.jsr310.JavaTimeModule)
-        mapper.registerModule(new JavaTimeModule());
-        //
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(
-                mapper);
-        // Aggiungo i media type text/plain per supportare dataHttpClient come jmeter
-        List<MediaType> supportedMediaTypes = new ArrayList<>(
-                mappingJackson2HttpMessageConverter.getSupportedMediaTypes());
-        supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
-        supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.ISO_8859_1));
+	ObjectMapper mapper = new ObjectMapper();
+	TypeFactory typeFactory = TypeFactory.defaultInstance();
+	AnnotationIntrospector introspector = new JaxbAnnotationIntrospector(typeFactory);
+	// make deserializer use JAXB annotations (only)
+	mapper.getDeserializationConfig().with(introspector);
+	// make serializer use JAXB annotations (only)
+	mapper.getSerializationConfig().with(introspector);
+	// since spring boot 2.5.0 (need com.fasterxml.jackson.datatype.jsr310.JavaTimeModule)
+	mapper.registerModule(new JavaTimeModule());
+	//
+	mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+	mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+	MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(
+		mapper);
+	// Aggiungo i media type text/plain per supportare dataHttpClient come jmeter
+	List<MediaType> supportedMediaTypes = new ArrayList<>(
+		mappingJackson2HttpMessageConverter.getSupportedMediaTypes());
+	supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
+	supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.ISO_8859_1));
 
-        mappingJackson2HttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
+	mappingJackson2HttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
 
-        return mappingJackson2HttpMessageConverter;
+	return mappingJackson2HttpMessageConverter;
     }
 
     @Bean
     public OpenAPI eidasOpenAPI() {
-        return new OpenAPI()
-                .info(new Info().title("Verifica firma EIDAS")
-                        .description("Microserivice per verifica firma basato su librerie EIDAS (dss)")
-                        .version((StringUtils.isNotBlank(getClass().getPackage().getImplementationVersion())
-                                ? getClass().getPackage().getImplementationVersion() : "")))
-                .externalDocs(
-                        new ExternalDocumentation().description("DSS on GitHub").url("https://github.com/esig/dss"));
+	return new OpenAPI().info(new Info().title("Verifica firma EIDAS")
+		.description("Microserivice per verifica firma basato su librerie EIDAS (dss)")
+		.version((StringUtils.isNotBlank(getClass().getPackage().getImplementationVersion())
+			? getClass().getPackage().getImplementationVersion()
+			: "")))
+		.externalDocs(new ExternalDocumentation().description("DSS on GitHub")
+			.url("https://github.com/esig/dss"));
     }
 }

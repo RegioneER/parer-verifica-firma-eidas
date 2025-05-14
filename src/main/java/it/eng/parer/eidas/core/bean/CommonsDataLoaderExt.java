@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.core.bean;
@@ -46,54 +42,54 @@ public class CommonsDataLoaderExt extends CommonsDataLoader implements CustomDat
      * ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com - ex URL from AIA
      * ldap://xadessrv.plugtests.net/CN=LevelBCAOK,OU=Plugtests_2015-2016,O=ETSI,C=FR?cACertificate;binary
      *
-     * @param urlString
-     *            URL LDAP resource
+     * @param urlString URL LDAP resource
      *
      * @return byte[]
      */
     @Override
     public byte[] ldapGet(final String urlString) {
-        return customLdapGet(urlString);
+	return customLdapGet(urlString);
     }
 
     public String getLdapTimeoutConnection() {
-        return ldapTimeoutConnection;
+	return ldapTimeoutConnection;
     }
 
     public void setLdapTimeoutConnection(String ldapTimeoutConnection) {
-        this.ldapTimeoutConnection = ldapTimeoutConnection;
+	this.ldapTimeoutConnection = ldapTimeoutConnection;
     }
 
     /* HTTP GET */
     @Override
     protected byte[] httpGet(String url) {
-        return customHttpGet(url);
+	return customHttpGet(url);
     }
 
     /* HTTP POST */
     @Override
     public byte[] post(String url, byte[] content) {
-        return customPost(url, content);
+	return customPost(url, content);
     }
 
     @Override
-    public byte[] execute(CloseableHttpClient client, HttpUriRequest httpRequest) throws IOException {
-        return super.execute(client, httpRequest);
+    public byte[] execute(CloseableHttpClient client, HttpUriRequest httpRequest)
+	    throws IOException {
+	return super.execute(client, httpRequest);
     }
 
     @Override
     public void setCommonsDataHttpClient(CommonsDataHttpClient dataHttpClient) {
-        this.dataHttpClient = dataHttpClient;
+	this.dataHttpClient = dataHttpClient;
     }
 
     @Override
     public CommonsDataHttpClient getCommonsDataHttpClient() {
-        return dataHttpClient;
+	return dataHttpClient;
     }
 
     @Override
     public Logger logger() {
-        return LOG;
+	return LOG;
     }
 
 }

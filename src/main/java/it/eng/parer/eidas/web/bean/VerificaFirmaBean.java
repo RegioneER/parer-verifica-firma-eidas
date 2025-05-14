@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.web.bean;
@@ -51,90 +47,89 @@ public class VerificaFirmaBean implements Serializable {
     private transient List<MultipartFile> fileOriginali;
 
     public boolean isAbilitaControlloRevoca() {
-        return abilitaControlloRevoca;
+	return abilitaControlloRevoca;
     }
 
     public void setAbilitaControlloRevoca(boolean abilitaControlloRevoca) {
-        this.abilitaControlloRevoca = abilitaControlloRevoca;
+	this.abilitaControlloRevoca = abilitaControlloRevoca;
     }
 
     public boolean isAbilitaControlloCatenaTrusted() {
-        return abilitaControlloCatenaTrusted;
+	return abilitaControlloCatenaTrusted;
     }
 
     public void setAbilitaControlloCatenaTrusted(boolean abilitaControlloCatenaTrusted) {
-        this.abilitaControlloCatenaTrusted = abilitaControlloCatenaTrusted;
+	this.abilitaControlloCatenaTrusted = abilitaControlloCatenaTrusted;
     }
 
     public boolean isAbilitaControlloCa() {
-        return abilitaControlloCa;
+	return abilitaControlloCa;
     }
 
     public void setAbilitaControlloCa(boolean abilitaControlloCa) {
-        this.abilitaControlloCa = abilitaControlloCa;
+	this.abilitaControlloCa = abilitaControlloCa;
     }
 
     public boolean isAbilitaControlloCrittografico() {
-        return abilitaControlloCrittografico;
+	return abilitaControlloCrittografico;
     }
 
     public void setAbilitaControlloCrittografico(boolean abilitaControlloCrittografico) {
-        this.abilitaControlloCrittografico = abilitaControlloCrittografico;
+	this.abilitaControlloCrittografico = abilitaControlloCrittografico;
     }
 
     /**
      * @return the includiRaw
      */
     public boolean isIncludiRaw() {
-        return includiRaw;
+	return includiRaw;
     }
 
     /**
-     * @param includiRaw
-     *            the includiRaw to set
+     * @param includiRaw the includiRaw to set
      */
     public void setIncludiRaw(boolean includiRaw) {
-        this.includiRaw = includiRaw;
+	this.includiRaw = includiRaw;
     }
 
     public LocalDate getDataRiferimento() {
-        return dataRiferimento;
+	return dataRiferimento;
     }
 
     public void setDataRiferimento(LocalDate dataRiferimento) {
-        this.dataRiferimento = dataRiferimento;
+	this.dataRiferimento = dataRiferimento;
     }
 
     public LocalTime getOraRiferimento() {
-        return oraRiferimento;
+	return oraRiferimento;
     }
 
     public void setOraRiferimento(LocalTime oraRiferimento) {
-        this.oraRiferimento = oraRiferimento;
+	this.oraRiferimento = oraRiferimento;
     }
 
     public MultipartFile getFileDaVerificare() {
-        return fileDaVerificare;
+	return fileDaVerificare;
     }
 
     public void setFileDaVerificare(MultipartFile fileDaVerificare) {
-        this.fileDaVerificare = fileDaVerificare;
+	this.fileDaVerificare = fileDaVerificare;
     }
 
     public MultipartFile getFileDssPolicy() {
-        return fileDssPolicy;
+	return fileDssPolicy;
     }
 
     public void setFileDssPolicy(MultipartFile fileDssPolicy) {
-        this.fileDssPolicy = fileDssPolicy;
+	this.fileDssPolicy = fileDssPolicy;
     }
 
     public List<MultipartFile> getFileOriginali() {
-        return fileOriginali;
+	return fileOriginali;
     }
 
     public void setFileOriginali(List<MultipartFile> fileOriginali) {
-        this.fileOriginali = fileOriginali;
+	this.fileOriginali = fileOriginali;
     }
 
 }

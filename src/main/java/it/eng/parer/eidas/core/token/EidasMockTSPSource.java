@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.core.token;
@@ -79,72 +75,78 @@ public class EidasMockTSPSource implements TSPSource {
     private String alias;
 
     public void setToken(KeyStoreSignatureTokenConnection token) {
-        this.token = token;
+	this.token = token;
     }
 
     public void setAlias(String alias) {
-        this.alias = alias;
+	this.alias = alias;
     }
 
     @Override
     public TimestampBinary getTimeStampResponse(DigestAlgorithm digestAlgorithm, byte[] digest) {
-        Objects.requireNonNull(token, "KeyStore token is not defined!");
-        try {
-            TimeStampRequestGenerator requestGenerator = new TimeStampRequestGenerator();
-            requestGenerator.setCertReq(true);
-            TimeStampRequest request = requestGenerator.generate(new ASN1ObjectIdentifier(digestAlgorithm.getOid()),
-                    digest);
+	Objects.requireNonNull(token, "KeyStore token is not defined!");
+	try {
+	    TimeStampRequestGenerator requestGenerator = new TimeStampRequestGenerator();
+	    requestGenerator.setCertReq(true);
+	    TimeStampRequest request = requestGenerator
+		    .generate(new ASN1ObjectIdentifier(digestAlgorithm.getOid()), digest);
 
-            KSPrivateKeyEntry ksPK = (KSPrivateKeyEntry) token.getKey(alias);
-            if (ksPK == null) {
-                throw new IllegalArgumentException(String.format(
-                        "Unable to initialize the MockTSPSource! "
-                                + "Reason : Unable to retrieve private key from the given keyStore with alias '%s'",
-                        alias));
-            }
+	    KSPrivateKeyEntry ksPK = (KSPrivateKeyEntry) token.getKey(alias);
+	    if (ksPK == null) {
+		throw new IllegalArgumentException(String.format(
+			"Unable to initialize the MockTSPSource! "
+				+ "Reason : Unable to retrieve private key from the given keyStore with alias '%s'",
+			alias));
+	    }
 
-            log.atDebug().log("Timestamping with {}", ksPK.getCertificate());
+	    log.atDebug().log("Timestamping with {}", ksPK.getCertificate());
 
-            X509CertificateHolder certificate = new X509CertificateHolder(ksPK.getCertificate().getEncoded());
-            List<X509Certificate> chain = new ArrayList<>();
-            CertificateToken[] certificateChain = ksPK.getCertificateChain();
-            for (CertificateToken token : certificateChain) {
-                chain.add(token.getCertificate());
-            }
+	    X509CertificateHolder certificate = new X509CertificateHolder(
+		    ksPK.getCertificate().getEncoded());
+	    List<X509Certificate> chain = new ArrayList<>();
+	    CertificateToken[] certificateChain = ksPK.getCertificateChain();
+	    for (CertificateToken token : certificateChain) {
+		chain.add(token.getCertificate());
+	    }
 
-            Set<ASN1ObjectIdentifier> accepted = new HashSet<>();
-            accepted.add(TSPAlgorithms.SHA1);
-            accepted.add(TSPAlgorithms.SHA256);
-            accepted.add(TSPAlgorithms.SHA384);
-            accepted.add(TSPAlgorithms.SHA512);
+	    Set<ASN1ObjectIdentifier> accepted = new HashSet<>();
+	    accepted.add(TSPAlgorithms.SHA1);
+	    accepted.add(TSPAlgorithms.SHA256);
+	    accepted.add(TSPAlgorithms.SHA384);
+	    accepted.add(TSPAlgorithms.SHA512);
 
-            AlgorithmIdentifier digestAlgorithmIdentifier = new AlgorithmIdentifier(
-                    new ASN1ObjectIdentifier(digestAlgorithm.getOid()));
-            AlgorithmIdentifier encryptionAlg = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption);
+	    AlgorithmIdentifier digestAlgorithmIdentifier = new AlgorithmIdentifier(
+		    new ASN1ObjectIdentifier(digestAlgorithm.getOid()));
+	    AlgorithmIdentifier encryptionAlg = new AlgorithmIdentifier(
+		    PKCSObjectIdentifiers.rsaEncryption);
 
-            DefaultCMSSignatureAlgorithmNameGenerator sigAlgoGenerator = new DefaultCMSSignatureAlgorithmNameGenerator();
-            String sigAlgoName = sigAlgoGenerator.getSignatureName(digestAlgorithmIdentifier, encryptionAlg);
+	    DefaultCMSSignatureAlgorithmNameGenerator sigAlgoGenerator = new DefaultCMSSignatureAlgorithmNameGenerator();
+	    String sigAlgoName = sigAlgoGenerator.getSignatureName(digestAlgorithmIdentifier,
+		    encryptionAlg);
 
-            ContentSigner signer = new JcaContentSignerBuilder(sigAlgoName).build(ksPK.getPrivateKey());
+	    ContentSigner signer = new JcaContentSignerBuilder(sigAlgoName)
+		    .build(ksPK.getPrivateKey());
 
-            SignerInfoGenerator infoGenerator = new SignerInfoGeneratorBuilder(new BcDigestCalculatorProvider())
-                    .build(signer, certificate);
-            DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().build()
-                    .get(digestAlgorithmIdentifier);
+	    SignerInfoGenerator infoGenerator = new SignerInfoGeneratorBuilder(
+		    new BcDigestCalculatorProvider()).build(signer, certificate);
+	    DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().build()
+		    .get(digestAlgorithmIdentifier);
 
-            TimeStampTokenGenerator tokenGenerator = new TimeStampTokenGenerator(infoGenerator, digestCalculator,
-                    new ASN1ObjectIdentifier("1.2.3.4"));
-            tokenGenerator.addCertificates(new JcaCertStore(chain));
+	    TimeStampTokenGenerator tokenGenerator = new TimeStampTokenGenerator(infoGenerator,
+		    digestCalculator, new ASN1ObjectIdentifier("1.2.3.4"));
+	    tokenGenerator.addCertificates(new JcaCertStore(chain));
 
-            TimeStampResponseGenerator responseGenerator = new TimeStampResponseGenerator(tokenGenerator, accepted);
-            TimeStampResponse response = responseGenerator.generate(request, new BigInteger(128, random), new Date());
-            TimeStampToken timeStampToken = response.getTimeStampToken();
+	    TimeStampResponseGenerator responseGenerator = new TimeStampResponseGenerator(
+		    tokenGenerator, accepted);
+	    TimeStampResponse response = responseGenerator.generate(request,
+		    new BigInteger(128, random), new Date());
+	    TimeStampToken timeStampToken = response.getTimeStampToken();
 
-            return new TimestampBinary(DSSASN1Utils.getDEREncoded(timeStampToken));
+	    return new TimestampBinary(DSSASN1Utils.getDEREncoded(timeStampToken));
 
-        } catch (IOException | TSPException | OperatorException | CertificateException e) {
-            throw new DSSException("Unable to generate a timestamp from the Mock", e);
-        }
+	} catch (IOException | TSPException | OperatorException | CertificateException e) {
+	    throw new DSSException("Unable to generate a timestamp from the Mock", e);
+	}
     }
 
 }

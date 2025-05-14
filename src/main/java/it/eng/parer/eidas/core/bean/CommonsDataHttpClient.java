@@ -1,18 +1,14 @@
 /*
  * Engineering Ingegneria Informatica S.p.A.
  *
- * Copyright (C) 2023 Regione Emilia-Romagna
- * <p/>
- * This program is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
- * <p/>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU Affero General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Copyright (C) 2023 Regione Emilia-Romagna <p/> This program is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. <p/> This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. <p/> You should
+ * have received a copy of the GNU Affero General Public License along with this program. If not,
+ * see <https://www.gnu.org/licenses/>.
  */
 
 package it.eng.parer.eidas.core.bean;
@@ -207,28 +203,27 @@ public class CommonsDataHttpClient implements Serializable {
      * The default constructor for CommonsDataLoader.
      */
     public CommonsDataHttpClient() {
-        // empty
+	// empty
     }
 
     /**
      * init method
      */
     public void init() {
-        if (client == null) {
-            client = createHttpClient();
-        }
+	if (client == null) {
+	    client = createHttpClient();
+	}
     }
 
     /**
      * destroy method
      *
-     * @throws IOException
-     *             generic exception
+     * @throws IOException generic exception
      */
     public void destroy() throws IOException {
-        if (client != null) {
-            client.close();
-        }
+	if (client != null) {
+	    client.close();
+	}
     }
 
     /**
@@ -237,7 +232,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getTimeoutConnection() {
-        return timeoutConnection.toMillisecondsIntBound();
+	return timeoutConnection.toMillisecondsIntBound();
     }
 
     /**
@@ -245,11 +240,10 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * A negative value is interpreted as undefined (use system default).
      *
-     * @param timeoutConnection
-     *            the value (millis)
+     * @param timeoutConnection the value (millis)
      */
     public void setTimeoutConnection(final int timeoutConnection) {
-        this.timeoutConnection = toTimeoutMilliseconds(timeoutConnection);
+	this.timeoutConnection = toTimeoutMilliseconds(timeoutConnection);
     }
 
     /**
@@ -258,7 +252,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getTimeoutConnectionRequest() {
-        return timeoutConnectionRequest.toMillisecondsIntBound();
+	return timeoutConnectionRequest.toMillisecondsIntBound();
     }
 
     /**
@@ -266,11 +260,10 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * A negative value is interpreted as undefined (use system default).
      *
-     * @param timeoutConnectionRequest
-     *            the value (millis)
+     * @param timeoutConnectionRequest the value (millis)
      */
     public void setTimeoutConnectionRequest(int timeoutConnectionRequest) {
-        this.timeoutConnectionRequest = toTimeoutMilliseconds(timeoutConnectionRequest);
+	this.timeoutConnectionRequest = toTimeoutMilliseconds(timeoutConnectionRequest);
     }
 
     /**
@@ -279,7 +272,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getTimeoutResponse() {
-        return timeoutResponse.toMillisecondsIntBound();
+	return timeoutResponse.toMillisecondsIntBound();
     }
 
     /**
@@ -287,11 +280,10 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * A negative value is interpreted as undefined (use system default).
      *
-     * @param timeoutResponse
-     *            the value (millis)
+     * @param timeoutResponse the value (millis)
      */
     public void setTimeoutResponse(int timeoutResponse) {
-        this.timeoutResponse = toTimeoutMilliseconds(timeoutResponse);
+	this.timeoutResponse = toTimeoutMilliseconds(timeoutResponse);
     }
 
     /**
@@ -300,7 +292,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getTimeoutSocket() {
-        return timeoutSocket.toMillisecondsIntBound();
+	return timeoutSocket.toMillisecondsIntBound();
     }
 
     /**
@@ -308,11 +300,10 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * A negative value is interpreted as undefined (use system default).
      *
-     * @param timeoutSocket
-     *            the value (millis)
+     * @param timeoutSocket the value (millis)
      */
     public void setTimeoutSocket(final int timeoutSocket) {
-        this.timeoutSocket = toTimeoutMilliseconds(timeoutSocket);
+	this.timeoutSocket = toTimeoutMilliseconds(timeoutSocket);
     }
 
     /**
@@ -321,17 +312,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getConnectionKeepAlive() {
-        return connectionKeepAlive.toMillisecondsIntBound();
+	return connectionKeepAlive.toMillisecondsIntBound();
     }
 
     /**
      * Sets the connection keep alive timeout in milliseconds.
      *
-     * @param connectionKeepAlive
-     *            the value (millis)
+     * @param connectionKeepAlive the value (millis)
      */
     public void setConnectionKeepAlive(int connectionKeepAlive) {
-        this.connectionKeepAlive = toTimeValueMilliseconds(connectionKeepAlive);
+	this.connectionKeepAlive = toTimeValueMilliseconds(connectionKeepAlive);
     }
 
     /**
@@ -340,17 +330,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return the value (millis)
      */
     public int getConnectionsMaxTotal() {
-        return connectionsMaxTotal;
+	return connectionsMaxTotal;
     }
 
     /**
      * Sets the maximum connections number.
      *
-     * @param connectionsMaxTotal
-     *            maximum number of connections
+     * @param connectionsMaxTotal maximum number of connections
      */
     public void setConnectionsMaxTotal(int connectionsMaxTotal) {
-        this.connectionsMaxTotal = connectionsMaxTotal;
+	this.connectionsMaxTotal = connectionsMaxTotal;
     }
 
     /**
@@ -359,17 +348,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return maximum number of connections per one route
      */
     public int getConnectionsMaxPerRoute() {
-        return connectionsMaxPerRoute;
+	return connectionsMaxPerRoute;
     }
 
     /**
      * Sets the maximum connections number per route.
      *
-     * @param connectionsMaxPerRoute
-     *            maximum number of connections per one route
+     * @param connectionsMaxPerRoute maximum number of connections per one route
      */
     public void setConnectionsMaxPerRoute(int connectionsMaxPerRoute) {
-        this.connectionsMaxPerRoute = connectionsMaxPerRoute;
+	this.connectionsMaxPerRoute = connectionsMaxPerRoute;
     }
 
     /**
@@ -378,17 +366,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return connection time to live (millis)
      */
     public int getConnectionTimeToLive() {
-        return connectionTimeToLive.toMillisecondsIntBound();
+	return connectionTimeToLive.toMillisecondsIntBound();
     }
 
     /**
      * Sets the finite connection total time to live (TTL) in milliseconds.
      *
-     * @param connectionTimeToLive
-     *            the finite connection time to live (millis)
+     * @param connectionTimeToLive the finite connection time to live (millis)
      */
     public void setConnectionTimeToLive(int connectionTimeToLive) {
-        this.connectionTimeToLive = toTimeValueMilliseconds(connectionTimeToLive);
+	this.connectionTimeToLive = toTimeValueMilliseconds(connectionTimeToLive);
     }
 
     /**
@@ -397,17 +384,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return true if http redirects are allowed
      */
     public boolean isRedirectsEnabled() {
-        return redirectsEnabled;
+	return redirectsEnabled;
     }
 
     /**
      * Sets if redirect should be enabled.
      *
-     * @param redirectsEnabled
-     *            true if http redirects are allowed
+     * @param redirectsEnabled true if http redirects are allowed
      */
     public void setRedirectsEnabled(boolean redirectsEnabled) {
-        this.redirectsEnabled = redirectsEnabled;
+	this.redirectsEnabled = redirectsEnabled;
     }
 
     /**
@@ -416,7 +402,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return TRUE if the default system network properties shall be used, FALSE otherwise
      */
     public boolean isUseSystemProperties() {
-        return useSystemProperties;
+	return useSystemProperties;
     }
 
     /**
@@ -426,62 +412,56 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * NOTE: all other configured property may override the default behavior!
      *
-     * @param useSystemProperties
-     *            if the default system network properties shall be used
+     * @param useSystemProperties if the default system network properties shall be used
      */
     public void setUseSystemProperties(boolean useSystemProperties) {
-        this.useSystemProperties = useSystemProperties;
+	this.useSystemProperties = useSystemProperties;
     }
 
     /**
      * This method sets the SSL protocol to be used
      *
-     * @param sslProtocol
-     *            the ssl protocol to be used
+     * @param sslProtocol the ssl protocol to be used
      */
     public void setSslProtocol(String sslProtocol) {
-        this.sslProtocol = sslProtocol;
+	this.sslProtocol = sslProtocol;
     }
 
     /**
      * Sets the SSL KeyStore
      *
-     * @param sslKeyStore
-     *            {@link DSSDocument}
+     * @param sslKeyStore {@link DSSDocument}
      */
     public void setSslKeystore(DSSDocument sslKeyStore) {
-        this.sslKeystore = sslKeyStore;
+	this.sslKeystore = sslKeyStore;
     }
 
     /**
      * Sets if the KeyStore shall be considered as a trust material (used for SSL connection)
      *
-     * @param loadKeyStoreAsTrustMaterial
-     *            if the KeyStore shall be considered as a trust material
+     * @param loadKeyStoreAsTrustMaterial if the KeyStore shall be considered as a trust material
      */
     public void setKeyStoreAsTrustMaterial(boolean loadKeyStoreAsTrustMaterial) {
-        this.loadKeyStoreAsTrustMaterial = loadKeyStoreAsTrustMaterial;
+	this.loadKeyStoreAsTrustMaterial = loadKeyStoreAsTrustMaterial;
     }
 
     /**
      * Sets the SSL KeyStore type
      *
-     * @param sslKeystoreType
-     *            {@link String}
+     * @param sslKeystoreType {@link String}
      */
     public void setSslKeystoreType(String sslKeystoreType) {
-        this.sslKeystoreType = sslKeystoreType;
+	this.sslKeystoreType = sslKeystoreType;
     }
 
     /**
-     * Sets the KeyStore password. Please note that the password shall be the same for the keystore and the extraction
-     * of a corresponding key.
+     * Sets the KeyStore password. Please note that the password shall be the same for the keystore
+     * and the extraction of a corresponding key.
      *
-     * @param sslKeystorePassword
-     *            char array representing the password
+     * @param sslKeystorePassword char array representing the password
      */
     public void setSslKeystorePassword(char[] sslKeystorePassword) {
-        this.sslKeystorePassword = sslKeystorePassword;
+	this.sslKeystorePassword = sslKeystorePassword;
     }
 
     /**
@@ -489,31 +469,28 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * NOTE: different from KeyStore!
      *
-     * @param sslTrustStore
-     *            {@link DSSDocument}
+     * @param sslTrustStore {@link DSSDocument}
      */
     public void setSslTruststore(DSSDocument sslTrustStore) {
-        this.sslTruststore = sslTrustStore;
+	this.sslTruststore = sslTrustStore;
     }
 
     /**
      * Sets the password for SSL truststore
      *
-     * @param sslTruststorePassword
-     *            char array representing a password string
+     * @param sslTruststorePassword char array representing a password string
      */
     public void setSslTruststorePassword(char[] sslTruststorePassword) {
-        this.sslTruststorePassword = sslTruststorePassword;
+	this.sslTruststorePassword = sslTruststorePassword;
     }
 
     /**
      * Sets the SSL TrustStore type
      *
-     * @param sslTruststoreType
-     *            {@link String}
+     * @param sslTruststoreType {@link String}
      */
     public void setSslTruststoreType(String sslTruststoreType) {
-        this.sslTruststoreType = sslTruststoreType;
+	this.sslTruststoreType = sslTruststoreType;
     }
 
     /**
@@ -522,10 +499,10 @@ public class CommonsDataHttpClient implements Serializable {
      * @return a map between {@link HostConnection} and {@link UserCredentials}
      */
     public Map<HostConnection, UserCredentials> getAuthenticationMap() {
-        if (authenticationMap == null) {
-            authenticationMap = new HashMap<>();
-        }
-        return authenticationMap;
+	if (authenticationMap == null) {
+	    authenticationMap = new HashMap<>();
+	}
+	return authenticationMap;
     }
 
     /**
@@ -533,73 +510,65 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * NOTE: this method overrides the current instance of {@code authenticationMap}
      *
-     * @param authenticationMap
-     *            a map between {@link HostConnection} and {@link UserCredentials}
+     * @param authenticationMap a map between {@link HostConnection} and {@link UserCredentials}
      */
     public void setAuthenticationMap(Map<HostConnection, UserCredentials> authenticationMap) {
-        this.authenticationMap = authenticationMap;
+	this.authenticationMap = authenticationMap;
     }
 
     /**
      * Adds authentication credentials to the existing {@code authenticationMap}
      *
-     * @param hostConnection
-     *            host connection details
-     * @param userCredentials
-     *            user login credentials
+     * @param hostConnection  host connection details
+     * @param userCredentials user login credentials
      *
      * @return this (for fluent addAuthentication)
      */
-    public CommonsDataHttpClient addAuthentication(HostConnection hostConnection, UserCredentials userCredentials) {
-        Map<HostConnection, UserCredentials> authenticationMap = getAuthenticationMap();
-        authenticationMap.put(hostConnection, userCredentials);
-        return this;
+    public CommonsDataHttpClient addAuthentication(HostConnection hostConnection,
+	    UserCredentials userCredentials) {
+	Map<HostConnection, UserCredentials> authenticationMap = getAuthenticationMap();
+	authenticationMap.put(hostConnection, userCredentials);
+	return this;
     }
 
     /**
-     * Sets whether the preemptive authentication should be used. When set to TRUE, the dataHttpClient sends
-     * authentication details (i.e. user credentials) within the initial request to the remote host, instead of sending
-     * the credentials only after a request from the host. Please note that the preemptive authentication should not be
-     * used over an insecure connection. Default : FALSE (preemptive authentication is not used)
+     * Sets whether the preemptive authentication should be used. When set to TRUE, the
+     * dataHttpClient sends authentication details (i.e. user credentials) within the initial
+     * request to the remote host, instead of sending the credentials only after a request from the
+     * host. Please note that the preemptive authentication should not be used over an insecure
+     * connection. Default : FALSE (preemptive authentication is not used)
      *
-     * @param preemptiveAuthentication
-     *            whether the preemptive authentication should be used
+     * @param preemptiveAuthentication whether the preemptive authentication should be used
      */
     public void setPreemptiveAuthentication(boolean preemptiveAuthentication) {
-        this.preemptiveAuthentication = preemptiveAuthentication;
+	this.preemptiveAuthentication = preemptiveAuthentication;
     }
 
     /**
      * Adds authentication credentials to the existing {@code authenticationMap}
      *
-     * @param host
-     *            host
-     * @param port
-     *            port
-     * @param scheme
-     *            scheme
-     * @param login
-     *            login
-     * @param password
-     *            password
+     * @param host     host
+     * @param port     port
+     * @param scheme   scheme
+     * @param login    login
+     * @param password password
      *
      * @return this (for fluent addAuthentication)
      */
-    public CommonsDataHttpClient addAuthentication(final String host, final int port, final String scheme,
-            final String login, final char[] password) {
-        final HostConnection hostConnection = new HostConnection(host, port, scheme);
-        final UserCredentials userCredentials = new UserCredentials(login, password);
-        return addAuthentication(hostConnection, userCredentials);
+    public CommonsDataHttpClient addAuthentication(final String host, final int port,
+	    final String scheme, final String login, final char[] password) {
+	final HostConnection hostConnection = new HostConnection(host, port, scheme);
+	final UserCredentials userCredentials = new UserCredentials(login, password);
+	return addAuthentication(hostConnection, userCredentials);
     }
 
     /**
      * Sets a custom retry strategy
      *
-     * @param retryStrategy
-     *            {@link HttpRequestRetryStrategy}
+     * @param retryStrategy {@link HttpRequestRetryStrategy}
      */
     public void setRetryStrategy(final HttpRequestRetryStrategy retryStrategy) {
-        this.retryStrategy = retryStrategy;
+	this.retryStrategy = retryStrategy;
     }
 
     /**
@@ -608,17 +577,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return an array if {@link String}s
      */
     public String[] getSupportedSSLProtocols() {
-        return supportedSSLProtocols;
+	return supportedSSLProtocols;
     }
 
     /**
      * Sets supported SSL protocols
      *
-     * @param supportedSSLProtocols
-     *            an array if {@link String}s
+     * @param supportedSSLProtocols an array if {@link String}s
      */
     public void setSupportedSSLProtocols(String[] supportedSSLProtocols) {
-        this.supportedSSLProtocols = supportedSSLProtocols;
+	this.supportedSSLProtocols = supportedSSLProtocols;
     }
 
     /**
@@ -627,17 +595,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return an array if {@link String}s
      */
     public String[] getSupportedSSLCipherSuites() {
-        return supportedSSLCipherSuites;
+	return supportedSSLCipherSuites;
     }
 
     /**
      * Sets supported SSL Cipher Suites
      *
-     * @param supportedSSLCipherSuites
-     *            an array if {@link String}s
+     * @param supportedSSLCipherSuites an array if {@link String}s
      */
     public void setSupportedSSLCipherSuites(String[] supportedSSLCipherSuites) {
-        this.supportedSSLCipherSuites = supportedSSLCipherSuites;
+	this.supportedSSLCipherSuites = supportedSSLCipherSuites;
     }
 
     /**
@@ -646,17 +613,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return {@link HostnameVerifier}
      */
     public HostnameVerifier getHostnameVerifier() {
-        return hostnameVerifier;
+	return hostnameVerifier;
     }
 
     /**
      * Sets a custom {@code HostnameVerifier}
      *
-     * @param hostnameVerifier
-     *            {@link HostnameVerifier}
+     * @param hostnameVerifier {@link HostnameVerifier}
      */
     public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
-        this.hostnameVerifier = hostnameVerifier;
+	this.hostnameVerifier = hostnameVerifier;
     }
 
     /**
@@ -665,17 +631,16 @@ public class CommonsDataHttpClient implements Serializable {
      * @return {@link TrustStrategy}
      */
     public TrustStrategy getTrustStrategy() {
-        return trustStrategy;
+	return trustStrategy;
     }
 
     /**
      * Sets the {@code TrustStrategy}
      *
-     * @param trustStrategy
-     *            {@link TrustStrategy}
+     * @param trustStrategy {@link TrustStrategy}
      */
     public void setTrustStrategy(TrustStrategy trustStrategy) {
-        this.trustStrategy = trustStrategy;
+	this.trustStrategy = trustStrategy;
     }
 
     /**
@@ -684,148 +649,150 @@ public class CommonsDataHttpClient implements Serializable {
      * @return {@link HttpClientResponseHandler}
      */
     public HttpClientResponseHandler<byte[]> getHttpClientResponseHandler() {
-        return httpClientResponseHandler;
+	return httpClientResponseHandler;
     }
 
     /**
-     * Sets the {@code HttpClientResponseHandler<byte[]>} response handler performing a processing of an HTTP
-     * dataHttpClient response and returns a byte array in case of success.
+     * Sets the {@code HttpClientResponseHandler<byte[]>} response handler performing a processing
+     * of an HTTP dataHttpClient response and returns a byte array in case of success.
      *
-     * @param httpClientResponseHandler
-     *            {@link HttpClientResponseHandler}
+     * @param httpClientResponseHandler {@link HttpClientResponseHandler}
      */
-    public void setHttpClientResponseHandler(HttpClientResponseHandler<byte[]> httpClientResponseHandler) {
-        Objects.requireNonNull(httpClientResponseHandler, "HttpClientResponseHandler cannot be null!");
-        this.httpClientResponseHandler = httpClientResponseHandler;
+    public void setHttpClientResponseHandler(
+	    HttpClientResponseHandler<byte[]> httpClientResponseHandler) {
+	Objects.requireNonNull(httpClientResponseHandler,
+		"HttpClientResponseHandler cannot be null!");
+	this.httpClientResponseHandler = httpClientResponseHandler;
     }
 
     /**
      * Gets the {@code HttpHost}
      *
-     * @param httpRequest
-     *            {@link HttpUriRequest}
+     * @param httpRequest {@link HttpUriRequest}
      *
      * @return {@link HttpHost}
      */
     protected HttpHost getHttpHost(final HttpUriRequest httpRequest) {
-        try {
-            final URI uri = httpRequest.getUri();
-            return new HttpHost(uri.getScheme(), uri.getHost(), uri.getPort());
-        } catch (URISyntaxException e) {
-            throw new DSSExternalResourceException(String.format("Invalid URI : %s", e.getMessage()), e);
-        }
+	try {
+	    final URI uri = httpRequest.getUri();
+	    return new HttpHost(uri.getScheme(), uri.getHost(), uri.getPort());
+	} catch (URISyntaxException e) {
+	    throw new DSSExternalResourceException(
+		    String.format("Invalid URI : %s", e.getMessage()), e);
+	}
     }
 
     /**
      * Gets the {@code HttpContext}
      *
-     * @param httpHost
-     *            {@link HttpHost}
+     * @param httpHost {@link HttpHost}
      *
      * @return {@link HttpContext}
      */
     protected HttpContext getHttpContext(HttpHost httpHost) {
-        HttpClientContext localContext = HttpClientContext.create();
-        localContext = configurePreemptiveAuthentication(localContext, httpHost);
-        return localContext;
+	HttpClientContext localContext = HttpClientContext.create();
+	localContext = configurePreemptiveAuthentication(localContext, httpHost);
+	return localContext;
     }
 
     /**
-     * This method is used to configure preemptive authentication process for {@code HttpClientContext}, when required
+     * This method is used to configure preemptive authentication process for
+     * {@code HttpClientContext}, when required
      *
-     * @param localContext
-     *            {@link HttpClientContext}
-     * @param httpHost
-     *            {@link HttpHost}
+     * @param localContext {@link HttpClientContext}
+     * @param httpHost     {@link HttpHost}
      *
      * @return {@link HttpClientContext}
      */
-    protected HttpClientContext configurePreemptiveAuthentication(HttpClientContext localContext, HttpHost httpHost) {
-        if (preemptiveAuthentication && Utils.isMapNotEmpty(getAuthenticationMap())) {
-            Credentials credentials = getCredentialsProvider().getCredentials(new AuthScope(httpHost), localContext);
-            BasicScheme basicScheme = new BasicScheme();
-            basicScheme.initPreemptive(credentials);
-            localContext.resetAuthExchange(httpHost, basicScheme);
-        }
-        return localContext;
+    protected HttpClientContext configurePreemptiveAuthentication(HttpClientContext localContext,
+	    HttpHost httpHost) {
+	if (preemptiveAuthentication && Utils.isMapNotEmpty(getAuthenticationMap())) {
+	    Credentials credentials = getCredentialsProvider()
+		    .getCredentials(new AuthScope(httpHost), localContext);
+	    BasicScheme basicScheme = new BasicScheme();
+	    basicScheme.initPreemptive(credentials);
+	    localContext.resetAuthExchange(httpHost, basicScheme);
+	}
+	return localContext;
     }
 
     /**
      * Closes all the parameters quietly
      *
-     * @param httpRequest
-     *            {@link HttpUriRequestBase}
-     * @param client
-     *            {@link CloseableHttpClient}
+     * @param httpRequest {@link HttpUriRequestBase}
+     * @param client      {@link CloseableHttpClient}
      */
     protected void closeQuietly(HttpUriRequestBase httpRequest, CloseableHttpClient client) {
-        try {
-            if (httpRequest != null) {
-                httpRequest.cancel();
-            }
-        } finally {
-            Utils.closeQuietly(client);
-        }
+	try {
+	    if (httpRequest != null) {
+		httpRequest.cancel();
+	    }
+	} finally {
+	    Utils.closeQuietly(client);
+	}
     }
 
     private HttpClientConnectionManager getConnectionManager() {
-        final PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder.create()
-                .setTlsSocketStrategy(getClientTlsStrategy()).setDefaultSocketConfig(getSocketConfig())
-                .setMaxConnTotal(getConnectionsMaxTotal()).setMaxConnPerRoute(getConnectionsMaxPerRoute());
+	final PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder
+		.create().setTlsSocketStrategy(getClientTlsStrategy())
+		.setDefaultSocketConfig(getSocketConfig()).setMaxConnTotal(getConnectionsMaxTotal())
+		.setMaxConnPerRoute(getConnectionsMaxPerRoute());
 
-        final ConnectionConfig.Builder connectionConfigBuilder = ConnectionConfig.custom()
-                .setConnectTimeout(timeoutConnection).setTimeToLive(connectionTimeToLive);
+	final ConnectionConfig.Builder connectionConfigBuilder = ConnectionConfig.custom()
+		.setConnectTimeout(timeoutConnection).setTimeToLive(connectionTimeToLive);
 
-        final PoolingHttpClientConnectionManager connectionManager = builder.build();
-        connectionManager.setDefaultConnectionConfig(connectionConfigBuilder.build());
+	final PoolingHttpClientConnectionManager connectionManager = builder.build();
+	connectionManager.setDefaultConnectionConfig(connectionConfigBuilder.build());
 
-        LOG.atDebug().log("PoolingHttpClientConnectionManager: max total: {}", connectionManager.getMaxTotal());
-        LOG.atDebug().log("PoolingHttpClientConnectionManager: max per route: {}",
-                connectionManager.getDefaultMaxPerRoute());
+	LOG.atDebug().log("PoolingHttpClientConnectionManager: max total: {}",
+		connectionManager.getMaxTotal());
+	LOG.atDebug().log("PoolingHttpClientConnectionManager: max per route: {}",
+		connectionManager.getDefaultMaxPerRoute());
 
-        return connectionManager;
+	return connectionManager;
     }
 
     private SocketConfig getSocketConfig() {
-        SocketConfig.Builder socketConfigBuilder = SocketConfig.custom();
-        socketConfigBuilder.setSoTimeout(timeoutSocket);
-        return socketConfigBuilder.build();
+	SocketConfig.Builder socketConfigBuilder = SocketConfig.custom();
+	socketConfigBuilder.setSoTimeout(timeoutSocket);
+	return socketConfigBuilder.build();
     }
 
     private DefaultClientTlsStrategy getClientTlsStrategy() {
-        try {
-            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
-            sslContextBuilder.setProtocol(sslProtocol);
+	try {
+	    SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+	    sslContextBuilder.setProtocol(sslProtocol);
 
-            final TrustStrategy trustStrategy = getTrustStrategy();
-            if (trustStrategy != null) {
-                LOG.atDebug().log("Set the TrustStrategy");
-                sslContextBuilder.loadTrustMaterial(null, trustStrategy);
-            }
+	    final TrustStrategy trustStrategy = getTrustStrategy();
+	    if (trustStrategy != null) {
+		LOG.atDebug().log("Set the TrustStrategy");
+		sslContextBuilder.loadTrustMaterial(null, trustStrategy);
+	    }
 
-            final KeyStore sslTrustStore = getSSLTrustStore();
-            if (sslTrustStore != null) {
-                LOG.atDebug().log("Set the SSL trust store as trust materials");
-                sslContextBuilder.loadTrustMaterial(sslTrustStore, trustStrategy);
-            }
+	    final KeyStore sslTrustStore = getSSLTrustStore();
+	    if (sslTrustStore != null) {
+		LOG.atDebug().log("Set the SSL trust store as trust materials");
+		sslContextBuilder.loadTrustMaterial(sslTrustStore, trustStrategy);
+	    }
 
-            final KeyStore sslKeystore = getSSLKeyStore();
-            if (sslKeystore != null) {
-                LOG.atDebug().log("Set the SSL keystore as key materials");
-                sslContextBuilder.loadKeyMaterial(sslKeystore, sslKeystorePassword);
-                if (loadKeyStoreAsTrustMaterial) {
-                    LOG.atDebug().log("Set the SSL keystore as trust materials");
-                    sslContextBuilder.loadTrustMaterial(sslKeystore, trustStrategy);
-                }
-            }
+	    final KeyStore sslKeystore = getSSLKeyStore();
+	    if (sslKeystore != null) {
+		LOG.atDebug().log("Set the SSL keystore as key materials");
+		sslContextBuilder.loadKeyMaterial(sslKeystore, sslKeystorePassword);
+		if (loadKeyStoreAsTrustMaterial) {
+		    LOG.atDebug().log("Set the SSL keystore as trust materials");
+		    sslContextBuilder.loadTrustMaterial(sslKeystore, trustStrategy);
+		}
+	    }
 
-            DefaultClientTlsStrategy defaultClientTlsStrategy = new DefaultClientTlsStrategy(sslContextBuilder.build(),
-                    getSupportedSSLProtocols(), getSupportedSSLCipherSuites(), SSLBufferMode.STATIC,
-                    getHostnameVerifier());
-            return defaultClientTlsStrategy;
-        } catch (final Exception e) {
-            throw new IllegalArgumentException("Unable to configure the SSLContext/SSLConnectionSocketFactory", e);
-        }
+	    DefaultClientTlsStrategy defaultClientTlsStrategy = new DefaultClientTlsStrategy(
+		    sslContextBuilder.build(), getSupportedSSLProtocols(),
+		    getSupportedSSLCipherSuites(), SSLBufferMode.STATIC, getHostnameVerifier());
+	    return defaultClientTlsStrategy;
+	} catch (final Exception e) {
+	    throw new IllegalArgumentException(
+		    "Unable to configure the SSLContext/SSLConnectionSocketFactory", e);
+	}
     }
 
     /**
@@ -833,13 +800,11 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * @return {@link KeyStore}
      *
-     * @throws IOException
-     *             if IOException occurs
-     * @throws GeneralSecurityException
-     *             if GeneralSecurityException occurs
+     * @throws IOException              if IOException occurs
+     * @throws GeneralSecurityException if GeneralSecurityException occurs
      */
     protected KeyStore getSSLKeyStore() throws IOException, GeneralSecurityException {
-        return loadKeyStore(sslKeystore, sslKeystoreType, sslKeystorePassword);
+	return loadKeyStore(sslKeystore, sslKeystoreType, sslKeystorePassword);
     }
 
     /**
@@ -847,26 +812,24 @@ public class CommonsDataHttpClient implements Serializable {
      *
      * @return {@link KeyStore}
      *
-     * @throws IOException
-     *             if IOException occurs
-     * @throws GeneralSecurityException
-     *             if GeneralSecurityException occurs
+     * @throws IOException              if IOException occurs
+     * @throws GeneralSecurityException if GeneralSecurityException occurs
      */
     protected KeyStore getSSLTrustStore() throws IOException, GeneralSecurityException {
-        return loadKeyStore(sslTruststore, sslTruststoreType, sslTruststorePassword);
+	return loadKeyStore(sslTruststore, sslTruststoreType, sslTruststorePassword);
     }
 
     private KeyStore loadKeyStore(DSSDocument store, String type, char[] password)
-            throws IOException, GeneralSecurityException {
-        if (store != null) {
-            try (InputStream is = store.openStream()) {
-                KeyStore ks = KeyStore.getInstance(type);
-                ks.load(is, password);
-                return ks;
-            }
-        } else {
-            return null;
-        }
+	    throws IOException, GeneralSecurityException {
+	if (store != null) {
+	    try (InputStream is = store.openStream()) {
+		KeyStore ks = KeyStore.getInstance(type);
+		ks.load(is, password);
+		return ks;
+	    }
+	} else {
+	    return null;
+	}
     }
 
     /**
@@ -876,22 +839,24 @@ public class CommonsDataHttpClient implements Serializable {
      * @return {@link HttpClientBuilder}
      */
     protected HttpClientBuilder getHttpClientBuilder() {
-        HttpClientBuilder httpClientBuilder = HttpClients.custom();
+	HttpClientBuilder httpClientBuilder = HttpClients.custom();
 
-        if (useSystemProperties) {
-            httpClientBuilder.useSystemProperties();
-        }
+	if (useSystemProperties) {
+	    httpClientBuilder.useSystemProperties();
+	}
 
-        httpClientBuilder = configCredentials(httpClientBuilder);
+	httpClientBuilder = configCredentials(httpClientBuilder);
 
-        final RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
-                .setConnectionRequestTimeout(timeoutConnectionRequest).setResponseTimeout(timeoutResponse)
-                .setConnectionKeepAlive(connectionKeepAlive).setRedirectsEnabled(redirectsEnabled);
+	final RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+		.setConnectionRequestTimeout(timeoutConnectionRequest)
+		.setResponseTimeout(timeoutResponse).setConnectionKeepAlive(connectionKeepAlive)
+		.setRedirectsEnabled(redirectsEnabled);
 
-        httpClientBuilder.setConnectionManager(getConnectionManager())
-                .setDefaultRequestConfig(requestConfigBuilder.build()).setRetryStrategy(retryStrategy);
+	httpClientBuilder.setConnectionManager(getConnectionManager())
+		.setDefaultRequestConfig(requestConfigBuilder.build())
+		.setRetryStrategy(retryStrategy);
 
-        return httpClientBuilder;
+	return httpClientBuilder;
     }
 
     /**
@@ -900,55 +865,56 @@ public class CommonsDataHttpClient implements Serializable {
      * @return {@link CloseableHttpClient}
      */
     protected CloseableHttpClient createHttpClient() {
-        return getHttpClientBuilder().build();
+	return getHttpClientBuilder().build();
     }
 
     /**
      * Defines the Credentials
      *
-     * @param httpClientBuilder
-     *            {@link HttpClientBuilder}
-     * @param url
-     *            {@link String}
+     * @param httpClientBuilder {@link HttpClientBuilder}
+     * @param url               {@link String}
      *
      * @return {@link HttpClientBuilder}
      */
     private HttpClientBuilder configCredentials(HttpClientBuilder httpClientBuilder) {
-        final BasicCredentialsProvider credentialsProvider = getCredentialsProvider();
-        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-        return httpClientBuilder;
+	final BasicCredentialsProvider credentialsProvider = getCredentialsProvider();
+	httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+	return httpClientBuilder;
     }
 
     /**
-     * Builds and returns a {@code BasicCredentialsProvider} configured with {@code authenticationMap}
+     * Builds and returns a {@code BasicCredentialsProvider} configured with
+     * {@code authenticationMap}
      *
      * @return {@link BasicCredentialsProvider}
      */
     protected BasicCredentialsProvider getCredentialsProvider() {
-        final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        for (final Map.Entry<HostConnection, UserCredentials> entry : getAuthenticationMap().entrySet()) {
-            final HostConnection hostConnection = entry.getKey();
-            final UserCredentials userCredentials = entry.getValue();
-            final AuthScope authscope = new AuthScope(hostConnection.getProtocol(), hostConnection.getHost(),
-                    hostConnection.getPort(), hostConnection.getRealm(), hostConnection.getScheme());
+	final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+	for (final Map.Entry<HostConnection, UserCredentials> entry : getAuthenticationMap()
+		.entrySet()) {
+	    final HostConnection hostConnection = entry.getKey();
+	    final UserCredentials userCredentials = entry.getValue();
+	    final AuthScope authscope = new AuthScope(hostConnection.getProtocol(),
+		    hostConnection.getHost(), hostConnection.getPort(), hostConnection.getRealm(),
+		    hostConnection.getScheme());
 
-            final UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(
-                    userCredentials.getUsername(), userCredentials.getPassword());
-            credentialsProvider.setCredentials(authscope, usernamePasswordCredentials);
-        }
-        return credentialsProvider;
+	    final UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(
+		    userCredentials.getUsername(), userCredentials.getPassword());
+	    credentialsProvider.setCredentials(authscope, usernamePasswordCredentials);
+	}
+	return credentialsProvider;
     }
 
     private static Timeout toTimeoutMilliseconds(int millis) {
-        if (millis < 0) {
-            LOG.info("A negative timeout has been provided. Use system default.");
-            return null;
-        }
-        return Timeout.ofMilliseconds(millis);
+	if (millis < 0) {
+	    LOG.info("A negative timeout has been provided. Use system default.");
+	    return null;
+	}
+	return Timeout.ofMilliseconds(millis);
     }
 
     private static TimeValue toTimeValueMilliseconds(int millis) {
-        return TimeValue.ofMilliseconds(millis);
+	return TimeValue.ofMilliseconds(millis);
     }
 
     /**
@@ -957,7 +923,7 @@ public class CommonsDataHttpClient implements Serializable {
      * @return dataHttpClient
      */
     public CloseableHttpClient getHttpClient() {
-        return client;
+	return client;
     }
 
 }
