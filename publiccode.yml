@@ -77,7 +77,7 @@ maintenance:
       name: Cristiano Casagni
   contractors:
     - name: ' Engineering Ingegneria Informatica S.p.A.'
-      until: '2024-06-30'
+      until: '2026-23-12'
   type: contract
 name: Parer - Verifica Firma Eidas
 platforms:
