@@ -1,8 +1,10 @@
 ## Container scan evidence CVE
 <strong>Image name:</strong> registry.ente.regione.emr.it/parer/okd/verifica-firma-eidas:sast
-<br/><strong>Run date:</strong> Wed May 7 13:00:29 CEST 2025
-<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/612321">Job</a>
-<br/><strong>CVE founded:</strong> 1
+<br/><strong>Run date:</strong> Fri Aug 22 12:26:01 CEST 2025
+<br/><strong>Produced by:</strong> <a href="https://gitlab.ente.regione.emr.it/parer/okd/verifica-firma-eidas/-/jobs/724322">Job</a>
+<br/><strong>CVE founded:</strong> 3
 | CVE | Description | Severity | Solution | 
 |:---:|:---|:---:|:---|
-| [CVE-2025-27363](http://www.openwall.com/lists/oss-security/2025/03/13/1)|An out of bounds write exists in FreeType versions 2.13.0 and below (newer versions of FreeType are not vulnerable) when attempting to parse font subglyph structures related to TrueType GX and variable font files. The vulnerable code assigns a signed short value to an unsigned long and then adds a static value causing it to wrap around and allocate too small of a heap buffer. The code then writes up to 6 signed long integers out of bounds relative to this buffer. This may result in arbitrary code execution. This vulnerability may have been exploited in the wild.|High|No solution provided|
+| [CVE-2025-5914](https://access.redhat.com/errata/RHSA-2025:14130)|A vulnerability has been identified in the libarchive library, specifically within the archive_read_format_rar_seek_data() function. This flaw involves an integer overflow that can ultimately lead to a double-free condition. Exploiting a double-free vulnerability can result in memory corruption, enabling an attacker to execute arbitrary code or cause a denial-of-service condition.|High|Upgrade libarchive to 3.3.3-6.el8_10|
+| [CVE-2025-7425](https://access.redhat.com/errata/RHSA-2025:12447)|A flaw was found in libxslt where the attribute type, atype, flags are modified in a way that corrupts internal memory management. When XSLT functions, such as the key() process, result in tree fragments, this corruption prevents the proper cleanup of ID attributes. As a result, the system may access freed memory, causing crashes or enabling attackers to trigger heap corruption.|High|Upgrade libxml2 to 2.9.7-21.el8_10.2|
+| [CVE-2025-6965](https://access.redhat.com/errata/RHSA-2025:11992)|There exists a vulnerability in SQLite versions before 3.50.2 where the number of aggregate terms could exceed the number of columns available. This could lead to a memory corruption issue. We recommend upgrading to version 3.50.2 or above.|High|Upgrade sqlite-libs to 3.26.0-20.el8_10|

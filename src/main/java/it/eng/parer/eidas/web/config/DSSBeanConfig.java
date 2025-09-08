@@ -367,6 +367,12 @@ public class DSSBeanConfig {
 		JdbcCacheAIASource jdbcCacheAIASource = new JdbcCacheAIASource();
 		jdbcCacheAIASource.setJdbcCacheConnector(jdbcCacheConnector());
 		jdbcCacheAIASource.setProxySource(onlineAIASource());
+
+		try {
+		    jdbcCacheAIASource.initTable();
+		} catch (SQLException e) {
+		    throw new DSSException("Errore inizializzazione AIA JDBC cache", e);
+		}
 		return jdbcCacheAIASource;
 	    }
 	    FileCacheDataLoader fileCacheDataLoader = fileCacheDataLoader();
