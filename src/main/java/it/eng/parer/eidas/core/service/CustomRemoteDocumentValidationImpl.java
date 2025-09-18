@@ -25,29 +25,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.xml.sax.SAXException;
 
+import eu.europa.esig.dss.enumerations.Level;
 import eu.europa.esig.dss.enumerations.MimeType;
 import eu.europa.esig.dss.enumerations.TokenExtractionStrategy;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.model.policy.ValidationPolicy;
 import eu.europa.esig.dss.pades.validation.PDFDocumentValidator;
 import eu.europa.esig.dss.pdf.IPdfObjFactory;
 import eu.europa.esig.dss.pdf.ServiceLoaderPdfObjFactory;
 import eu.europa.esig.dss.pdf.modifications.DefaultPdfDifferencesFinder;
 import eu.europa.esig.dss.pdf.modifications.DefaultPdfObjectModificationsFinder;
-import eu.europa.esig.dss.policy.ValidationPolicy;
-import eu.europa.esig.dss.policy.ValidationPolicyFacade;
-import eu.europa.esig.dss.policy.jaxb.Level;
+import eu.europa.esig.dss.policy.EtsiValidationPolicy;
+import eu.europa.esig.dss.policy.EtsiValidationPolicyFactory;
 import eu.europa.esig.dss.policy.jaxb.LevelConstraint;
 import eu.europa.esig.dss.spi.signature.AdvancedSignature;
 import eu.europa.esig.dss.spi.validation.CertificateVerifier;
@@ -62,7 +60,6 @@ import it.eng.parer.eidas.model.EidasWSReportsDTOTree;
 import it.eng.parer.eidas.model.exception.EidasParerException;
 import it.eng.parer.eidas.model.exception.ParerError;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.xml.bind.JAXBException;
 
 public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocumentValidation {
 
@@ -200,10 +197,6 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	    ValidationPolicy customValidationConstraints;
 	    try {
 		customValidationConstraints = compileValidationPolicy(dataToValidateMetadata);
-	    } catch (JAXBException | XMLStreamException | SAXException ex) {
-		throw new EidasParerException(dataToValidateMetadata, ex)
-			.withCode(ParerError.ErrorCode.GENERIC_ERROR)
-			.withMessage("Errore generico in fase di compilazione custom policy");
 	    } catch (IOException ex) {
 		throw new EidasParerException(dataToValidateMetadata, ex)
 			.withCode(ParerError.ErrorCode.IO_ERROR)
@@ -293,8 +286,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
      *
      */
     private ValidationPolicy compileValidationPolicy(
-	    EidasDataToValidateMetadata dataToValidateMetadata)
-	    throws JAXBException, XMLStreamException, IOException, SAXException {
+	    EidasDataToValidateMetadata dataToValidateMetadata) throws IOException {
 	// Level IGNORE
 	final LevelConstraint ignore = new LevelConstraint();
 	ignore.setLevel(Level.IGNORE);
@@ -308,49 +300,51 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 		.isControlloCertificatoIgnorato();
 	boolean controlloRevocaIgnorato = dataToValidateMetadata.isControlloRevocaIgnorato();
 
-	final ValidationPolicyFacade facade = ValidationPolicyFacade.newFacade();
-	final ValidationPolicy validationPolicyJaxb = defaultValidationPolicy.exists()
-		? facade.getValidationPolicy(defaultValidationPolicy.getInputStream())
-		: facade.getDefaultValidationPolicy();
+	// from 6.3 migration to EtsiValidation*
+	final EtsiValidationPolicyFactory etsiFactory = new EtsiValidationPolicyFactory();
+	final EtsiValidationPolicy etsiValidationJaxb = defaultValidationPolicy.exists()
+		? (EtsiValidationPolicy) etsiFactory
+			.loadValidationPolicy(defaultValidationPolicy.getInputStream())
+		: (EtsiValidationPolicy) etsiFactory.loadDefaultValidationPolicy();
 
 	if (controlloCrittograficoIgnorato) {
 	    log.atDebug().log("Validation policy controlloCatenaTrustIgnorato set to level {}",
 		    Level.IGNORE);
 	    //
-	    validationPolicyJaxb.getCryptographic().setLevel(Level.IGNORE);// default FAIL
+	    etsiValidationJaxb.getCryptographic().setLevel(Level.IGNORE);// default FAIL
 	    log.atDebug().log(
 		    "Validation policy: cryptographic constraint original level {}, to level {}",
-		    validationPolicyJaxb.getCryptographic().getLevel(), Level.IGNORE);
+		    etsiValidationJaxb.getCryptographic().getLevel(), Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getCryptographic().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/cryptographic constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getCryptographic().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSignatureIntact().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signatureIntact constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSignatureIntact().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getReferenceDataExistence().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/referenceDataExistence constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getReferenceDataExistence().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getReferenceDataIntact().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/referenceDataIntact constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getReferenceDataIntact().getLevel(),
 		    Level.IGNORE);
 
@@ -359,51 +353,51 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	     * che si deve ignorare questo tipo di controllo, non porta a criticità.
 	     */
 	    // CA
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getCACertificate().getCryptographic().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/CACertificate/cryptographic constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getCACertificate().getCryptographic().getLevel(),
 		    Level.IGNORE);
 
 	    // Timestamp
-	    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 		    .getCryptographic().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: timestampConstraints/cryptographic constraint original level {}, to level {}",
-		    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 			    .getCryptographic().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 		    .getSignatureIntact().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: timestampConstraints/cryptographic/getSignatureIntact constraint original level {}, to level {}",
-		    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 			    .getSignatureIntact().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 		    .getReferenceDataExistence().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: timestampConstraints/cryptographic/getReferenceDataExistence constraint original level {}, to level {}",
-		    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 			    .getReferenceDataExistence().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 		    .getReferenceDataIntact().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: timestampConstraints/cryptographic/getReferenceDataIntact constraint original level {}, to level {}",
-		    validationPolicyJaxb.getTimestampConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getTimestampConstraints().getBasicSignatureConstraints()
 			    .getReferenceDataIntact().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getCryptographic().getAlgoExpirationDate().setLevel(Level.IGNORE);
+	    etsiValidationJaxb.getCryptographic().getAlgoExpirationDate().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: cryptographic/getAlgoExpirationDate constraint original level {}, to level {}",
-		    validationPolicyJaxb.getCryptographic().getAlgoExpirationDate().getLevel(),
+		    etsiValidationJaxb.getCryptographic().getAlgoExpirationDate().getLevel(),
 		    Level.IGNORE);
 	}
 
@@ -411,11 +405,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	    log.atDebug().log("Validation policy controlloCatenaTrustIgnorato set to level {}",
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getProspectiveCertificateChain().setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/prospectiveCertificateChain constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getProspectiveCertificateChain().getLevel(),
 		    Level.IGNORE);
 	}
@@ -424,11 +418,11 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	    log.atDebug().log("Validation policy controlloCertificatoIgnorato set to level {}",
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSignatureIntact().setLevel(Level.IGNORE);// default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signatureIntact constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSignatureIntact().getLevel(),
 		    Level.IGNORE);
 	}
@@ -447,37 +441,37 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	    log.atDebug().log("Validation policy controlloCRLIgnorato set to level {}",
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSigningCertificate().setRevocationFreshnessNextUpdate(ignore);
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signingCertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSigningCertificate().getRevocationFreshnessNextUpdate().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSigningCertificate().getRevocationDataAvailable().setLevel(Level.IGNORE); // default
 												  // FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signingCertificate/revocationDataAvailable constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSigningCertificate().getRevocationDataAvailable().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSigningCertificate().getRevocationIssuerNotExpired().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signingCertificate/revocationIssuerNotExpired constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSigningCertificate().getRevocationIssuerNotExpired().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getSigningCertificate().getRevocationInfoAccessPresent()
 		    .setLevel(Level.IGNORE); // default FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/signingCertificate/revocationInfoAccessPresent constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getSigningCertificate().getRevocationInfoAccessPresent().getLevel(),
 		    Level.IGNORE);
 	    /*
@@ -486,56 +480,55 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
 	     */
 	    // CA
 	    // no time constraint
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getCACertificate().setRevocationFreshnessNextUpdate(ignore);
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/CACertificate/revocationFreshnessNextUpdate constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getCACertificate().getRevocationFreshnessNextUpdate().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 		    .getCACertificate().getRevocationDataAvailable().setLevel(Level.IGNORE); // default
 											     // FAIL
 	    log.atDebug().log(
 		    "Validation policy: basicSignatureConstraints/CACertificate/revocationDataAvailable constraint original level {}, to level {}",
-		    validationPolicyJaxb.getSignatureConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getSignatureConstraints().getBasicSignatureConstraints()
 			    .getCACertificate().getRevocationDataAvailable().getLevel(),
 		    Level.IGNORE);
 
 	    //
-	    validationPolicyJaxb.getRevocationConstraints().setLevel(Level.IGNORE);
+	    etsiValidationJaxb.getRevocationConstraints().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: revocationConstraints constraint original level {}, to level {}",
-		    validationPolicyJaxb.getRevocationConstraints().getLevel(), Level.IGNORE);
+		    etsiValidationJaxb.getRevocationConstraints().getLevel(), Level.IGNORE);
 
 	    // no time constraint
-	    validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints()
+	    etsiValidationJaxb.getRevocationConstraints().getBasicSignatureConstraints()
 		    .getSigningCertificate().setRevocationFreshnessNextUpdate(ignore);
 	    log.atDebug().log(
 		    "Validation policy: revocationConstraints/revocationFreshnessNextUpdate constraint original level {}, to level {}",
-		    validationPolicyJaxb.getRevocationConstraints().getBasicSignatureConstraints()
+		    etsiValidationJaxb.getRevocationConstraints().getBasicSignatureConstraints()
 			    .getSigningCertificate().getRevocationFreshnessNextUpdate(),
 		    Level.IGNORE);
 
 	    // OCSP
-	    validationPolicyJaxb.getRevocationConstraints().getUnknownStatus()
-		    .setLevel(Level.IGNORE);
+	    etsiValidationJaxb.getRevocationConstraints().getUnknownStatus().setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: revocationConstraints/UnknownStatus constraint original level {}, to level {}",
-		    validationPolicyJaxb.getRevocationConstraints().getUnknownStatus().getLevel(),
+		    etsiValidationJaxb.getRevocationConstraints().getUnknownStatus().getLevel(),
 		    Level.IGNORE);
 
-	    validationPolicyJaxb.getRevocationConstraints().getSelfIssuedOCSP()
+	    etsiValidationJaxb.getRevocationConstraints().getSelfIssuedOCSP()
 		    .setLevel(Level.IGNORE);
 	    log.atDebug().log(
 		    "Validation policy: revocationConstraints/SelfIssuedOCSP constraint original level {}, to level {}",
-		    validationPolicyJaxb.getRevocationConstraints().getSelfIssuedOCSP().getLevel(),
+		    etsiValidationJaxb.getRevocationConstraints().getSelfIssuedOCSP().getLevel(),
 		    Level.IGNORE);
 
 	}
 
-	return validationPolicyJaxb;
+	return etsiValidationJaxb;
     }
 
     /**

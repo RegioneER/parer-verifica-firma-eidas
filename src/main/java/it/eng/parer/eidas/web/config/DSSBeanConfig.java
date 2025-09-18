@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore.PasswordProtection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -42,6 +44,7 @@ import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.cades.signature.CAdESService;
 import eu.europa.esig.dss.jades.signature.JAdESService;
 import eu.europa.esig.dss.model.DSSException;
+import eu.europa.esig.dss.model.tsl.TrustServiceStatusAndInformationExtensions;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.service.crl.JdbcCacheCRLSource;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
@@ -66,9 +69,14 @@ import eu.europa.esig.dss.spi.x509.revocation.crl.CRLSource;
 import eu.europa.esig.dss.spi.x509.revocation.ocsp.OCSPSource;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection;
+import eu.europa.esig.dss.tsl.function.GrantedOrRecognizedAtNationalLevelTrustAnchorPeriodPredicate;
 import eu.europa.esig.dss.tsl.function.OfficialJournalSchemeInformationURI;
+import eu.europa.esig.dss.tsl.function.TrustAnchorPeriodPredicate;
+import eu.europa.esig.dss.tsl.function.TypeOtherTSLPointer;
+import eu.europa.esig.dss.tsl.function.XMLOtherTSLPointer;
 import eu.europa.esig.dss.tsl.job.TLValidationJob;
 import eu.europa.esig.dss.tsl.source.LOTLSource;
+import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.ws.signature.common.RemoteDocumentSignatureServiceImpl;
 import eu.europa.esig.dss.ws.signature.common.RemoteMultipleDocumentsSignatureServiceImpl;
 import eu.europa.esig.dss.ws.signature.common.RemoteTrustedListSignatureServiceImpl;
@@ -189,6 +197,40 @@ public class DSSBeanConfig {
     @Value("${cache.file.path:}")
     private String cacheFilePath;
 
+    /* from 6.3 */
+    @Value("${tl.loader.ades.enabled}")
+    private boolean adesLotlEnabled;
+
+    @Value("${tl.loader.ades.lotlUrl}")
+    private String adesLotlUrl;
+
+    @Value("${tl.loader.ades.keystore.type}")
+    private String adesKeyStoreType;
+
+    @Value("${tl.loader.ades.keystore.filename}")
+    private String adesKeyStoreFilename;
+
+    @Value("${tl.loader.ades.keystore.password}")
+    private String adesKeyStorePassword;
+
+    @Value("${tl.loader.ades.tsl.type}")
+    private String adesTSLType;
+
+    @Value("${tl.loader.ades.tsl.status.list}")
+    private List<String> adesTSLStatusList;
+
+    @Value("${tl.loader.ades.tl.versions}")
+    private List<Integer> adesTLVersions;
+
+    @Value("${tl.loader.lotl.use.sunset.date}")
+    private boolean useSunsetDate;
+
+    @Value("${tl.loader.lotl.tl.versions}")
+    private List<Integer> lotlTLVersions;
+
+    @Value("${tl.loader.trust.all}")
+    private boolean tlTrustAllStrategy;
+
     /** CUSTOM HTTP CLIENT ! **/
     @Bean(initMethod = "init", destroyMethod = "destroy")
     public CommonsDataHttpClient dataHttpClient() {
@@ -255,9 +297,8 @@ public class DSSBeanConfig {
      * TABLE non desisedarata corretto che vengano create le tabelle ma non si vuole dropparle non
      * appena il processo viene interrotto
      *
-     * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
-     * europa/esig/dss/web/ config/DSSBeanConfig.java
+     * Visit https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/
+     * main/java/eu/ europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
@@ -308,9 +349,8 @@ public class DSSBeanConfig {
      * TABLE non desisedarata corretto che vengano create le tabelle ma non si vuole dropparle non
      * appena il processo viene interrotto
      *
-     * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
-     * europa/esig/dss/web/ config/DSSBeanConfig.java
+     * Visit https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/
+     * main/java/eu/ europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      *
      */
@@ -354,9 +394,8 @@ public class DSSBeanConfig {
      * appena il processo viene interrotto
      *
      *
-     * Visit
-     * https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/main/java/eu/
-     * europa/esig/dss/web/ config/DSSBeanConfig.java
+     * Visit https://github.com/esig/dss-demonstrations/blob/master/dss-demo-webapp/src/
+     * main/java/eu/ europa/esig/dss/web/ config/DSSBeanConfig.java
      *
      */
     // @Bean(initMethod = "initTable", destroyMethod = "destroyTable")
@@ -543,6 +582,13 @@ public class DSSBeanConfig {
 	lotlSource.setSigningCertificatesAnnouncementPredicate(
 		new OfficialJournalSchemeInformationURI(currentOjUrl));
 	lotlSource.setPivotSupport(true);
+	if (useSunsetDate) {
+	    lotlSource.setTrustAnchorValidityPredicate(
+		    new GrantedOrRecognizedAtNationalLevelTrustAnchorPeriodPredicate());
+	}
+	if (Utils.isCollectionNotEmpty(lotlTLVersions)) {
+	    lotlSource.setTLVersions(lotlTLVersions);
+	}
 	return lotlSource;
     }
 
@@ -583,7 +629,7 @@ public class DSSBeanConfig {
     public TLValidationJob job() {
 	TLValidationJob job = new TLValidationJob();
 	job.setTrustedListCertificateSource(trustedListSource());
-	job.setListOfTrustedListSources(europeanLOTL());
+	job.setListOfTrustedListSources(listOfTrustedListSources());
 	job.setOfflineDataLoader(offlineLoader());
 	job.setOnlineDataLoader(onlineLoader());
 	return job;
@@ -614,4 +660,72 @@ public class DSSBeanConfig {
 	return new JdbcCacheConnector(dataSource);
     }
 
+    /* from 6.3 */
+    private LOTLSource[] listOfTrustedListSources() {
+	List<LOTLSource> lotlSourceList = new ArrayList<>();
+	lotlSourceList.add(europeanLOTL());
+	if (adesLotlEnabled) {
+	    lotlSourceList.add(adesLOTL());
+	}
+	return lotlSourceList.toArray(new LOTLSource[0]);
+    }
+
+    @Bean(name = "ades-source")
+    public LOTLSource adesLOTL() {
+	LOTLSource adesLOTL = new LOTLSource();
+	adesLOTL.setUrl(adesLotlUrl);
+	adesLOTL.setCertificateSource(adesLotlKeyStore());
+	adesLOTL.setMraSupport(true);
+	adesLOTL.setPivotSupport(false);
+
+	adesLOTL.setLotlPredicate(
+		new XMLOtherTSLPointer().and(new TypeOtherTSLPointer(adesTSLType)));
+	adesLOTL.setTlPredicate(
+		new XMLOtherTSLPointer().and(new TypeOtherTSLPointer(adesTSLType)).negate()); // allow
+											      // all
+											      // TSL
+											      // Types
+
+	if (Utils.isCollectionNotEmpty(adesTSLStatusList)) {
+	    adesLOTL.setTrustAnchorValidityPredicate(adesLOTLTrustAnchorValidityPrecicate());
+	}
+	if (Utils.isCollectionNotEmpty(adesTLVersions)) {
+	    adesLOTL.setTLVersions(adesTLVersions);
+	}
+
+	return adesLOTL;
+    }
+
+    @Bean
+    public KeyStoreCertificateSource adesLotlKeyStore() {
+	try {
+	    return new KeyStoreCertificateSource(
+		    ResourceUtils.getURL(adesKeyStoreFilename).openStream(), adesKeyStoreType,
+		    adesKeyStorePassword.toCharArray());
+	} catch (IOException e) {
+	    throw new DSSException("Unable to load the file " + adesKeyStoreFilename, e);
+	}
+    }
+
+    @Bean
+    public TrustAnchorPeriodPredicate adesLOTLTrustAnchorValidityPrecicate() {
+	return new TrustAnchorPeriodPredicate() {
+	    @Override
+	    public boolean test(
+		    TrustServiceStatusAndInformationExtensions trustServiceStatusAndInformationExtensions) {
+		return adesTSLStatusList.stream().anyMatch(
+			v -> v.equals(trustServiceStatusAndInformationExtensions.getStatus()));
+	    }
+	};
+    }
+
+    @Bean
+    public CommonsDataLoader tlDataLoader() {
+	if (tlTrustAllStrategy) {
+	    LOG.info("TrustAllStrategy is enabled on TL loading.");
+	    return trustAllDataLoader();
+	} else {
+	    return dataLoader();
+	}
+    }
 }

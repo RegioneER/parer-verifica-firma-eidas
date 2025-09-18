@@ -78,6 +78,30 @@ lotl:
   country:
     code: EU
 
+# AdES LOTL config
+tl:
+  loader:
+    ades: 
+      enabled: false
+      lotlUrl: "https://ec.europa.eu/tools/lotl/mra/ades-lotl.xml"
+      keystore: 
+        type: PKCS12
+        filename: classpath:ades/ades-keystore.p12
+        password: ks-password
+      tsl:
+        type: http://ec.europa.eu/tools/lotl/mra/ades-lotl-tsl-type
+        status:
+          list: ""
+      tl:
+        versions: "5,6"
+    lotl:
+      use:
+        sunset:
+          date: false	# Defines whether trust anchors shall be loaded with a validity period (granted and recognized at national level)
+      tl:
+        versions: "5,6" # Defines a list of accepted TL versions
+    trust:
+      all: false # Defines whether all SSL-certificates should be trusted on TL-loading
 # https://www.freeformatter.com/cron-expression-generator-quartz.html
 cron:
   tl:

@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /*
  * since spring boot 3.x
@@ -42,12 +41,10 @@ public class StrictSecurityConfig {
 	//
 	http.csrf(csrf -> csrf.disable()) // disable csrf
 		.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-			.requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + RESOURCE_INFOS))
-			.authenticated())
+			.requestMatchers(URL_ADMIN_BASE + RESOURCE_INFOS).authenticated())
 		.httpBasic(Customizer.withDefaults()) // basic auth
 		.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-			.requestMatchers(new AntPathRequestMatcher(URL_ADMIN_BASE + "/**"))
-			.denyAll()) // deny all
+			.requestMatchers(URL_ADMIN_BASE + "/**").denyAll()) // deny all
 		.authorizeHttpRequests(
 			authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()); // permit
 												  // all
