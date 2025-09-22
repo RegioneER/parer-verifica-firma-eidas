@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.28.1-SNAPSHOT</version>
+	<version>1.29.1-SNAPSHOT</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>it.eng.parer</groupId>
 		<artifactId>parer-pom</artifactId>
-		<version>7.1.0</version>
+		<version>7.1.2</version>
 	</parent>
 
     <properties>
@@ -21,13 +21,13 @@
 		<!-- Applied for jdk11 bug -->
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
-		<dss.version>6.2</dss.version>
-		<springboot.version>3.4.4</springboot.version>
-		<springdoc-openapi-starter-webmvc-ui.version>2.8.6</springdoc-openapi-starter-webmvc-ui.version>		
+		<dss.version>6.3</dss.version>
+		<springboot.version>3.5.5</springboot.version>
+		<springdoc-openapi-starter-webmvc-ui.version>2.8.13</springdoc-openapi-starter-webmvc-ui.version>		
 		<logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
-		<tika.version>3.1.0</tika.version>
+		<tika.version>3.2.2</tika.version>
 		<httpcore5.version>5.3.4</httpcore5.version>
-		<httpclient5.version>5.4.2</httpclient5.version>
+		<httpclient5.version>5.5</httpclient5.version>
 		<jaxb-api.version>2.3.1</jaxb-api.version>
 		<bootstrap.version>4.6.2</bootstrap.version>
 		<popper.js.version>1.16.1</popper.js.version>
@@ -36,11 +36,13 @@
 		<highlightjs.version>11.5.0</highlightjs.version>
 		<highlightjs-badgejs.version>0.0.5</highlightjs-badgejs.version>
 		<font-awesome.version>6.5.2</font-awesome.version>
-		<fop.version>2.10</fop.version>
-		<commons-io.version>2.18.0</commons-io.version>
-		<org-json.version>20250107</org-json.version>
+		<fop.version>2.11</fop.version>
+		<commons-io.version>2.20.0</commons-io.version>
+		<org-json.version>20250517</org-json.version>
+		<commons-validator.version>1.10.0</commons-validator.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.13.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.14.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
@@ -111,6 +113,10 @@
 	                 	<groupId>org.bouncycastle</groupId>
 	                 	<artifactId>bcmail-jdk18on</artifactId>
 	                 </exclusion>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-lang3</artifactId>
+					</exclusion>
            		 </exclusions>				
 			</dependency>
             <dependency>
@@ -133,7 +139,12 @@
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
-			</dependency>		
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>			
         </dependencies>          
     </dependencyManagement>
 
@@ -230,13 +241,22 @@
 			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
 			<artifactId>dss-crl-parser-stream</artifactId>
 		</dependency>
+		<!-- from 6.3 -->
+		<dependency>
+			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
+			<artifactId>dss-policy-jaxb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>eu.europa.ec.joinup.sd-dss</groupId>
+			<artifactId>dss-cms-object</artifactId>
+		</dependency>
 		<!-- Model -->
 		<dependency>
 			<groupId>it.eng.parer</groupId>
 			<artifactId>verificafirma-eidas-beans</artifactId>
 		</dependency>
 
-	
+
 		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -279,6 +299,12 @@
         <dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- Jaxb -->
 		<dependency>
@@ -363,7 +389,12 @@
 		    <groupId>org.json</groupId>
 		    <artifactId>json</artifactId>
 		    <version>${org-json.version}</version>
-		</dependency>		
+		</dependency>
+		<dependency>
+		    <groupId>commons-validator</groupId>
+		    <artifactId>commons-validator</artifactId>
+		    <version>${commons-validator.version}</version>
+		</dependency>
 		<!-- Webjars -->
 		<dependency>
 			<groupId>org.webjars</groupId>

@@ -9,18 +9,14 @@
 	<div th:replace="~{fragments/template.html :: main}"></div>
 
 	<sec:authorize access="isAuthenticated()">
-		<div class="container"
-			style="padding-top: 10px; padding-bottom: 10px;">
-			<div class="row">
-				<div class="col">
-					<a href="#" class="btn btn-primary btn-sm fa fa-sign-out"
-						th:href="@{/logout}"> Esci</a>
-
+		<div class="container" style="padding-top: 10px; padding-bottom: 10px;">
+			<div class="row justify-content-end">
+				<div class="col-auto text-end">
+					<span class="fa fa-user fa-sm" /> Utente: <strong><span sec:authentication="name"></span></strong>
 				</div>
-				<div class="col-sm-2">
-					<span class="fa fa-user fa-sm" /> Utente: <strong><span
-						sec:authentication="name"></span></strong>
-				</div>				
+				<div class="col-auto text-end">
+					<a href="#" class="btn btn-primary btn-sm fa fa-sign-out" th:href="@{/logout}"> Esci</a>
+				</div>
 			</div>
 		</div>
 	</sec:authorize>
