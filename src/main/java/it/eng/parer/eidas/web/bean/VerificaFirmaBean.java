@@ -47,89 +47,89 @@ public class VerificaFirmaBean implements Serializable {
     private transient List<MultipartFile> fileOriginali;
 
     public boolean isAbilitaControlloRevoca() {
-	return abilitaControlloRevoca;
+        return abilitaControlloRevoca;
     }
 
     public void setAbilitaControlloRevoca(boolean abilitaControlloRevoca) {
-	this.abilitaControlloRevoca = abilitaControlloRevoca;
+        this.abilitaControlloRevoca = abilitaControlloRevoca;
     }
 
     public boolean isAbilitaControlloCatenaTrusted() {
-	return abilitaControlloCatenaTrusted;
+        return abilitaControlloCatenaTrusted;
     }
 
     public void setAbilitaControlloCatenaTrusted(boolean abilitaControlloCatenaTrusted) {
-	this.abilitaControlloCatenaTrusted = abilitaControlloCatenaTrusted;
+        this.abilitaControlloCatenaTrusted = abilitaControlloCatenaTrusted;
     }
 
     public boolean isAbilitaControlloCa() {
-	return abilitaControlloCa;
+        return abilitaControlloCa;
     }
 
     public void setAbilitaControlloCa(boolean abilitaControlloCa) {
-	this.abilitaControlloCa = abilitaControlloCa;
+        this.abilitaControlloCa = abilitaControlloCa;
     }
 
     public boolean isAbilitaControlloCrittografico() {
-	return abilitaControlloCrittografico;
+        return abilitaControlloCrittografico;
     }
 
     public void setAbilitaControlloCrittografico(boolean abilitaControlloCrittografico) {
-	this.abilitaControlloCrittografico = abilitaControlloCrittografico;
+        this.abilitaControlloCrittografico = abilitaControlloCrittografico;
     }
 
     /**
      * @return the includiRaw
      */
     public boolean isIncludiRaw() {
-	return includiRaw;
+        return includiRaw;
     }
 
     /**
      * @param includiRaw the includiRaw to set
      */
     public void setIncludiRaw(boolean includiRaw) {
-	this.includiRaw = includiRaw;
+        this.includiRaw = includiRaw;
     }
 
     public LocalDate getDataRiferimento() {
-	return dataRiferimento;
+        return dataRiferimento;
     }
 
     public void setDataRiferimento(LocalDate dataRiferimento) {
-	this.dataRiferimento = dataRiferimento;
+        this.dataRiferimento = dataRiferimento;
     }
 
     public LocalTime getOraRiferimento() {
-	return oraRiferimento;
+        return oraRiferimento;
     }
 
     public void setOraRiferimento(LocalTime oraRiferimento) {
-	this.oraRiferimento = oraRiferimento;
+        this.oraRiferimento = oraRiferimento;
     }
 
     public MultipartFile getFileDaVerificare() {
-	return fileDaVerificare;
+        return fileDaVerificare;
     }
 
     public void setFileDaVerificare(MultipartFile fileDaVerificare) {
-	this.fileDaVerificare = fileDaVerificare;
+        this.fileDaVerificare = fileDaVerificare;
     }
 
     public MultipartFile getFileDssPolicy() {
-	return fileDssPolicy;
+        return fileDssPolicy;
     }
 
     public void setFileDssPolicy(MultipartFile fileDssPolicy) {
-	this.fileDssPolicy = fileDssPolicy;
+        this.fileDssPolicy = fileDssPolicy;
     }
 
     public List<MultipartFile> getFileOriginali() {
-	return fileOriginali;
+        return fileOriginali;
     }
 
     public void setFileOriginali(List<MultipartFile> fileOriginali) {
-	this.fileOriginali = fileOriginali;
+        this.fileOriginali = fileOriginali;
     }
 
 }

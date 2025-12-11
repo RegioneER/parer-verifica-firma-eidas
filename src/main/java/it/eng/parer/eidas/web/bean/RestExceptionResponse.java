@@ -32,7 +32,7 @@ import it.eng.parer.eidas.model.exception.EidasParerException;
  *
  */
 @JsonIgnoreProperties(value = {
-	"eidasParerException", "localizedMessage", "suppressed", "cause", "stackTrace" })
+        "eidasParerException", "localizedMessage", "suppressed", "cause", "stackTrace" })
 public class RestExceptionResponse extends EidasParerException {
 
     private final EidasParerException eidasParerException;
@@ -47,13 +47,13 @@ public class RestExceptionResponse extends EidasParerException {
     private static final long serialVersionUID = 225598790808095611L;
 
     public RestExceptionResponse() {
-	super();
-	this.eidasParerException = new EidasParerException();
+        super();
+        this.eidasParerException = new EidasParerException();
     }
 
     public RestExceptionResponse(EidasParerException eidasParerException) {
-	super();
-	this.eidasParerException = eidasParerException;
+        super();
+        this.eidasParerException = eidasParerException;
     }
 
     /*
@@ -61,71 +61,71 @@ public class RestExceptionResponse extends EidasParerException {
      */
     @Override
     public String getMessage() {
-	return getEidasParerException().getMessage();
+        return getEidasParerException().getMessage();
     }
 
     @Override
     public String getMoreInfo() {
-	return getEidasParerException().getMoreInfo();
+        return getEidasParerException().getMoreInfo();
     }
 
     @Override
     public ErrorCode getCode() {
-	return getEidasParerException().getCode();
+        return getEidasParerException().getCode();
     }
 
     @Override
     public List<String> getDetails() {
-	return getEidasParerException().getDetails();
+        return getEidasParerException().getDetails();
     }
 
     /*
      * local property
      */
     public LocalDateTime getDatetime() {
-	return datetime;
+        return datetime;
     }
 
     @Schema(hidden = true, accessMode = AccessMode.READ_ONLY)
     public EidasParerException getEidasParerException() {
-	return eidasParerException;
+        return eidasParerException;
     }
 
     @Override
     public EidasParerException withMoreInfo(String moreInfo) {
-	return getEidasParerException().withMoreInfo(moreInfo);
+        return getEidasParerException().withMoreInfo(moreInfo);
     }
 
     @Override
     public EidasParerException withCode(ErrorCode code) {
-	return getEidasParerException().withCode(code);
+        return getEidasParerException().withCode(code);
     }
 
     @Override
     public EidasParerException withMessage(String message) {
-	return getEidasParerException().withMessage(message);
+        return getEidasParerException().withMessage(message);
     }
 
     @Override
     public EidasParerException withDetail(String message) {
-	return getEidasParerException().withDetail(message);
+        return getEidasParerException().withDetail(message);
     }
 
     @JsonInclude(Include.NON_NULL)
     @Override
     public EidasDataToValidateMetadata getMetadata() {
-	return getEidasParerException().getMetadata();
+        return getEidasParerException().getMetadata();
     }
 
     @Schema(hidden = true, accessMode = AccessMode.READ_ONLY)
     @Override
     public String getLocalizedMessage() {
-	return super.getLocalizedMessage();
+        return super.getLocalizedMessage();
     }
 
     @Override
     public String toString() {
-	return super.toString() + " - datetime=" + datetime;
+        return super.toString() + " - datetime=" + datetime;
     }
 
 }

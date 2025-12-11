@@ -26,11 +26,11 @@ import org.springframework.util.ResourceUtils;
  */
 
 public class EidasKeyStoreSignatureTokenConnection
-	extends eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection {
+        extends eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection {
 
     public EidasKeyStoreSignatureTokenConnection(String ksFile, String ksType,
-	    PasswordProtection ksPassword) throws IOException {
-	super(ResourceUtils.getURL(ksFile).openStream(), ksType, ksPassword);
+            PasswordProtection ksPassword) throws IOException {
+        super(ResourceUtils.getURL(ksFile).openStream(), ksType, ksPassword);
     }
 
 }

@@ -51,7 +51,7 @@ import it.eng.parer.eidas.web.util.RestUtil;
  * @author sinatti_s
  */
 @ControllerAdvice(basePackages = {
-	"it.eng.parer.eidas.web.rest" })
+        "it.eng.parer.eidas.web.rest" })
 @RequestMapping(produces = MediaType.APPLICATION_PROBLEM_JSON_VALUE)
 public class AdviceHandler {
 
@@ -65,97 +65,97 @@ public class AdviceHandler {
 
     @ExceptionHandler(EidasParerException.class)
     public final ResponseEntity<RestExceptionResponse> handleEidasParerException(
-	    EidasParerException ex, WebRequest request) {
-	// log code based
-	if (ex.getCode().equals(EIDAS_ERROR)) {
-	    // log warn
-	    log.atWarn().log(STD_MSG_APP_WARN, ex);
-	} else {
-	    // log error
-	    log.atError().log(STD_MSG_APP_ERROR, ex);
-	}
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(RestUtil.buildParerResponseEntity(ex, request), headers,
-		HttpStatus.INTERNAL_SERVER_ERROR);
+            EidasParerException ex, WebRequest request) {
+        // log code based
+        if (ex.getCode().equals(EIDAS_ERROR)) {
+            // log warn
+            log.atWarn().log(STD_MSG_APP_WARN, ex);
+        } else {
+            // log error
+            log.atError().log(STD_MSG_APP_ERROR, ex);
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(RestUtil.buildParerResponseEntity(ex, request), headers,
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public final ResponseEntity<RestExceptionResponse> handleMediaTypeException(
-	    HttpMediaTypeNotSupportedException ex, WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-		Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
+            HttpMediaTypeNotSupportedException ex, WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+                Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public final ResponseEntity<RestExceptionResponse> handleValidationException(
-	    MethodArgumentNotValidException ex, WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	// details
-	List<String> details = new ArrayList<>();
-	Stream.of(Arrays.asList(ex.getBody().getDetail()),
-		ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList())
-		.forEach(details::addAll);
-	//
-	return new ResponseEntity<>(
-		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, details), headers,
-		HttpStatus.BAD_REQUEST);
+            MethodArgumentNotValidException ex, WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // details
+        List<String> details = new ArrayList<>();
+        Stream.of(Arrays.asList(ex.getBody().getDetail()),
+                ex.getAllErrors().stream().map(ObjectError::getDefaultMessage).toList())
+                .forEach(details::addAll);
+        //
+        return new ResponseEntity<>(
+                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR, details), headers,
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpMessageConversionException.class)
     public ResponseEntity<RestExceptionResponse> handleHttpMessageConversionException(
-	    HttpMessageConversionException ex, WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(
-		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-			Arrays.asList("Contenuto di metadata non corretto")),
-		headers, HttpStatus.BAD_REQUEST);
+            HttpMessageConversionException ex, WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(
+                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+                        Arrays.asList("Contenuto di metadata non corretto")),
+                headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<RestExceptionResponse> handleMissingServletRequestPartException(
-	    MissingServletRequestPartException ex, WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-		Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
+            MissingServletRequestPartException ex, WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+                Arrays.asList(ex.getBody().getDetail())), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<RestExceptionResponse> handleMaxSizeException(
-	    MaxUploadSizeExceededException ex, WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(
-		RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
-			Arrays.asList("Dimensione massima consentita di upload "
-				+ ex.getMaxUploadSize() + " MB")),
-		headers, HttpStatus.EXPECTATION_FAILED);
+            MaxUploadSizeExceededException ex, WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_VALIDATION_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(
+                RestUtil.buildValidationException(STD_MSG_VALIDATION_ERROR,
+                        Arrays.asList("Dimensione massima consentita di upload "
+                                + ex.getMaxUploadSize() + " MB")),
+                headers, HttpStatus.EXPECTATION_FAILED);
     }
 
     @ExceptionHandler(Throwable.class)
     public final ResponseEntity<RestExceptionResponse> handleGenericException(Exception ex,
-	    WebRequest request) {
-	// log generic exception
-	log.atError().log(STD_MSG_GENERIC_ERROR, ex);
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_JSON);
-	return new ResponseEntity<>(RestUtil.buildGenericResponseEntity(request), headers,
-		HttpStatus.INTERNAL_SERVER_ERROR);
+            WebRequest request) {
+        // log generic exception
+        log.atError().log(STD_MSG_GENERIC_ERROR, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(RestUtil.buildGenericResponseEntity(request), headers,
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

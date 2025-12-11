@@ -74,7 +74,7 @@ public class VerificaFirmaWs {
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-	binder.addValidators(eidasMetadaValidator);
+        binder.addValidators(eidasMetadaValidator);
     }
 
     /**
@@ -87,24 +87,24 @@ public class VerificaFirmaWs {
      */
     @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta un JSON con i metadati relativi alla verifica. La risorsa ottenuta da questa chiamata è il report di verifica")
     @ApiResponses(value = {
-	    @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
-		    @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
-	    @ApiResponse(responseCode = "500", description = "Documento firmato non riconosciuto", content = {
-		    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }) })
+            @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
+                    @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
+            @ApiResponse(responseCode = "500", description = "Documento firmato non riconosciuto", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }) })
     @PostMapping(value = {
-	    RESOURCE_REPORT_VERIFICA }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+            RESOURCE_REPORT_VERIFICA }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<EidasWSReportsDTOTree> validateJson(
-	    @Parameter(description = "DSS DataToValidate Json", required = true) @Valid @RequestBody(required = true) EidasDataToValidateMetadata metadata,
-	    HttpServletRequest request) {
-	// LOG UUID
-	MDC.put(Constants.UUID_LOG_MDC, metadata.getUuid());
-	// LOG BODY
-	if (log.isDebugEnabled()) {
-	    log.atDebug().log("RequestBody {}", new JSONObject(metadata).toString());
-	}
-	EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
-	return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
-		.body(body);
+            @Parameter(description = "DSS DataToValidate Json", required = true) @Valid @RequestBody(required = true) EidasDataToValidateMetadata metadata,
+            HttpServletRequest request) {
+        // LOG UUID
+        MDC.put(Constants.UUID_LOG_MDC, metadata.getUuid());
+        // LOG BODY
+        if (log.isDebugEnabled()) {
+            log.atDebug().log("RequestBody {}", new JSONObject(metadata).toString());
+        }
+        EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
+        return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
+                .body(body);
     }
 
     /**
@@ -120,29 +120,29 @@ public class VerificaFirmaWs {
      */
     @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta chiamata POST con multipart/form-data. La risorsa ottenuta da questa chiamata è il report di verifica")
     @ApiResponses(value = {
-	    @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
-		    @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
-	    @ApiResponse(responseCode = "400", description = "Parametri errati durante l'esecuzione della procedura", content = {
-		    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }),
-	    @ApiResponse(responseCode = "417", description = "File eccede dimensioni consentite", content = {
-		    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }),
-	    @ApiResponse(responseCode = "500", description = "Documento firmato non riconosciuto", content = {
-		    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }) })
+            @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
+                    @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
+            @ApiResponse(responseCode = "400", description = "Parametri errati durante l'esecuzione della procedura", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }),
+            @ApiResponse(responseCode = "417", description = "File eccede dimensioni consentite", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }),
+            @ApiResponse(responseCode = "500", description = "Documento firmato non riconosciuto", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = RestExceptionResponse.class)) }) })
     @PostMapping(value = {
-	    RESOURCE_REPORT_VERIFICA }, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+            RESOURCE_REPORT_VERIFICA }, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<EidasWSReportsDTOTree> validateMultipart(
-	    @Parameter(description = "File firmato", required = true) @RequestPart(name = "signedFile", required = true) MultipartFile signedFile,
-	    @Parameter(description = "Metadati", required = false, schema = @Schema(type = "string", format = "binary")) @RequestPart(name = "metadata", required = false) Optional<EidasDataToValidateMetadata> metadata,
-	    @Parameter(description = "File originale/i", required = false) @RequestPart(name = "originalFiles", required = false) MultipartFile[] originalFiles,
-	    @Parameter(description = "File custom policy", required = false) @RequestPart(name = "customValidationFile", required = false) MultipartFile customValidationFile,
-	    HttpServletRequest request) {
-	// optional value
-	EidasDataToValidateMetadata localMetadata = metadata
-		.orElse(new EidasDataToValidateMetadata());
-	MDC.put(Constants.UUID_LOG_MDC, localMetadata.getUuid());
-	EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnMultipart(localMetadata,
-		request, signedFile, originalFiles, customValidationFile);
-	return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
-		.body(body);
+            @Parameter(description = "File firmato", required = true) @RequestPart(name = "signedFile", required = true) MultipartFile signedFile,
+            @Parameter(description = "Metadati", required = false, schema = @Schema(type = "string", format = "binary")) @RequestPart(name = "metadata", required = false) Optional<EidasDataToValidateMetadata> metadata,
+            @Parameter(description = "File originale/i", required = false) @RequestPart(name = "originalFiles", required = false) MultipartFile[] originalFiles,
+            @Parameter(description = "File custom policy", required = false) @RequestPart(name = "customValidationFile", required = false) MultipartFile customValidationFile,
+            HttpServletRequest request) {
+        // optional value
+        EidasDataToValidateMetadata localMetadata = metadata
+                .orElse(new EidasDataToValidateMetadata());
+        MDC.put(Constants.UUID_LOG_MDC, localMetadata.getUuid());
+        EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnMultipart(localMetadata,
+                request, signedFile, originalFiles, customValidationFile);
+        return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
+                .body(body);
     }
 }

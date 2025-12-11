@@ -38,8 +38,8 @@ import it.eng.parer.eidas.web.VerificaFirmaEidasApplication;
  * @since 1.10.1
  */
 @SpringBootTest(classes = VerificaFirmaEidasApplication.class, properties = {
-	"logging.level.root=INFO", "logging.level.it.eng.parer=INFO",
-	"spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1" })
+        "logging.level.root=INFO", "logging.level.it.eng.parer=INFO",
+        "spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1" })
 class EidasHelperTest {
 
     @Autowired
@@ -54,13 +54,13 @@ class EidasHelperTest {
      */
     @Test
     void testMimeTypeOffice() throws IOException {
-	String fileWithoutSignature = ResourceUtils
-		.getURL("classpath:NOT_SIGNED/office_non_firmato").getFile();
-	DSSDocument input = new FileDocument(fileWithoutSignature);
+        String fileWithoutSignature = ResourceUtils
+                .getURL("classpath:NOT_SIGNED/office_non_firmato").getFile();
+        DSSDocument input = new FileDocument(fileWithoutSignature);
 
-	String expetedMimeType = "application/msword";
-	String actualMimeType = eidasHelper.detectMimeType(input);
-	assertEquals(expetedMimeType, actualMimeType);
+        String expetedMimeType = "application/msword";
+        String actualMimeType = eidasHelper.detectMimeType(input);
+        assertEquals(expetedMimeType, actualMimeType);
     }
 
 }

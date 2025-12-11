@@ -23,12 +23,12 @@ public class CustomBanner implements Banner {
 
     @Override
     public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
-	out.println("================================================================");
-	out.println("@EIDAS "
-		+ (StringUtils.isNotBlank(getClass().getPackage().getImplementationVersion())
-			? "v." + getClass().getPackage().getImplementationVersion()
-			: " on localhost "));
-	out.println("================================================================");
+        out.println("================================================================");
+        out.println("@EIDAS "
+                + (StringUtils.isNotBlank(getClass().getPackage().getImplementationVersion())
+                        ? "v." + getClass().getPackage().getImplementationVersion()
+                        : " on localhost "));
+        out.println("================================================================");
 
     }
 }

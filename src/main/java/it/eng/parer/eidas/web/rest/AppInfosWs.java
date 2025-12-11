@@ -54,7 +54,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AppInfosWs {
 
     private Map<String, Map<String, String>> infos = Collections
-	    .synchronizedMap(new LinkedHashMap<>());
+            .synchronizedMap(new LinkedHashMap<>());
 
     private static final String ENV_FILTER_GIT = "git";
     private static final String ENV_FILTER_DSS = "dss";
@@ -76,81 +76,81 @@ public class AppInfosWs {
     String rootToSkip;
 
     @SuppressWarnings({
-	    "rawtypes", "unchecked" })
+            "rawtypes", "unchecked" })
     @Operation(summary = "Info", method = "Informazioni applicativo")
     @ApiResponses(value = {
-	    @ApiResponse(responseCode = "200", description = "Informazioni applicativo", content = {
-		    @Content(mediaType = "application/json") }) })
+            @ApiResponse(responseCode = "200", description = "Informazioni applicativo", content = {
+                    @Content(mediaType = "application/json") }) })
     @GetMapping(value = {
-	    RESOURCE_INFOS }, produces = MediaType.APPLICATION_JSON_VALUE)
+            RESOURCE_INFOS }, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Map<String, String>>> infos(HttpServletRequest request) {
 
-	MutablePropertySources propSrcs = ((AbstractEnvironment) env).getPropertySources();
+        MutablePropertySources propSrcs = ((AbstractEnvironment) env).getPropertySources();
 
-	// infos
-	// git
-	Properties gitprops = new Properties();
-	StreamSupport.stream(propSrcs.spliterator(), false)
-		.filter(MapPropertySource.class::isInstance)
-		.map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
-		.flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
-		.filter(propName -> propName.startsWith(ENV_FILTER_GIT))
-		.forEach(propName -> gitprops.setProperty(propName, getProperty(propName)));
+        // infos
+        // git
+        Properties gitprops = new Properties();
+        StreamSupport.stream(propSrcs.spliterator(), false)
+                .filter(MapPropertySource.class::isInstance)
+                .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
+                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .filter(propName -> propName.startsWith(ENV_FILTER_GIT))
+                .forEach(propName -> gitprops.setProperty(propName, getProperty(propName)));
 
-	if (!ENV_FILTER_GIT.matches(rootToSkip)) {
-	    infos.put(ENV_FILTER_GIT, new TreeMap<>((Map) gitprops));
-	}
+        if (!ENV_FILTER_GIT.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_GIT, new TreeMap<>((Map) gitprops));
+        }
 
-	// dss
-	Properties dssprops = new Properties();
-	StreamSupport.stream(propSrcs.spliterator(), false)
-		.filter(MapPropertySource.class::isInstance)
-		.map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
-		.flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
-		.filter(propName -> propName.startsWith(ENV_FILTER_DSS))
-		.forEach(propName -> dssprops.setProperty(propName, getProperty(propName)));
+        // dss
+        Properties dssprops = new Properties();
+        StreamSupport.stream(propSrcs.spliterator(), false)
+                .filter(MapPropertySource.class::isInstance)
+                .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
+                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .filter(propName -> propName.startsWith(ENV_FILTER_DSS))
+                .forEach(propName -> dssprops.setProperty(propName, getProperty(propName)));
 
-	if (!ENV_FILTER_DSS.matches(rootToSkip)) {
-	    infos.put(ENV_FILTER_DSS, new TreeMap<>((Map) dssprops));
-	}
+        if (!ENV_FILTER_DSS.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_DSS, new TreeMap<>((Map) dssprops));
+        }
 
-	// spring
-	Properties springprops = new Properties();
-	StreamSupport.stream(propSrcs.spliterator(), false)
-		.filter(MapPropertySource.class::isInstance)
-		.map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
-		.flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
-		.filter(propName -> propName.startsWith(ENV_FILTER_SPRING))
-		.forEach(propName -> springprops.setProperty(propName, getProperty(propName)));
+        // spring
+        Properties springprops = new Properties();
+        StreamSupport.stream(propSrcs.spliterator(), false)
+                .filter(MapPropertySource.class::isInstance)
+                .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
+                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .filter(propName -> propName.startsWith(ENV_FILTER_SPRING))
+                .forEach(propName -> springprops.setProperty(propName, getProperty(propName)));
 
-	if (!ENV_FILTER_SPRING.matches(rootToSkip)) {
-	    infos.put(ENV_FILTER_SPRING, new TreeMap<>((Map) springprops));
-	}
+        if (!ENV_FILTER_SPRING.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_SPRING, new TreeMap<>((Map) springprops));
+        }
 
-	// others
-	List<String> allcurrkeys = infos.values().stream().map(Map::keySet)
-		.flatMap(Collection::stream).toList();
-	Properties othersprops = new Properties();
-	StreamSupport.stream(propSrcs.spliterator(), false)
-		.filter(MapPropertySource.class::isInstance)
-		.map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
-		.flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
-		.filter(propName -> !allcurrkeys.contains(propName))
-		.forEach(propName -> othersprops.setProperty(propName, getProperty(propName)));
+        // others
+        List<String> allcurrkeys = infos.values().stream().map(Map::keySet)
+                .flatMap(Collection::stream).toList();
+        Properties othersprops = new Properties();
+        StreamSupport.stream(propSrcs.spliterator(), false)
+                .filter(MapPropertySource.class::isInstance)
+                .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
+                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .filter(propName -> !allcurrkeys.contains(propName))
+                .forEach(propName -> othersprops.setProperty(propName, getProperty(propName)));
 
-	if (!ENV_FILTER_OTHERS.matches(rootToSkip)) {
-	    infos.put(ENV_FILTER_OTHERS, new TreeMap<>((Map) othersprops));
-	}
+        if (!ENV_FILTER_OTHERS.matches(rootToSkip)) {
+            infos.put(ENV_FILTER_OTHERS, new TreeMap<>((Map) othersprops));
+        }
 
-	return ResponseEntity.ok().lastModified(LocalDateTime.now().atZone(ZoneId.systemDefault()))
-		.eTag(ETAG).body(infos);
+        return ResponseEntity.ok().lastModified(LocalDateTime.now().atZone(ZoneId.systemDefault()))
+                .eTag(ETAG).body(infos);
     }
 
     private String getProperty(String key) {
-	try {
-	    return env.getProperty(key);
-	} catch (IllegalArgumentException e) {
-	    return "non disponibile";
-	}
+        try {
+            return env.getProperty(key);
+        } catch (IllegalArgumentException e) {
+            return "non disponibile";
+        }
     }
 }

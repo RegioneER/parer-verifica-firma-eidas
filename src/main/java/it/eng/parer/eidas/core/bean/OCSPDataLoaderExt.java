@@ -49,49 +49,49 @@ public class OCSPDataLoaderExt extends OCSPDataLoader implements CustomDataLoade
      */
     @Override
     public byte[] ldapGet(final String urlString) {
-	return customLdapGet(urlString);
+        return customLdapGet(urlString);
     }
 
     @Override
     public String getLdapTimeoutConnection() {
-	return ldapTimeoutConnection;
+        return ldapTimeoutConnection;
     }
 
     public void setLdapTimeoutConnection(String ldapTimeoutConnection) {
-	this.ldapTimeoutConnection = ldapTimeoutConnection;
+        this.ldapTimeoutConnection = ldapTimeoutConnection;
     }
 
     /* HTTP GET */
     @Override
     protected byte[] httpGet(String url) {
-	return customHttpGet(url);
+        return customHttpGet(url);
     }
 
     /* HTTP POST */
     @Override
     public byte[] post(String url, byte[] content) {
-	return customPost(url, content);
+        return customPost(url, content);
     }
 
     @Override
     public byte[] execute(CloseableHttpClient client, HttpUriRequest httpRequest)
-	    throws IOException {
-	return super.execute(client, httpRequest);
+            throws IOException {
+        return super.execute(client, httpRequest);
     }
 
     @Override
     public void setCommonsDataHttpClient(CommonsDataHttpClient dataHttpClient) {
-	this.dataHttpClient = dataHttpClient;
+        this.dataHttpClient = dataHttpClient;
     }
 
     @Override
     public CommonsDataHttpClient getCommonsDataHttpClient() {
-	return dataHttpClient;
+        return dataHttpClient;
     }
 
     @Override
     public Logger logger() {
-	return LOG;
+        return LOG;
     }
 
 }
