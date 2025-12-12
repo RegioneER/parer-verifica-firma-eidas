@@ -31,25 +31,25 @@ public class VerificaFirmaResultPaginatorBean implements Serializable {
      * @return the nrResult
      */
     public int getNrResult() {
-	return nrResult;
+        return nrResult;
     }
 
     public void incNrResult() {
-	nrResult++;
+        nrResult++;
     }
 
     /**
      * @return the curPage
      */
     public int getCurPage() {
-	return curPage;
+        return curPage;
     }
 
     /**
      * @param curPage the curPage to set
      */
     public void setCurPage(int curPage) {
-	this.curPage = curPage;
+        this.curPage = curPage;
     }
 
 }

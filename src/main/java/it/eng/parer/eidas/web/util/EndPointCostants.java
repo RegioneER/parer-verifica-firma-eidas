@@ -19,7 +19,7 @@ package it.eng.parer.eidas.web.util;
 public class EndPointCostants {
 
     private EndPointCostants() {
-	throw new IllegalStateException("Utility class");
+        throw new IllegalStateException("Utility class");
     }
 
     public static final String URL_ADMIN_BASE = "/admin";

@@ -39,16 +39,16 @@ public class TSLLoaderJob {
 
     @PostConstruct
     public void init() {
-	if (offlineEnabled) {
-	    job.offlineRefresh();
-	}
-	//
-	job.onlineRefresh();
+        if (offlineEnabled) {
+            job.offlineRefresh();
+        }
+        //
+        job.onlineRefresh();
     }
 
     @Scheduled(cron = "${cron.tl.sched}")
     public void refresh() {
-	job.onlineRefresh();
+        job.onlineRefresh();
     }
 
 }

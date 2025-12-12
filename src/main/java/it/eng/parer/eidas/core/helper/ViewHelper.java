@@ -43,24 +43,24 @@ public class ViewHelper {
     String propsToSkip;
 
     public void convertAppPropertiesAsMap(Model model) {
-	Properties props = new Properties();
-	MutablePropertySources propSrcs = ((AbstractEnvironment) env).getPropertySources();
-	StreamSupport.stream(propSrcs.spliterator(), false)
-		.filter(MapPropertySource.class::isInstance)
-		.map(ps -> ((EnumerablePropertySource<?>) ps).getPropertyNames())
-		.flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
-		.forEach(propName -> props.setProperty(propName, getProperty(propName)));
-	model.addAttribute("app", new TreeMap<>(props));
+        Properties props = new Properties();
+        MutablePropertySources propSrcs = ((AbstractEnvironment) env).getPropertySources();
+        StreamSupport.stream(propSrcs.spliterator(), false)
+                .filter(MapPropertySource.class::isInstance)
+                .map(ps -> ((EnumerablePropertySource<?>) ps).getPropertyNames())
+                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .forEach(propName -> props.setProperty(propName, getProperty(propName)));
+        model.addAttribute("app", new TreeMap<>(props));
     }
 
     private String getProperty(String key) {
-	try {
-	    return env.getProperty(key);
-	} catch (IllegalArgumentException e) {
-	    log.atWarn().log(
-		    "Errore durante il recupero della variabile d'ambiente {}. All'interno del valore c'è forse un placeholder tipo ${var}?",
-		    key, e);
-	    return "non disponibile";
-	}
+        try {
+            return env.getProperty(key);
+        } catch (IllegalArgumentException e) {
+            log.atWarn().log(
+                    "Errore durante il recupero della variabile d'ambiente {}. All'interno del valore c'è forse un placeholder tipo ${var}?",
+                    key, e);
+            return "non disponibile";
+        }
     }
 }

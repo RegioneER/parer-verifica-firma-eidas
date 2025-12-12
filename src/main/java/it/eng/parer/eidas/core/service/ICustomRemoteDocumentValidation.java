@@ -44,6 +44,6 @@ public interface ICustomRemoteDocumentValidation {
     void setDefaultValidationPolicy(Resource defaultValidationPolicy);
 
     EidasWSReportsDTOTree validateSignature(EidasDataToValidateMetadata dataToValidateMetadata,
-	    HttpServletRequest request);
+            HttpServletRequest request);
 
 }

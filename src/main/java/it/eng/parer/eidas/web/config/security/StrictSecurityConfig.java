@@ -38,24 +38,24 @@ public class StrictSecurityConfig {
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-	//
-	http.csrf(csrf -> csrf.disable()) // disable csrf
-		.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-			.requestMatchers(URL_ADMIN_BASE + RESOURCE_INFOS).authenticated())
-		.httpBasic(Customizer.withDefaults()) // basic auth
-		.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-			.requestMatchers(URL_ADMIN_BASE + "/**").denyAll()) // deny all
-		.authorizeHttpRequests(
-			authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()); // permit
-												  // all
+        //
+        http.csrf(csrf -> csrf.disable()) // disable csrf
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(URL_ADMIN_BASE + RESOURCE_INFOS).authenticated())
+                .httpBasic(Customizer.withDefaults()) // basic auth
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(URL_ADMIN_BASE + "/**").denyAll()) // deny all
+                .authorizeHttpRequests(
+                        authorizeHttpRequests -> authorizeHttpRequests.anyRequest().permitAll()); // permit
+        // all
 
-	/*
-	 * h2 console https://springframework.guru/using-the-h2-database-console-in-spring-boot-
-	 * with-spring-security/
-	 */
-	http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        /*
+         * h2 console https://springframework.guru/using-the-h2-database-console-in-spring-boot-
+         * with-spring-security/
+         */
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
-	return http.build();
+        return http.build();
     }
 
 }

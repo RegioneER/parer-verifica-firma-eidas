@@ -23,7 +23,7 @@ package it.eng.parer.eidas.core.util;
 public class Constants {
 
     private Constants() {
-	throw new IllegalStateException("Constant class");
+        throw new IllegalStateException("Constant class");
     }
 
     public static final String UUID_LOG_MDC = "uuid";

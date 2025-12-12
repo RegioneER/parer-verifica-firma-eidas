@@ -16,7 +16,8 @@
  */
 package it.eng.parer.eidas.core.helper;
 
-import org.apache.commons.validator.routines.UrlValidator;
+import java.net.URI;
+
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -28,19 +29,33 @@ public class EidasMetadaValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-	return EidasDataToValidateMetadata.class.equals(clazz);
+        return EidasDataToValidateMetadata.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-	UrlValidator urlValidator = new UrlValidator();
-	//
-	EidasDataToValidateMetadata metadata = (EidasDataToValidateMetadata) target;
-	if (metadata.getRemoteSignedDocument().getUri() == null || !urlValidator
-		.isValid(metadata.getRemoteSignedDocument().getUri().toASCIIString())) {
-	    errors.reject("NOT-VALID-URI",
-		    "Necessario indicare un URI valido del documento firmato da recuperare");
-	}
+        EidasDataToValidateMetadata metadata = (EidasDataToValidateMetadata) target;
+        URI uri = metadata.getRemoteSignedDocument().getUri();
+
+        if (!isValidUri(uri)) {
+            errors.reject("NOT-VALID-URI",
+                    "Necessario indicare un URI valido del documento firmato da recuperare");
+        }
     }
 
+    private boolean isValidUri(URI uri) {
+        if (uri == null) {
+            return false;
+        }
+
+        try {
+            // Use JDK's built-in URL validation
+            java.net.URL url = uri.toURL();
+            // Additional checks can be added here
+            return url.getProtocol() != null
+                    && (url.getProtocol().equals("http") || url.getProtocol().equals("https"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

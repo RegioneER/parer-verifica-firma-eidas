@@ -24,13 +24,13 @@ import it.eng.parer.eidas.web.config.CustomBanner;
 public class VerificaFirmaEidasApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-	SpringApplication application = new SpringApplication(VerificaFirmaEidasApplication.class);
-	application.setBanner(new CustomBanner());
-	application.run(args);
+        SpringApplication application = new SpringApplication(VerificaFirmaEidasApplication.class);
+        application.setBanner(new CustomBanner());
+        application.run(args);
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-	return application.sources(VerificaFirmaEidasApplication.class);
+        return application.sources(VerificaFirmaEidasApplication.class);
     }
 }
