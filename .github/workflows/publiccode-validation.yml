@@ -1,5 +1,0 @@
-name: AgiD Public code validation
-on: pull_request
-jobs:
-  publiccode_validation:
-    uses: RegioneER/parer-github-template/.github/workflows/publiccode-validation.yml@v1

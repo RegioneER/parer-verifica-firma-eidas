@@ -1,0 +1,16 @@
+name: ParER Workflow
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  call-wf-template:
+    uses: RegioneER/parer-github-template/.github/workflows/wf-template.yml@v2
+    with:
+      java: '21'
+      publiccode-file: 'publiccode.yml'
+      run-publiccode-validation: true
+    secrets:
+      CI_PARERWORKER_RW_TOKEN: ${{ secrets.CI_PARERWORKER_RW_TOKEN }}
