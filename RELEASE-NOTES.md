@@ -1,8 +1,5 @@
-## 1.30.0 (11-12-2025)
+## 1.31.0 (03-03-2026)
 
-### Bugfix: 2
-- [#39413](https://parermine.regione.emilia-romagna.it/issues/39413) Correzione marshalling response "org.springframework.http.converter.HttpMessageNotWritableException: Could not marshal [it.eng.parer.eidas.model.EidasWSReportsDTOTree]: null"
-- [#39412](https://parermine.regione.emilia-romagna.it/issues/39412) Correzione gestione LDAP server connection timeout
-
-### Novità: 1
-- [#39402](https://parermine.regione.emilia-romagna.it/issues/39402) Patch di sicurezza per interventi legati a CVE
+### Novità: 2
+- [#40034](https://parermine.regione.emilia-romagna.it/issues/40034) Introduzione certificati AgiD (CA Ministero della difesa) per trusted liste (LOTL)
+- [#39961](https://parermine.regione.emilia-romagna.it/issues/39961) Patch di sicurezza per interventi legati a CVE
