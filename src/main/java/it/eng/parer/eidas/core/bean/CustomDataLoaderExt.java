@@ -37,6 +37,7 @@ import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.slf4j.Logger;
 
 import eu.europa.esig.dss.model.DSSException;
+import eu.europa.esig.dss.model.http.ResponseEnvelope;
 import eu.europa.esig.dss.service.http.commons.LdapURLUtils;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.exception.DSSExternalResourceException;
@@ -140,7 +141,8 @@ public interface CustomDataLoaderExt {
             final HttpEntity requestEntity = new BufferedHttpEntity(httpEntity);
             httpRequest.setEntity(requestEntity);
 
-            return execute(getCommonsDataHttpClient().getHttpClient(), httpRequest);
+            return executeHttpRequest(getCommonsDataHttpClient().getHttpClient(), httpRequest,
+                    false, true).getResponseBody();
 
         } catch (IOException e) {
             throw new DSSExternalResourceException(
@@ -162,7 +164,8 @@ public interface CustomDataLoaderExt {
 
         try {
             httpRequest = customGetHttpRequest(url);
-            return execute(getCommonsDataHttpClient().getHttpClient(), httpRequest);
+            return executeHttpRequest(getCommonsDataHttpClient().getHttpClient(), httpRequest,
+                    false, true).getResponseBody();
 
         } catch (URISyntaxException | IOException e) {
             throw new DSSExternalResourceException(
@@ -197,8 +200,9 @@ public interface CustomDataLoaderExt {
      * define standard getter & setter (inherit from {@link CommonsDataLoader})
      */
 
-    public byte[] execute(final CloseableHttpClient client, final HttpUriRequest httpRequest)
-            throws IOException;
+    public ResponseEnvelope executeHttpRequest(final CloseableHttpClient client,
+            final HttpUriRequest httpRequest, boolean includeResponseDetails,
+            boolean includeResponseBody) throws IOException;
 
     public String getContentType();
 

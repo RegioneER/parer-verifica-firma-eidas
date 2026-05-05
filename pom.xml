@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.31.1-SNAPSHOT</version>
+	<version>1.32.0</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -21,23 +21,22 @@
 		<!-- Applied for jdk11 bug -->
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
-		<dss.version>6.3</dss.version>
-		<springboot.version>3.5.10</springboot.version>
-		<springdoc-openapi-starter-webmvc-ui.version>2.8.15</springdoc-openapi-starter-webmvc-ui.version>		
-		<logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
-		<tika.version>3.2.3</tika.version>
-		<httpcore5.version>5.4</httpcore5.version>
+		<dss.version>6.4</dss.version>
+		<springboot.version>4.0.6</springboot.version>
+		<springdoc-openapi-starter-webmvc-ui.version>3.0.3</springdoc-openapi-starter-webmvc-ui.version>
+		<tika.version>3.3.0</tika.version>
+		<httpcore5.version>5.4.2</httpcore5.version>
 		<httpclient5.version>5.6</httpclient5.version>
 		<bootstrap.version>4.6.2</bootstrap.version>
 		<popper.js.version>1.16.1</popper.js.version>
 		<jquery.version>3.7.1</jquery.version>
-		<highlightjs.version>11.5.0</highlightjs.version>
-		<highlightjs-badgejs.version>0.0.5</highlightjs-badgejs.version>
-		<font-awesome.version>6.5.2</font-awesome.version>
+		<highlightjs.version>11.11.1</highlightjs.version>
+		<highlightjs-badgejs.version>0.0.6</highlightjs-badgejs.version>
+		<font-awesome.version>6.7.2</font-awesome.version>
 		<fop.version>2.11</fop.version>
 		<org-json.version>20251224</org-json.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.15.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.16.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
@@ -114,11 +113,6 @@
 					</exclusion>
            		 </exclusions>				
 			</dependency>
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>${logstash-logback-encoder.version}</version>
-            </dependency>
 			<dependency>
 			    <groupId>org.apache.httpcomponents.core5</groupId>
 			    <artifactId>httpcore5</artifactId>
@@ -261,10 +255,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+	  <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webmvc</artifactId>  <!-- Changed from web -->
+   	  </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
@@ -301,18 +295,24 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Jaxb -->
+		<!-- Upgrade to Spring-Boot 4.x {-->
+		<!-- JAXB: verifica se esiste tools.jackson -->
 		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>			
+		    <groupId>tools.jackson.module</groupId>
+		    <artifactId>jackson-module-jaxb-annotations</artifactId>
 		</dependency>
-		<!-- Encoder logstash -->
+		<!-- JAXB API (sostituisce javax.xml.bind rimosso da JDK 11+) -->
 		<dependency>
-			<groupId>net.logstash.logback</groupId>
-			<artifactId>logstash-logback-encoder</artifactId>
+		    <groupId>jakarta.xml.bind</groupId>
+		    <artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
-
-
+		<dependency>
+		    <groupId>org.glassfish.jaxb</groupId>
+		    <artifactId>jaxb-runtime</artifactId>
+		    <scope>runtime</scope>
+		</dependency>
+	    <!-- } Upgrade to Spring-Boot 4.x -->
+	    
 		<!-- Third party -->
 		<dependency>
 			<groupId>com.h2database</groupId>

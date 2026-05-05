@@ -77,7 +77,7 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi9/openjdk-21:1.23
+FROM registry.access.redhat.com/ubi10/openjdk-21-runtime:1.24
 
 LABEL io.k8s.description="Microservizio verifica firma EIDAS (basato su immagine ubi RedHat)" \
       io.k8s.display-name="Verifica firma EIDAS" \

@@ -113,6 +113,12 @@ cron:
 default:
   validation:
     policy: "policy/custom_constraint.xml"
+  qwac:
+    validation:
+      policy: "policy/qwac-constraint.xml"
+  certificate:
+    validation:
+      policy: "policy/certificate-constraint.xml"
 
 proxy:
   http:

@@ -46,11 +46,11 @@ import eu.europa.esig.dss.jades.signature.JAdESService;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.tsl.TrustServiceStatusAndInformationExtensions;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.service.SecureRandomNonceSource;
 import eu.europa.esig.dss.service.crl.JdbcCacheCRLSource;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.http.commons.FileCacheDataLoader;
-import eu.europa.esig.dss.service.http.commons.SSLCertificateLoader;
 import eu.europa.esig.dss.service.http.proxy.ProxyConfig;
 import eu.europa.esig.dss.service.ocsp.JdbcCacheOCSPSource;
 import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
@@ -160,6 +160,22 @@ public class DSSBeanConfig {
     /* from 5.13 */
     @Value("${cache.expiration:0}")
     private long cacheExpiration;
+
+    /* from 6.4 */
+    @Value("${default.certificate.validation.policy}")
+    private String defaultCertificateValidationPolicy;
+
+    /* from 6.4 */
+    @Value("${default.qwac.validation.policy}")
+    private String defaultQWACValidationPolicy;
+
+    /* from 6.4 */
+    @Value("${dataloader.ocsp.nonce.enabled:false}")
+    private boolean ocspNonceEnabled;
+
+    /* from 6.4 */
+    @Value("${dataloader.ocsp.nonce.size:32}")
+    private int ocspNonceSize;
 
     /* custom */
     @Value("${revoke.data.loading.strategy.crl-first.enabled:false}")
@@ -340,6 +356,9 @@ public class DSSBeanConfig {
     public OnlineOCSPSource onlineOCSPSource() {
         OnlineOCSPSource onlineOCSPSource = new OnlineOCSPSource();
         onlineOCSPSource.setDataLoader(ocspDataLoader());
+        if (ocspNonceEnabled) {
+            onlineOCSPSource.setNonceSource(new SecureRandomNonceSource(ocspNonceSize));
+        }
         return onlineOCSPSource;
     }
 
@@ -646,15 +665,6 @@ public class DSSBeanConfig {
     }
 
     /* from 5.8 */
-    /* QWAC Validation */
-
-    @Bean
-    public SSLCertificateLoader sslCertificateLoader() {
-        SSLCertificateLoader sslCertificateLoader = new SSLCertificateLoader();
-        sslCertificateLoader.setCommonsDataLoader(trustAllDataLoader());
-        return sslCertificateLoader;
-    }
-
     @Bean
     public JdbcCacheConnector jdbcCacheConnector() {
         return new JdbcCacheConnector(dataSource);
@@ -728,4 +738,15 @@ public class DSSBeanConfig {
             return dataLoader();
         }
     }
+
+    @Bean
+    public ClassPathResource defaultQwacPolicy() {
+        return new ClassPathResource(defaultQWACValidationPolicy);
+    }
+
+    @Bean
+    public ClassPathResource defaultCertificateValidationPolicy() {
+        return new ClassPathResource(defaultCertificateValidationPolicy);
+    }
+
 }

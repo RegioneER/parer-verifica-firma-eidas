@@ -13,41 +13,27 @@
 
 package it.eng.parer.eidas.web.config;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.jaxb.JaxbAnnotationModule;
 
 @Configuration
 @ComponentScan("it.eng.parer.eidas.core")
 @PropertySource("classpath:git.properties")
 public class AppConfiguration implements WebMvcConfigurer {
-
-    @Autowired
-    Environment env;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -60,37 +46,13 @@ public class AppConfiguration implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
-    /**
-     * Note: introdotto l'introspector Jaxb in modo tale da gestire correttamente sia in fase di
-     * serialiazzione che deserializzazione il report DSS (Jaxb Object)
-     *
-     * @return MappingJackson2HttpMessageConverter
-     */
     @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        ObjectMapper mapper = new ObjectMapper();
-        TypeFactory typeFactory = TypeFactory.defaultInstance();
-        AnnotationIntrospector introspector = new JaxbAnnotationIntrospector(typeFactory);
-        // make deserializer use JAXB annotations (only)
-        mapper.getDeserializationConfig().with(introspector);
-        // make serializer use JAXB annotations (only)
-        mapper.getSerializationConfig().with(introspector);
-        // since spring boot 2.5.0 (need com.fasterxml.jackson.datatype.jsr310.JavaTimeModule)
-        mapper.registerModule(new JavaTimeModule());
-        //
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(
-                mapper);
-        // Aggiungo i media type text/plain per supportare dataHttpClient come jmeter
-        List<MediaType> supportedMediaTypes = new ArrayList<>(
-                mappingJackson2HttpMessageConverter.getSupportedMediaTypes());
-        supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
-        supportedMediaTypes.add(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.ISO_8859_1));
-
-        mappingJackson2HttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
-
-        return mappingJackson2HttpMessageConverter;
+    public ObjectMapper jaxbObjectMapper() {
+        return JsonMapper.builder().addModule(new JaxbAnnotationModule())
+                // JavaTimeModule NON serve più: incluso in jackson-databind 3.x
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).build();
     }
 
     @Bean

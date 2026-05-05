@@ -20,6 +20,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.esig.dss.model.http.ResponseEnvelope;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 
 public class CommonsDataLoaderExt extends CommonsDataLoader implements CustomDataLoaderExt {
@@ -72,9 +73,10 @@ public class CommonsDataLoaderExt extends CommonsDataLoader implements CustomDat
     }
 
     @Override
-    public byte[] execute(CloseableHttpClient client, HttpUriRequest httpRequest)
-            throws IOException {
-        return super.execute(client, httpRequest);
+    public ResponseEnvelope executeHttpRequest(final CloseableHttpClient client,
+            final HttpUriRequest httpRequest, boolean includeResponseDetails,
+            boolean includeResponseBody) throws IOException {
+        return super.executeHttpRequest(client, httpRequest, false, true);
     }
 
     @Override

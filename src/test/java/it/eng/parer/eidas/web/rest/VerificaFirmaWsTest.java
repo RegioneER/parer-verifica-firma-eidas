@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +46,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,12 +64,22 @@ import it.eng.parer.eidas.model.exception.ParerError.ErrorCode;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerificaFirmaWsTest {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private RestTemplate restTemplate;
+
+    @Value("${server.servlet.context-path:/}")
+    private String contextPath;
+
+    @LocalServerPort
+    private int port;
+
+    private String getBaseUrl() {
+        return "http://localhost:" + port + contextPath;
+    }
 
     @BeforeAll
     void init() {
-        restTemplate.getRestTemplate().setErrorHandler(new EidasErrorHandler());
+        restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new EidasErrorHandler());
     }
 
     @Test
@@ -83,8 +94,8 @@ class VerificaFirmaWsTest {
         HttpEntity<MultiValueMap<String, Object>> entity = prepareMultipartReq(pathSig,
                 Optional.empty());
 
-        EidasWSReportsDTOTree result = restTemplate.postForObject(URL_REPORT_VERIFICA, entity,
-                EidasWSReportsDTOTree.class);
+        EidasWSReportsDTOTree result = restTemplate.postForObject(
+                getBaseUrl() + URL_REPORT_VERIFICA, entity, EidasWSReportsDTOTree.class);
 
         assertNumeroDiFirme(result.getReport(), 3);
 
@@ -107,8 +118,8 @@ class VerificaFirmaWsTest {
         HttpEntity<MultiValueMap<String, Object>> entity = prepareMultipartReq(pathSig,
                 Optional.of(pathOrig));
 
-        EidasWSReportsDTOTree result = restTemplate.postForObject(URL_REPORT_VERIFICA, entity,
-                EidasWSReportsDTOTree.class);
+        EidasWSReportsDTOTree result = restTemplate.postForObject(
+                getBaseUrl() + URL_REPORT_VERIFICA, entity, EidasWSReportsDTOTree.class);
 
         assertNumeroDiFirme(result.getReport(), 1);
 
@@ -126,9 +137,9 @@ class VerificaFirmaWsTest {
         HttpEntity<MultiValueMap<String, Object>> entity = prepareMultipartReq(pathSig,
                 Optional.empty());
 
-        assertThrows(
-                EidasParerException.class, () -> restTemplate.postForObject(URL_REPORT_VERIFICA,
-                        entity, EidasWSReportsDTOTree.class),
+        assertThrows(EidasParerException.class,
+                () -> restTemplate.postForObject(getBaseUrl() + URL_REPORT_VERIFICA, entity,
+                        EidasWSReportsDTOTree.class),
                 "Should fail throwing EidasParerException");
 
     }
@@ -144,9 +155,9 @@ class VerificaFirmaWsTest {
         body.add("wrong", null);
         HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        EidasParerException ex = assertThrows(
-                EidasParerException.class, () -> restTemplate.postForObject(URL_REPORT_VERIFICA,
-                        entity, EidasWSReportsDTOTree.class),
+        EidasParerException ex = assertThrows(EidasParerException.class,
+                () -> restTemplate.postForObject(getBaseUrl() + URL_REPORT_VERIFICA, entity,
+                        EidasWSReportsDTOTree.class),
                 "Should fail throwing EidasParerException");
 
         assertEquals(ErrorCode.VALIDATION_ERROR, ex.getCode());
