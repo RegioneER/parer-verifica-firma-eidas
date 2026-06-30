@@ -43,7 +43,10 @@ public interface ICustomRemoteDocumentValidation {
      */
     void setDefaultValidationPolicy(Resource defaultValidationPolicy);
 
-    EidasWSReportsDTOTree validateSignature(EidasDataToValidateMetadata dataToValidateMetadata,
+    EidasWSReportsDTOTree validateSignatureWithMimetype(
+            EidasDataToValidateMetadata dataToValidateMetadata, HttpServletRequest request);
+
+    EidasWSReportsDTOTree validateOnlyMimetype(EidasDataToValidateMetadata dataToValidateMetadata,
             HttpServletRequest request);
 
 }

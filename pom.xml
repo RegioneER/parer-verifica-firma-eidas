@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>verifica-firma-eidas</artifactId>
-	<version>1.32.1-SNAPSHOT</version>
+	<version>1.33.0</version>
 	<packaging>${packaging.type}</packaging>
 	<name>Verifica Firma EIDAS</name>
 	<description>Progetto per effettuare firme e validazioni con librerie DSS (EIDAS)</description>
@@ -22,11 +22,11 @@
 		<detectJavaApiLink>false</detectJavaApiLink>
         <!-- third party libs -->		
 		<dss.version>6.4</dss.version>
-		<springboot.version>4.0.6</springboot.version>
+		<springboot.version>4.1.0</springboot.version>
 		<springdoc-openapi-starter-webmvc-ui.version>3.0.3</springdoc-openapi-starter-webmvc-ui.version>
-		<tika.version>3.3.0</tika.version>
+		<tika.version>3.3.1</tika.version>
 		<httpcore5.version>5.4.2</httpcore5.version>
-		<httpclient5.version>5.6</httpclient5.version>
+		<httpclient5.version>5.6.1</httpclient5.version>
 		<bootstrap.version>4.6.2</bootstrap.version>
 		<popper.js.version>1.16.1</popper.js.version>
 		<jquery.version>3.7.1</jquery.version>
@@ -36,28 +36,28 @@
 		<fop.version>2.11</fop.version>
 		<org-json.version>20251224</org-json.version>
 		<!-- custom libs -->
-		<verificafirma-eidas-beans.version>1.16.0</verificafirma-eidas-beans.version>
+		<verificafirma-eidas-beans.version>1.17.0</verificafirma-eidas-beans.version>
 		<start-class>it.eng.parer.eidas.web.VerificaFirmaEidasApplication</start-class>	
 	</properties>
 
-<scm>
-	<developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
+  <scm>
+    <developerConnection>scm:git:https://github.com/RegioneER/parer-verifica-firma-eidas.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
-<distributionManagement>
-        <repository>
-	   <id>github</id>
-	   <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
-	 </repository>      
-    </distributionManagement>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/RegioneER/parer-verifica-firma-eidas</url>
+    </repository>
+  </distributionManagement>
 
-<repositories>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>            
-        </repository>               
-      </repositories>
+  <repositories>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/RegioneER/parer-framework-parerpom</url>
+    </repository>
+  </repositories>
 
 	<dependencyManagement>
 		<dependencies>

@@ -16,11 +16,11 @@ package it.eng.parer.eidas.core.helper;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -33,14 +33,18 @@ import org.springframework.ui.Model;
 @Component
 public class ViewHelper {
 
-    private Logger log = LoggerFactory.getLogger(ViewHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(ViewHelper.class);
 
-    @Autowired
-    Environment env;
+    private final Environment env;
+    // Pattern pre-compilato: String.matches() ricompila il pattern ad ogni chiamata;
+    // null indica "nessun filtro" (propsToSkip è vuoto per default).
+    private final Pattern propsToSkipPattern;
 
-    // default : all
-    @Value("${parer.eidas.admin-ui.propstoskip:}")
-    String propsToSkip;
+    public ViewHelper(Environment env,
+            @Value("${parer.eidas.admin-ui.propstoskip:}") String propsToSkip) {
+        this.env = env;
+        this.propsToSkipPattern = propsToSkip.isEmpty() ? null : Pattern.compile(propsToSkip);
+    }
 
     public void convertAppPropertiesAsMap(Model model) {
         Properties props = new Properties();
@@ -48,7 +52,9 @@ public class ViewHelper {
         StreamSupport.stream(propSrcs.spliterator(), false)
                 .filter(MapPropertySource.class::isInstance)
                 .map(ps -> ((EnumerablePropertySource<?>) ps).getPropertyNames())
-                .flatMap(Arrays::<String>stream).filter(propName -> !propName.matches(propsToSkip))
+                .flatMap(Arrays::<String>stream)
+                .filter(propName -> propsToSkipPattern == null
+                        || !propsToSkipPattern.matcher(propName).matches())
                 .forEach(propName -> props.setProperty(propName, getProperty(propName)));
         model.addAttribute("app", new TreeMap<>(props));
     }

@@ -16,7 +16,9 @@ package it.eng.parer.eidas.web.rest;
 import static it.eng.parer.eidas.web.util.EndPointCostants.URL_REPORT_VERIFICA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,6 +125,71 @@ class VerificaFirmaWsTest {
 
         assertNumeroDiFirme(result.getReport(), 1);
 
+    }
+
+    @Test
+    void testVerificaFirmaWsCADESMultipart() throws IOException {
+
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:CADES/CADES.p7m")
+                .openStream();
+        Path pathSig = Files.createTempFile("sig", ".tmp");
+        Files.copy(fileWithSignature, pathSig, StandardCopyOption.REPLACE_EXISTING);
+
+        HttpEntity<MultiValueMap<String, Object>> entity = prepareMultipartReq(pathSig,
+                Optional.empty());
+
+        EidasWSReportsDTOTree result = restTemplate.postForObject(
+                getBaseUrl() + URL_REPORT_VERIFICA, entity, EidasWSReportsDTOTree.class);
+
+        assertNumeroDiFirme(result.getReport(), 1);
+    }
+
+    @Test
+    void testVerificaFirmaWsASICMultipart() throws IOException {
+
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:ASIC/ASIC.asice")
+                .openStream();
+        Path pathSig = Files.createTempFile("sig", ".tmp");
+        Files.copy(fileWithSignature, pathSig, StandardCopyOption.REPLACE_EXISTING);
+
+        HttpEntity<MultiValueMap<String, Object>> entity = prepareMultipartReq(pathSig,
+                Optional.empty());
+
+        EidasWSReportsDTOTree result = restTemplate.postForObject(
+                getBaseUrl() + URL_REPORT_VERIFICA, entity, EidasWSReportsDTOTree.class);
+
+        assertNumeroDiFirme(result.getReport(), 1);
+    }
+
+    @Test
+    void testVerificaFirmaWsPadesBesMultipartConSkipDocumentSignVerification() throws IOException {
+
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:PADES/PADES_BES.PDF")
+                .openStream();
+        Path pathSig = Files.createTempFile("sig", ".tmp");
+        Files.copy(fileWithSignature, pathSig, StandardCopyOption.REPLACE_EXISTING);
+
+        HttpHeaders metadataHeaders = new HttpHeaders();
+        metadataHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("signedFile", new FileSystemResource(pathSig));
+        body.add("metadata",
+                new HttpEntity<>("{\"skipDocumentSignVerification\":true}", metadataHeaders));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setAccept(List.of(MediaType.APPLICATION_XML));
+
+        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        EidasWSReportsDTOTree result = restTemplate.postForObject(
+                getBaseUrl() + URL_REPORT_VERIFICA, entity, EidasWSReportsDTOTree.class);
+
+        assertNotNull(result);
+        assertNull(result.getReport());
+        assertTrue(result.isUnsigned());
+        assertNotNull(result.getMimeType());
     }
 
     @Test

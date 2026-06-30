@@ -51,7 +51,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "Info", description = "Informazioni applicativo")
 @RestController
 @RequestMapping(URL_ADMIN_BASE)
-public class AppInfosWs {
+public class AppInfosEndpoint {
 
     private Map<String, Map<String, String>> infos = Collections
             .synchronizedMap(new LinkedHashMap<>());
@@ -77,7 +77,7 @@ public class AppInfosWs {
 
     @SuppressWarnings({
             "rawtypes", "unchecked" })
-    @Operation(summary = "Info", method = "Informazioni applicativo")
+    @Operation(summary = "Info", description = "Informazioni applicativo")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Informazioni applicativo", content = {
                     @Content(mediaType = "application/json") }) })

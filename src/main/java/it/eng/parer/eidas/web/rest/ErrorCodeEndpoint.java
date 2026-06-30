@@ -43,7 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "Errori", description = "Gestione errori applicativi")
 @RestController
 @RequestMapping(URL_API_BASE)
-public class ParerErrorCodeWs {
+public class ErrorCodeEndpoint {
 
     /* constants */
     private static final String ETAG = "v1.0";
@@ -51,7 +51,7 @@ public class ParerErrorCodeWs {
     @Autowired
     IErrorCodeManager errorCodeManager;
 
-    @Operation(summary = "Errors", method = "Lista dei codici di errore dell'applicazione")
+    @Operation(summary = "Errors", description = "Lista dei codici di errore dell'applicazione")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista codici di errore", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ParerErrorDoc[].class)) }) })
@@ -76,7 +76,7 @@ public class ParerErrorCodeWs {
                 .eTag(ETAG).body(docs);
     }
 
-    @Operation(summary = "Documents", method = "Dettaglio codice di errore by code")
+    @Operation(summary = "Documents", description = "Dettaglio codice di errore by code")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dettaglio codice di errore", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ParerErrorDoc.class)) }) })

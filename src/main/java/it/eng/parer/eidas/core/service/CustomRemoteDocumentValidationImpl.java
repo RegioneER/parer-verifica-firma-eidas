@@ -101,7 +101,7 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
     }
 
     @Override
-    public EidasWSReportsDTOTree validateSignature(
+    public EidasWSReportsDTOTree validateSignatureWithMimetype(
             EidasDataToValidateMetadata dataToValidateMetadata, HttpServletRequest request) {
         //
         final LocalDateTime startValidation = LocalDateTime.now(ZoneId.systemDefault());
@@ -158,6 +158,54 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
             long totalDateTime = Duration.between(startValidation, endValidation).toMillis();
             log.atInfo().log(
                     "Fine validazione documento con identificativo [{}] - data/ora fine {} (totale : {} ms)",
+                    dataToValidateMetadata.getDocumentId(), endValidation, totalDateTime);
+        }
+
+        return root;
+    }
+
+    @Override
+    public EidasWSReportsDTOTree validateOnlyMimetype(
+            EidasDataToValidateMetadata dataToValidateMetadata, HttpServletRequest request) {
+        //
+        final LocalDateTime startValidation = LocalDateTime.now(ZoneId.systemDefault());
+        //
+        log.atDebug().log(
+                "Inizio validazione formato documento con identificativo [{}] - data/ora inizio {}",
+                dataToValidateMetadata.getDocumentId(), startValidation);
+        //
+        EidasWSReportsDTOTree root = new EidasWSReportsDTOTree();
+        try {
+            // elab signed file
+            DSSDocument signedDocument = elabSignedFile(dataToValidateMetadata,
+                    dataToValidateMetadata.getRemoteSignedDocument());
+            // tree root
+            root = createRootNoReports(signedDocument, dataToValidateMetadata.getDocumentId());
+        } finally {
+            LocalDateTime endValidation = LocalDateTime.now(ZoneId.systemDefault());
+
+            // build version
+            root.setVservice(helper.buildversion());
+            // build Firma version
+            root.setVlibrary(helper.dssversion());
+            // selfLink
+            if (request != null) {
+                root.setSelfLink(request.getRequestURL().toString());
+            }
+            // Inizio e fine validazione
+            root.setStartValidation(
+                    Date.from(startValidation.atZone(ZoneId.systemDefault()).toInstant()));
+            root.setEndValidation(
+                    Date.from(endValidation.atZone(ZoneId.systemDefault()).toInstant()));
+
+            // delete temp files
+            helper.deleteTmpDocExtFiles(dataToValidateMetadata.getRemoteSignedDocument(),
+                    dataToValidateMetadata.getRemoteOriginalDocuments(),
+                    dataToValidateMetadata.getPolicyExt());
+
+            long totalDateTime = Duration.between(startValidation, endValidation).toMillis();
+            log.atInfo().log(
+                    "Fine validazione formato documento con identificativo [{}] - data/ora fine {} (totale : {} ms)",
                     dataToValidateMetadata.getDocumentId(), endValidation, totalDateTime);
         }
 
@@ -550,16 +598,28 @@ public class CustomRemoteDocumentValidationImpl implements ICustomRemoteDocument
          *
          * Per il momento il validation report non viene restituito al dataHttpClient
          */
-        WSReportsDTO wsdto = new WSReportsDTO(reports.getDiagnosticDataJaxb(),
-                reports.getSimpleReportJaxb(), reports.getDetailedReportJaxb());
-        EidasWSReportsDTOTree dto = new EidasWSReportsDTOTree(wsdto);
+        EidasWSReportsDTOTree dto = null;
+
+        if (reports != null) {
+            WSReportsDTO wsdto = new WSReportsDTO(reports.getDiagnosticDataJaxb(),
+                    reports.getSimpleReportJaxb(), reports.getDetailedReportJaxb());
+            dto = new EidasWSReportsDTOTree(wsdto);
+            // unsigned = NO signatures
+            dto.setUnsigned(reports.getSimpleReport().getSignaturesCount() == 0);
+        } else {
+            dto = new EidasWSReportsDTOTree();
+            dto.setUnsigned(true);
+        }
         dto.setMimeType(helper.detectMimeType(signedDocument));
         //
         dto.setIdComponente(idComponente);
-        // unsigned = NO signatures
-        dto.setUnsigned(reports.getSimpleReport().getSignaturesCount() == 0);
 
         return dto;
+    }
+
+    private EidasWSReportsDTOTree createRootNoReports(DSSDocument signedDocument,
+            String idComponente) {
+        return createRoot(signedDocument, null, idComponente);
     }
 
     /**

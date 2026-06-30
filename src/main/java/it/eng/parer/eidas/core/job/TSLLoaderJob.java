@@ -13,7 +13,6 @@
 
 package it.eng.parer.eidas.core.job;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,11 +30,14 @@ public class TSLLoaderJob {
      * filesystem. In case the directory does not exits the DSS logic raise an exception. Check
      * DSSBeanConfig.tlCacheDirectory method.
      */
-    @Value("${cron.tl.loader.offline.enabled}")
-    private boolean offlineEnabled;
+    private final boolean offlineEnabled;
+    private final TLValidationJob job;
 
-    @Autowired
-    private TLValidationJob job;
+    public TSLLoaderJob(@Value("${cron.tl.loader.offline.enabled}") boolean offlineEnabled,
+            TLValidationJob job) {
+        this.offlineEnabled = offlineEnabled;
+        this.job = job;
+    }
 
     @PostConstruct
     public void init() {

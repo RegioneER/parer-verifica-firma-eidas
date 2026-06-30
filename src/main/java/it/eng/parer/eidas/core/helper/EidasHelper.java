@@ -53,7 +53,6 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -71,6 +70,23 @@ public class EidasHelper {
 
     private static final Logger log = LoggerFactory.getLogger(EidasHelper.class);
 
+    // DocumentBuilderFactory è configurata una volta sola: la sua inizializzazione (feature lookup,
+    // attribute setup) è costosa. newDocumentBuilder() viene chiamato per ogni validazione in
+    // quanto
+    // DocumentBuilder NON è thread-safe.
+    private static final DocumentBuilderFactory SECURE_DOCUMENT_BUILDER_FACTORY;
+    static {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            SECURE_DOCUMENT_BUILDER_FACTORY = factory;
+        } catch (ParserConfigurationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private static final Detector TIKA_DETECTOR = TikaConfig.getDefaultConfig().getDetector();
 
     private static final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions
@@ -80,14 +96,16 @@ public class EidasHelper {
 
     private static final String LOG_BASE64_ERROR = "Errore verifica ASCII-Armor";
 
-    @Autowired
-    Environment env;
+    private final Environment env;
+    private final BuildProperties buildProperties;
+    private final CommonsDataHttpClient dataHttpClient;
 
-    @Autowired
-    BuildProperties buildProperties;
-
-    @Autowired
-    CommonsDataHttpClient dataHttpClient;
+    public EidasHelper(Environment env, BuildProperties buildProperties,
+            CommonsDataHttpClient dataHttpClient) {
+        this.env = env;
+        this.buildProperties = buildProperties;
+        this.dataHttpClient = dataHttpClient;
+    }
 
     public String buildversion() {
         return env.getProperty(BUILD_VERSION);
@@ -138,11 +156,7 @@ public class EidasHelper {
     }
 
     private DocumentBuilder getSecureSchemaFactory() throws ParserConfigurationException {
-        DocumentBuilderFactory dbfactory = DocumentBuilderFactory.newInstance();
-        dbfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        dbfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        dbfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-        return dbfactory.newDocumentBuilder();
+        return SECURE_DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
     }
 
     /**
@@ -174,11 +188,8 @@ public class EidasHelper {
     public void deleteTmpFile(String fileName) {
         if (StringUtils.isNotBlank(fileName)) {
             File tmpFile = new File(fileName);
-            if (tmpFile.exists()) {
-                boolean result = FileUtils.deleteQuietly(new File(fileName));
-                if (!result) {
-                    log.atWarn().log("Impossibile cancellare il file temporaneo {}", fileName);
-                }
+            if (tmpFile.exists() && !FileUtils.deleteQuietly(tmpFile)) {
+                log.atWarn().log("Impossibile cancellare il file temporaneo {}", fileName);
             }
         }
     }

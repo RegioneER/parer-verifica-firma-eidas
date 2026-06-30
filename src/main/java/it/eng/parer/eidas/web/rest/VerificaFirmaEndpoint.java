@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +42,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.eng.parer.eidas.core.helper.EidasMetadaValidator;
-import it.eng.parer.eidas.core.service.IErrorCodeManager;
 import it.eng.parer.eidas.core.service.IVerificaFirma;
 import it.eng.parer.eidas.core.util.Constants;
 import it.eng.parer.eidas.model.EidasDataToValidateMetadata;
@@ -52,25 +50,25 @@ import it.eng.parer.eidas.web.bean.RestExceptionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-@Tag(name = "Verifica", description = "Report verifica firma")
+@Tag(name = "Verifica", description = "Verifica firma digitale / formato")
 @RestController
 @Validated
 @RequestMapping(URL_API_BASE)
-public class VerificaFirmaWs {
+public class VerificaFirmaEndpoint {
 
-    private static final Logger log = LoggerFactory.getLogger(VerificaFirmaWs.class);
+    private static final Logger log = LoggerFactory.getLogger(VerificaFirmaEndpoint.class);
 
     /* constants */
     private static final String ETAG = "RVv1.0";
 
-    @Autowired
-    IVerificaFirma verificaFirma;
+    private final IVerificaFirma verificaFirma;
+    private final EidasMetadaValidator eidasMetadaValidator;
 
-    @Autowired
-    IErrorCodeManager errorCodeManager;
-
-    @Autowired
-    EidasMetadaValidator eidasMetadaValidator;
+    public VerificaFirmaEndpoint(IVerificaFirma verificaFirma,
+            EidasMetadaValidator eidasMetadaValidator) {
+        this.verificaFirma = verificaFirma;
+        this.eidasMetadaValidator = eidasMetadaValidator;
+    }
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -85,7 +83,7 @@ public class VerificaFirmaWs {
      *
      * @return EidasWSReportsDTOTree oggetto custom tree con risultati della verifica
      */
-    @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta un JSON con i metadati relativi alla verifica. La risorsa ottenuta da questa chiamata è il report di verifica")
+    @Operation(summary = "Report Verifica firma e mimetype", description = "Endpoint che accetta un JSON con i riferimenti ai file da validare. La risorsa ottenuta da questa chiamata è il report di verifica della firma e/o del mimetype del file passato in input")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
                     @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
@@ -96,15 +94,17 @@ public class VerificaFirmaWs {
     public ResponseEntity<EidasWSReportsDTOTree> validateJson(
             @Parameter(description = "DSS DataToValidate Json", required = true) @Valid @RequestBody(required = true) EidasDataToValidateMetadata metadata,
             HttpServletRequest request) {
-        // LOG UUID
         MDC.put(Constants.UUID_LOG_MDC, metadata.getUuid());
-        // LOG BODY
-        if (log.isDebugEnabled()) {
-            log.atDebug().log("RequestBody {}", new JSONObject(metadata).toString());
+        try {
+            if (log.isDebugEnabled()) {
+                log.atDebug().log("RequestBody {}", new JSONObject(metadata).toString());
+            }
+            EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
+            return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
+                    .body(body);
+        } finally {
+            MDC.remove(Constants.UUID_LOG_MDC);
         }
-        EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnJson(metadata, request);
-        return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
-                .body(body);
     }
 
     /**
@@ -118,7 +118,7 @@ public class VerificaFirmaWs {
      *
      * @return EidasWSReportsDTOTree
      */
-    @Operation(summary = "Report con verifica firma", method = "Effettua la verifica del file passato in input. Accetta chiamata POST con multipart/form-data. La risorsa ottenuta da questa chiamata è il report di verifica")
+    @Operation(summary = "Report Verifica firma e mimetype", description = "Endpoint che accetta un multipart/form-data con i file da validare. La risorsa ottenuta da questa chiamata è il report di verifica della firma e/o del mimetype del file passato in input")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Esito verifica documento firmato", content = {
                     @Content(mediaType = "application/xml", schema = @Schema(implementation = EidasWSReportsDTOTree.class)) }),
@@ -138,11 +138,15 @@ public class VerificaFirmaWs {
             HttpServletRequest request) {
         // optional value
         EidasDataToValidateMetadata localMetadata = metadata
-                .orElse(new EidasDataToValidateMetadata());
+                .orElseGet(EidasDataToValidateMetadata::new);
         MDC.put(Constants.UUID_LOG_MDC, localMetadata.getUuid());
-        EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnMultipart(localMetadata,
-                request, signedFile, originalFiles, customValidationFile);
-        return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
-                .body(body);
+        try {
+            EidasWSReportsDTOTree body = verificaFirma.validateSignatureOnMultipart(localMetadata,
+                    request, signedFile, originalFiles, customValidationFile);
+            return ResponseEntity.ok().lastModified(body.getEndValidation().toInstant()).eTag(ETAG)
+                    .body(body);
+        } finally {
+            MDC.remove(Constants.UUID_LOG_MDC);
+        }
     }
 }

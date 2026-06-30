@@ -15,6 +15,8 @@ package it.eng.parer.eidas.core.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,9 +24,13 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.ResourceUtils;
@@ -49,17 +55,24 @@ class CustomRemoteDocumentValidationTest {
     @Autowired
     ICustomRemoteDocumentValidation service;
 
-    @Test
-    void testPADESNow() throws Exception {
-
-        // data
-        InputStream fileWithSignature = ResourceUtils.getURL("classpath:PADES/PADES_BES.PDF")
+    /**
+     * Test parametrico per i formati con un singolo file firmato: PADES, CADES, ASIC. XADES rimane
+     * separato perché richiede anche il file originale.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideFormatiSingoli")
+    void testValidazioneFormatiSingoli(String signedClasspath, int expectedSignatures)
+            throws Exception {
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:" + signedClasspath)
                 .openStream();
-        // DataToValidateDTO Mock
         EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
-        validateSignaturesCount(result, 3);
+        EidasWSReportsDTOTree result = service.validateSignatureWithMimetype(dto, null);
+        validateSignaturesCount(result, expectedSignatures);
+    }
 
+    static Stream<Arguments> provideFormatiSingoli() {
+        return Stream.of(Arguments.of("PADES/PADES_BES.PDF", 3), Arguments.of("CADES/CADES.p7m", 1),
+                Arguments.of("ASIC/ASIC.asice", 1));
     }
 
     @Test
@@ -73,34 +86,9 @@ class CustomRemoteDocumentValidationTest {
         // DataToValidateDTO Mock
         EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileOriginal,
                 fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
+        EidasWSReportsDTOTree result = service.validateSignatureWithMimetype(dto, null);
         validateSignaturesCount(result, 1);
 
-    }
-
-    @Test
-    void testCADESNow() throws Exception {
-
-        // data
-        InputStream fileWithSignature = ResourceUtils.getURL("classpath:CADES/CADES.p7m")
-                .openStream();
-        // DataToValidateDTO Mock
-        EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
-        validateSignaturesCount(result, 1);
-
-    }
-
-    @Test
-    void testASICNow() throws Exception {
-
-        // data
-        InputStream fileWithSignature = ResourceUtils.getURL("classpath:ASIC/ASIC.asice")
-                .openStream();
-        // DataToValidateDTO Mock
-        EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
-        validateSignaturesCount(result, 1);
     }
 
     @Test
@@ -111,7 +99,7 @@ class CustomRemoteDocumentValidationTest {
                 .openStream();
         // DataToValidateDTO Mock
         EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
+        EidasWSReportsDTOTree result = service.validateSignatureWithMimetype(dto, null);
         validateSignaturesCount(result, 1);
         validateChildrenCount(result, 1);
     }
@@ -130,7 +118,7 @@ class CustomRemoteDocumentValidationTest {
         InputStream fileWithSignature = ResourceUtils
                 .getURL("classpath:NOT_SIGNED/office_non_firmato").openStream();
         EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
+        EidasWSReportsDTOTree result = service.validateSignatureWithMimetype(dto, null);
 
         String expetedMimeType = "application/msword";
         String actualMimeType = result.getMimeType();
@@ -155,11 +143,31 @@ class CustomRemoteDocumentValidationTest {
         dto.setControlloCertificatoIgnorato(true);
         dto.setControlloRevocaIgnorato(true);
 
-        EidasWSReportsDTOTree result = service.validateSignature(dto, null);
+        EidasWSReportsDTOTree result = service.validateSignatureWithMimetype(dto, null);
         validateSignaturesCount(result, 1);
         validateChildrenCount(result, 1);
         // total_passed
         validateSignaturesValidate(result, 1);
+    }
+
+    @Test
+    void testValidateOnlyMimetype() throws Exception {
+
+        // data
+        InputStream fileWithSignature = ResourceUtils.getURL("classpath:CADES/CADEST.pdf.p7m")
+                .openStream();
+        // DataToValidateDTO Mock
+        EidasDataToValidateMetadata dto = VerificaFirmaDocMockUtil.createMockDto(fileWithSignature);
+        // set skip sign validation
+        dto.setSkipDocumentSignVerification(true);
+
+        EidasWSReportsDTOTree result = service.validateOnlyMimetype(dto, null);
+        assertNull(result.getReport());
+        assertEquals(0, result.getChildren().size());
+        //
+        assertTrue(result.isUnsigned());
+        assertNotNull(result.getMimeType());
+        assertEquals("application/pkcs7-signature", result.getMimeType());
     }
 
     private void validateSignaturesCount(EidasWSReportsDTOTree result, int countSigns) {

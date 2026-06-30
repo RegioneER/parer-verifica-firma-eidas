@@ -62,15 +62,19 @@ public class ReportRenderingHelper {
 
     private static final String NAV_NEXT = "next";
 
-    private Marshaller simpleReportMarshaller;
-    private Marshaller detailedReportMarshaller;
-    private Marshaller diagnosticDataReportMarshaller;
+    private static final int MAX_NAV_DEPTH = 100;
+
+    // JAXBContext è thread-safe: viene creato una volta e riutilizzato.
+    // Marshaller NON è thread-safe: viene creato per ogni chiamata a partire dal contesto.
+    private JAXBContext simpleReportJaxbContext;
+    private JAXBContext detailedReportJaxbContext;
+    private JAXBContext diagnosticDataReportJaxbContext;
 
     private Templates templateSimpleReport;
     private Templates templateDetailedReport;
 
+    // FopFactory è thread-safe; FOUserAgent NON lo è: viene creato per ogni richiesta PDF.
     private FopFactory fopFactory;
-    private FOUserAgent foUserAgent;
     private Templates templateSimpleReportPdf;
     private Templates templateDetailedReportPdf;
 
@@ -88,24 +92,13 @@ public class ReportRenderingHelper {
             templateDetailedReport = transformerFactory.newTemplates(new StreamSource(is));
         }
 
-        JAXBContext simpleJaxbContext = JAXBContext.newInstance(XmlSimpleReport.class);
-        simpleReportMarshaller = simpleJaxbContext.createMarshaller();
-
-        JAXBContext detailedJaxbContext = JAXBContext.newInstance(XmlDetailedReport.class);
-        detailedReportMarshaller = detailedJaxbContext.createMarshaller();
-
-        JAXBContext diagnosticDataJaxbContext = JAXBContext.newInstance(XmlDiagnosticData.class);
-        diagnosticDataReportMarshaller = diagnosticDataJaxbContext.createMarshaller();
-        diagnosticDataReportMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        simpleReportJaxbContext = JAXBContext.newInstance(XmlSimpleReport.class);
+        detailedReportJaxbContext = JAXBContext.newInstance(XmlDetailedReport.class);
+        diagnosticDataReportJaxbContext = JAXBContext.newInstance(XmlDiagnosticData.class);
 
         FopFactoryBuilder builder = new FopFactoryBuilder(new File(".").toURI());
         builder.setAccessibility(true);
-
         fopFactory = builder.build();
-
-        foUserAgent = fopFactory.newFOUserAgent();
-        foUserAgent.setCreator("Parer DSS Webapp");
-        foUserAgent.setAccessibility(true);
 
         InputStream simpleIS = ReportRenderingHelper.class
                 .getResourceAsStream("/xslt/pdf/simple-report.xslt");
@@ -116,6 +109,13 @@ public class ReportRenderingHelper {
                 .getResourceAsStream("/xslt/pdf/detailed-report.xslt");
         templateDetailedReportPdf = transformerFactory.newTemplates(new StreamSource(detailedIS));
         Utils.closeQuietly(detailedIS);
+    }
+
+    private FOUserAgent newFOUserAgent() {
+        FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+        foUserAgent.setCreator("Parer DSS Webapp");
+        foUserAgent.setAccessibility(true);
+        return foUserAgent;
     }
 
     /**
@@ -129,7 +129,7 @@ public class ReportRenderingHelper {
      */
     public void generateSimpleReportPdf(String simpleReport, OutputStream os)
             throws FOPException, TransformerException {
-        Fop fop = fopFactory.newFop(MIME_PDF, foUserAgent, os);
+        Fop fop = fopFactory.newFop(MIME_PDF, newFOUserAgent(), os);
         Result res = new SAXResult(fop.getDefaultHandler());
         Transformer transformer = templateSimpleReportPdf.newTransformer();
         transformer.setErrorListener(new DSSXmlErrorListener());
@@ -147,7 +147,7 @@ public class ReportRenderingHelper {
      */
     public void generateDetailedReportPdf(String detailedReport, OutputStream os)
             throws FOPException, TransformerException {
-        Fop fop = fopFactory.newFop(MIME_PDF, foUserAgent, os);
+        Fop fop = fopFactory.newFop(MIME_PDF, newFOUserAgent(), os);
         Result res = new SAXResult(fop.getDefaultHandler());
         Transformer transformer = templateDetailedReportPdf.newTransformer();
         transformer.setErrorListener(new DSSXmlErrorListener());
@@ -217,7 +217,7 @@ public class ReportRenderingHelper {
             JAXBElement<XmlSimpleReport> report = new eu.europa.esig.dss.simplereport.jaxb.ObjectFactory()
                     .createSimpleReport(simpleReport);
             StringWriter sw = new StringWriter();
-            simpleReportMarshaller.marshal(report, sw);
+            simpleReportJaxbContext.createMarshaller().marshal(report, sw);
             return sw.toString();
         } catch (JAXBException e) {
             log.atError().log("Errore durante il marshall del simple report", e);
@@ -237,7 +237,7 @@ public class ReportRenderingHelper {
             JAXBElement<XmlDetailedReport> report = new eu.europa.esig.dss.detailedreport.jaxb.ObjectFactory()
                     .createDetailedReport(detailedReport);
             StringWriter sw = new StringWriter();
-            detailedReportMarshaller.marshal(report, sw);
+            detailedReportJaxbContext.createMarshaller().marshal(report, sw);
             return sw.toString();
         } catch (JAXBException e) {
             log.atError().log("Errore durante il marshall del detailed report", e);
@@ -250,7 +250,9 @@ public class ReportRenderingHelper {
         JAXBElement<XmlDiagnosticData> report = new eu.europa.esig.dss.diagnostic.jaxb.ObjectFactory()
                 .createDiagnosticData(diagnosticData);
         StringWriter sw = new StringWriter();
-        diagnosticDataReportMarshaller.marshal(report, sw);
+        Marshaller marshaller = diagnosticDataReportJaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.marshal(report, sw);
         return sw.toString();
     }
 
@@ -282,25 +284,26 @@ public class ReportRenderingHelper {
 
     public VerificaFirmaResultBean navNextBusta(String dir, VerificaFirmaResultBean current,
             int livello, int busta) {
-        VerificaFirmaResultBean result = null;
-        if (dir.equalsIgnoreCase(NAV_NEXT)) {
-            // call ricerca by child
-            result = current.ricerca(livello, busta + 1);
-            if (result != null) {
-                return result;
+        boolean isNext = dir.equalsIgnoreCase(NAV_NEXT);
+        for (int depth = 0; depth < MAX_NAV_DEPTH; depth++) {
+            VerificaFirmaResultBean result;
+            if (isNext) {
+                result = current.ricerca(livello, busta + 1);
+                if (result != null) {
+                    return result;
+                }
+                livello++;
             } else {
-                return navNextBusta(dir, current, livello + 1, busta);
-            }
-        } else {
-            // call ricerca by parent
-            result = current.getParent().ricerca(livello, busta - 1);
-            if (result != null) {
-                return result;
-            } else {
-                return navNextBusta(dir, current, livello - 1, busta);
+                result = current.getParent().ricerca(livello, busta - 1);
+                if (result != null) {
+                    return result;
+                }
+                livello--;
             }
         }
-
+        log.atWarn().log("navNextBusta: raggiunto limite massimo di iterazioni ({})",
+                MAX_NAV_DEPTH);
+        return null;
     }
 
 }

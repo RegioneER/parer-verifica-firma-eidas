@@ -21,12 +21,10 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,19 +44,20 @@ public class VerificaFirmaImpl implements IVerificaFirma {
     private static final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions
             .asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 
-    @Autowired
-    ICustomRemoteDocumentValidation service;
+    private final ICustomRemoteDocumentValidation service;
+    private final EidasHelper helper;
 
-    @Autowired
-    EidasHelper helper;
+    public VerificaFirmaImpl(ICustomRemoteDocumentValidation service, EidasHelper helper) {
+        this.service = service;
+        this.helper = helper;
+    }
 
     @Override
     public EidasWSReportsDTOTree validateSignatureOnJson(
             EidasDataToValidateMetadata dataToValidateDTO, HttpServletRequest request) {
         // verify dto
         elabValidateDtoExt(dataToValidateDTO);
-        // call verificaFirma
-        return service.validateSignature(dataToValidateDTO, request);
+        return validateDocumentSignatureAndOrMimeType(dataToValidateDTO, request);
     }
 
     @Override
@@ -69,8 +68,28 @@ public class VerificaFirmaImpl implements IVerificaFirma {
         // verify dto
         elaborateValidateDtoExtMultiPart(dataToValidateDTO, signedDocument, originalDocuments,
                 validationPolicy);
-        // call verificaFirma
-        return service.validateSignature(dataToValidateDTO, request);
+        return validateDocumentSignatureAndOrMimeType(dataToValidateDTO, request);
+    }
+
+    /*
+     * se skipDocumentSignVerification è true, allora non eseguo la verifica della firma ma solo la
+     * validazione del mimetype, altrimenti eseguo la verifica della firma. Questa logica è stata
+     * introdotta per gestire il caso in cui si voglia eseguire solo la validazione del mimetype
+     * senza eseguire la verifica della firma, ad esempio per i casi in cui si voglia eseguire la
+     * validazione del mimetype su un documento che non è firmato, ma che è comunque un documento
+     * valido per la validazione del mimetype, come ad esempio un documento che è stato firmato in
+     * modo non standard o che è stato modificato dopo la firma. In questi casi, se
+     * skipDocumentSignVerification è true, allora eseguo solo la validazione del mimetype e non
+     * eseguo la verifica della firma, altrimenti eseguo la verifica della firma e la validazione
+     * del mimetype.
+     *
+     */
+    private EidasWSReportsDTOTree validateDocumentSignatureAndOrMimeType(
+            EidasDataToValidateMetadata dataToValidateDTO, HttpServletRequest request) {
+        if (dataToValidateDTO.isSkipDocumentSignVerification()) {
+            return service.validateOnlyMimetype(dataToValidateDTO, request);
+        }
+        return service.validateSignatureWithMimetype(dataToValidateDTO, request);
     }
 
     private void elaborateValidateDtoExtMultiPart(EidasDataToValidateMetadata metadata,
@@ -109,24 +128,17 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             if (originalDocuments != null && originalDocuments.length != 0) {
                 // for earch multipart
                 for (MultipartFile originalDocument : originalDocuments) {
-                    EidasRemoteDocument originalRemoteDocumentExt = null;
                     // search on metadata by multipart file name
-                    Optional<EidasRemoteDocument> originalRemoteDocumentExtFound = metadata
+                    EidasRemoteDocument originalRemoteDocumentExt = metadata
                             .getRemoteOriginalDocuments().stream()
                             .filter(d -> d.getName().equalsIgnoreCase(originalDocument.getName())
                                     || d.getName().equalsIgnoreCase(
                                             originalDocument.getOriginalFilename()))
-                            .findFirst();
-                    // not present on metadata
-                    if (!originalRemoteDocumentExtFound.isPresent()) {
-                        // create new one
-                        originalRemoteDocumentExt = new EidasRemoteDocument();
-                        metadata.getRemoteOriginalDocuments().add(originalRemoteDocumentExt); // add
-                        // on
-                        // metadata
-                    } else {
-                        originalRemoteDocumentExt = originalRemoteDocumentExtFound.get();
-                    }
+                            .findFirst().orElseGet(() -> {
+                                EidasRemoteDocument newDoc = new EidasRemoteDocument();
+                                metadata.getRemoteOriginalDocuments().add(newDoc);
+                                return newDoc;
+                            });
                     // transfer to (create tmp file on disk)
                     final Path originalDocumentPath = transferViaMultiPartFile(originalDocument,
                             tmpFilePrefix, TMP_FILE_SUFFIX);
@@ -163,7 +175,6 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             final String tmpFileSuffix) throws IOException {
         final Path localDocumentPath = Files.createTempFile(tmpFilePrefix, tmpFileSuffix, attr);
         multipartFile.transferTo(localDocumentPath);
-        localDocumentPath.toFile().deleteOnExit();
         return localDocumentPath;
     }
 
@@ -233,7 +244,6 @@ public class VerificaFirmaImpl implements IVerificaFirma {
             String tmpFilePrefix, String tmpFileSuffix) throws IOException {
         final Path localPath = Files.createTempFile(tmpFilePrefix, tmpFileSuffix, attr);
         helper.getResourceFromURI(remoteDocumentExt.getUri(), localPath);
-        localPath.toFile().deleteOnExit();
         return localPath;
     }
 
