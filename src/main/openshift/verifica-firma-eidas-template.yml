@@ -249,8 +249,9 @@ objects:
               value: en_US.UTF-8
             - name: JAVA_OPTS_APPEND
               value: >-
-                -Dspring.profiles.active=${PROFILE} -XX:+UnlockExperimentalVMOptions 
-                -XX:+UseContainerSupport -Dsun.zip.disableMemoryMapping=true
+                -Dspring.profiles.active=${PROFILE}
+                -XX:ReservedCodeCacheSize=100m -Xss256k
+                -Dsun.zip.disableMemoryMapping=true
                 -Dcom.sun.management.jmxremote=true
                 -Dcom.sun.management.jmxremote.port=3000
                 -Dcom.sun.management.jmxremote.rmi.port=3001
@@ -258,9 +259,13 @@ objects:
                 -Dcom.sun.management.jmxremote.authenticate=false
                 -Dcom.sun.management.jmxremote.ssl=false
             - name: JAVA_MAX_MEM_RATIO
-              value: '90'
+              value: '80'
             - name: JAVA_INITIAL_MEM_RATIO
-              value: '40'
+              value: '35'
+            - name: GC_CONTAINER_OPTIONS
+              value: "-XX:+UseG1GC"
+            - name: GC_MAX_METASPACE_SIZE
+              value: "512"
           image: ${REGISTRY}:${IMGTAG}
           imagePullPolicy: Always
           livenessProbe:
@@ -297,7 +302,10 @@ objects:
           resources:
             limits:
               cpu: 800m
-              memory: 2500Mi
+              memory: 5Gi
+            requests:
+              cpu: 400m
+              memory: 2Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:

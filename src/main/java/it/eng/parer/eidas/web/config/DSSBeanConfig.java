@@ -192,6 +192,14 @@ public class DSSBeanConfig {
     @Value("${dataloader.timeoutsocket:300000}")
     private int timeoutSocket;
 
+    /* in ms (1m, default RequestConfig) */
+    @Value("${dataloader.timeoutconnectionrequest:60000}")
+    private int timeoutConnectionRequest;
+
+    /* in ms (1m, default RequestConfig) */
+    @Value("${dataloader.timeoutresponse:60000}")
+    private int timeoutResponse;
+
     @Value("${dataloader.connectionsmaxtotal:40}")
     private int connectionsMaxTotal;
 
@@ -255,6 +263,8 @@ public class DSSBeanConfig {
         dataClient.setTimeoutConnection(timeoutConnection);
         dataClient.setConnectionsMaxTotal(connectionsMaxTotal);
         dataClient.setTimeoutSocket(timeoutSocket);
+        dataClient.setTimeoutConnectionRequest(timeoutConnectionRequest);
+        dataClient.setTimeoutResponse(timeoutResponse);
         //
         dataClient.setConnectionsMaxPerRoute(connectionsMaxPerRoute);
         dataClient.setConnectionTimeToLive(connectionTimeToLive);
