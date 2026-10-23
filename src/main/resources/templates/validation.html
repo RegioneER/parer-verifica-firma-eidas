@@ -6,7 +6,7 @@
     <head th:replace="~{fragments/template.html :: header('EIDAS - Verifica')}"></head>
     
     <body>  
-       <script type="text/javascript">
+       <script type="text/javascript" th:attr="nonce=${cspNonce}">
        $(function() {
     	  	 $("#verifica").click( function()
     	           {

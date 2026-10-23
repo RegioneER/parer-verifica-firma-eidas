@@ -42,7 +42,10 @@ import it.eng.parer.eidas.web.VerificaFirmaEidasApplication;
 
 @SpringBootTest(classes = VerificaFirmaEidasApplication.class, properties = {
         "logging.level.root=INFO", "logging.level.it.eng.parer=INFO",
-        "spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1" })
+        "spring.datasource.url=jdbc:h2:mem:eidasdb-test;DB_CLOSE_DELAY=-1",
+        // timeout ridotti per velocizzare le chiamate di rete (LOTL/TL, OCSP, CRL) in fase di test
+        "dataloader.timeoutconnection=5000", "dataloader.timeoutsocket=5000",
+        "dataloader.timeoutconnectionrequest=5000", "dataloader.timeoutresponse=5000" })
 class CustomRemoteDocumentValidationTest {
 
     /**

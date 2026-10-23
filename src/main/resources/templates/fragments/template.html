@@ -26,7 +26,7 @@
 	</head>
 
 	<div th:fragment="main">
-		<button onclick="topFunction()" id="btnup" class="btn" style="background-color: transparent;"
+		<button id="btnup" class="btn" style="background-color: transparent;"
 			title="Page top">
 			<em class="fa fa-chevron-circle-up fa-4x" ></em>
 		</button>
@@ -52,7 +52,7 @@
 			</div>
 		</div>
 
-		<script type="text/javascript">
+		<script type="text/javascript" th:attr="nonce=${cspNonce}">
 			// When the user scrolls down 20px from the top of the document, show the button
 			window.onscroll = function() {scrollFunction()};
 		</script>

@@ -57,9 +57,9 @@ objects:
           #active: prod
         security: 
           user:
-          name: ${ADMIN_USER}
-          password: ${ADMIN_PWD}
-          roles: ADMIN
+            name: ${ADMIN_USER}
+            password: ${ADMIN_PWD}
+            roles: ADMIN
         datasource:
           url: ${DB_URL}
           driver-class-name: oracle.jdbc.OracleDriver
@@ -83,21 +83,21 @@ objects:
               auto: update
         main:
           allow-bean-definition-overriding: true
+        servlet:
+          multipart:
+            max-file-size: 2GB
+            max-request-size: 2GB
       # gestione actuators
       management:
         endpoint: 
           health:
-          show-details: when_authorized    
+            show-details: when_authorized    
         endpoints:
-        web: 
-          exposure: 
-            include: health
+          web: 
+            exposure: 
+              include: health
       logging:
         config: file:./config/logback.xml
-      servlet:
-        multipart:
-          max-file-size: 2GB
-          max-request-size: 2GB                            
     logback.xml: |-
       <configuration>
           <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -250,7 +250,7 @@ objects:
             - name: JAVA_OPTS_APPEND
               value: >-
                 -Dspring.profiles.active=${PROFILE}
-                -XX:ReservedCodeCacheSize=100m -Xss256k
+                -XX:ReservedCodeCacheSize=100m -Xss1024k
                 -Dsun.zip.disableMemoryMapping=true
                 -Dcom.sun.management.jmxremote=true
                 -Dcom.sun.management.jmxremote.port=3000

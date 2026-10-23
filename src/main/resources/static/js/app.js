@@ -1,3 +1,23 @@
+// Event handlers registrati qui invece che tramite attributi inline (onclick/onkeyup),
+// per essere compatibili con la Content-Security-Policy (script-src senza 'unsafe-inline').
+$(document).ready(function() {
+	$('#btnup').on('click', topFunction);
+
+	$(document).on('click', '.js-print-btn', function() {
+		window.print();
+	});
+
+	$(document).on('keyup', '.js-list-filter', function() {
+		filter(this, $(this).data('filter-target'));
+	});
+
+	$(document).on('click', '.js-list-filter-clear', function(e) {
+		e.preventDefault();
+		$(this).prev('.js-list-filter').val('');
+		filter($(this).prev('.js-list-filter'), $(this).data('filter-target'));
+	});
+});
+
 function scrollFunction() {
 	if (document.body.scrollTop > 60 || document.documentElement.scrollTop > 60) {
 		$("#btnup").show();

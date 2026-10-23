@@ -95,6 +95,15 @@ USER root
 RUN update-ca-trust 
 # End custom layer 
 
+# Fontconfig layer
+# Necessario per Apache FOP/Batik (generazione PDF report): senza il pacchetto
+# fontconfig (assente nell'immagine ubi minimale) la prima chiamata che genera
+# un PDF con immagini SVG embedded fallisce con
+# "RuntimeException: Fontconfig head is null, check your fonts or fonts configuration"
+RUN microdnf install -y fontconfig dejavu-sans-fonts dejavu-serif-fonts \
+    && microdnf clean all
+# End fontconfig layer
+
 ENV LANGUAGE='en_US:en'
 
 COPY --chown=185 target/*.jar /deployments/verifica-firma-eidas.jar

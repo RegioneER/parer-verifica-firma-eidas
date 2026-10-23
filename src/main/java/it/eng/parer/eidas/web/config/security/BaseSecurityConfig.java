@@ -23,6 +23,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.CrossOriginEmbedderPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.CrossOriginResourcePolicyHeaderWriter;
 
 /*
  * since spring boot 3.x
@@ -36,7 +39,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class BaseSecurityConfig {
 
     @Bean
-    protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain configure(HttpSecurity http) {
         //
         http.csrf(csrf -> csrf.disable()) // disable csrf
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -60,7 +63,17 @@ public class BaseSecurityConfig {
          * h2 console https://springframework.guru/using-the-h2-database-console-in-spring-boot-
          * with-spring-security/
          */
-        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable())
+                // mitiga il rischio di reverse tabnabbing / apertura non isolata di altre origini
+                .crossOriginOpenerPolicy(coop -> coop.policy(
+                        CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy.SAME_ORIGIN))
+                // impedisce il caricamento di risorse cross-origin che non dichiarano
+                // esplicitamente CORP/CORS
+                .crossOriginEmbedderPolicy(coep -> coep.policy(
+                        CrossOriginEmbedderPolicyHeaderWriter.CrossOriginEmbedderPolicy.REQUIRE_CORP))
+                // impedisce che le risorse di questa origine vengano incluse da altre origini
+                .crossOriginResourcePolicy(corp -> corp.policy(
+                        CrossOriginResourcePolicyHeaderWriter.CrossOriginResourcePolicy.SAME_ORIGIN)));
 
         return http.build();
     }

@@ -7,7 +7,7 @@
 	   </encoder>        
     </appender>
      
-    <logger name="eu.europa.esig.dss.tsl.job" level="info" additivity="false">
+    <logger name="eu.europa.esig.dss.validation.job" level="info" additivity="false">
          <appender-ref ref="CONSOLE"/> 
     </logger> 
     <logger name="eu.europa.esig.dss" level="error" additivity="false">

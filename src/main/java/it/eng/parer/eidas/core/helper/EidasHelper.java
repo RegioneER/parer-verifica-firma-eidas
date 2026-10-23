@@ -46,11 +46,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.ParseContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.info.BuildProperties;
@@ -87,7 +88,11 @@ public class EidasHelper {
         }
     }
 
-    private static final Detector TIKA_DETECTOR = TikaConfig.getDefaultConfig().getDetector();
+    // Tika 4.x ha rimosso TikaConfig (config XML sostituita da JSON): il rilevamento del mimetype
+    // non richiede configurazione custom, quindi si usa direttamente DefaultDetector che carica
+    // via ServiceLoader tutti i Detector disponibili sul classpath (equivalente del precedente
+    // TikaConfig.getDefaultConfig().getDetector()).
+    private static final Detector TIKA_DETECTOR = new DefaultDetector();
 
     private static final FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions
             .asFileAttribute(PosixFilePermissions.fromString("rw-------"));
@@ -126,10 +131,10 @@ public class EidasHelper {
         String mimeType = null;
         // Uso il TikaInputStream per riconoscere il mimetype application/msword (SUE
         // #25694)
-        try (InputStream is = TikaInputStream.get(document.openStream());) {
+        try (TikaInputStream is = TikaInputStream.get(document.openStream());) {
             Metadata metadata = new Metadata();
-            metadata.set(RESOURCE_NAME_KEY, null);
-            MediaType mime = TIKA_DETECTOR.detect(is, metadata);
+            metadata.set(RESOURCE_NAME_KEY, (String) null);
+            MediaType mime = TIKA_DETECTOR.detect(is, metadata, new ParseContext());
             mimeType = mime.toString();
             // text/plain vs application/xml
             if (mime.compareTo(MediaType.TEXT_PLAIN) == 0) {
